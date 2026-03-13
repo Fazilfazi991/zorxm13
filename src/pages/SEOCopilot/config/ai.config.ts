@@ -1,8 +1,8 @@
 export const AI_CONFIG = {
   GEMINI: {
     API_KEY: "AIzaSyDvhueyBmWw7zBj8jhz8JQkV0AqqegZS44",
-    MODEL: "gemini-1.5-flash",
-    API_URL: "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
+    MODEL: "gemini-1.5-flash-latest",
+    API_URL: "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent",
     MAX_TOKENS: 8192,
     TEMPERATURE: 0.2,
   },
