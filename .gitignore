@@ -26,3 +26,5 @@ dist-ssr
 # Project specific
 # wordpress/
 # *.zip
+.env
+.env.local
