@@ -1,0 +1,966 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026",
+  "total_rules": 210,
+  "categories": {
+    "title": "Title Tag",
+    "meta": "Meta Description",
+    "content": "Content Quality",
+    "keyword": "Keyword Optimization",
+    "headings": "Heading Structure",
+    "images": "Image Optimization",
+    "links": "Link Strategy",
+    "technical": "Technical SEO",
+    "schema": "Structured Data",
+    "readability": "Readability",
+    "ecommerce": "eCommerce SEO",
+    "mobile": "Mobile Optimization",
+    "performance": "Page Performance",
+    "engagement": "User Engagement",
+    "freshness": "Content Freshness"
+  },
+  "rules": [
+
+    {
+      "id": "title_missing",
+      "category": "title",
+      "severity": "critical",
+      "impact": "high",
+      "effort": "low",
+      "time_to_fix": "2 minutes",
+      "condition": "title_length === 0",
+      "message": "Your post has no SEO title set.",
+      "explanation": "The title tag is the single most important on-page SEO element. Google displays it in search results and uses it to understand your page topic. Missing titles can drop your rankings significantly.",
+      "fix_steps": [
+        "Open the SEO Copilot metabox in your post editor",
+        "Type your target keyword first in the title",
+        "Add a compelling descriptor after the keyword",
+        "Keep it between 50-60 characters total"
+      ],
+      "example_bad": "",
+      "example_good": "How to Start a WordPress Blog in 2026 — Beginner Guide"
+    },
+
+    {
+      "id": "title_too_short",
+      "category": "title",
+      "severity": "warning",
+      "impact": "medium",
+      "effort": "low",
+      "time_to_fix": "3 minutes",
+      "condition": "title_length < 30",
+      "message": "Your title is too short ({title_length} characters). Aim for 50-60 characters.",
+      "explanation": "Short titles waste valuable space in search results and miss the opportunity to include descriptive keywords that help both Google and searchers understand your content.",
+      "fix_steps": [
+        "Add your primary keyword if not already included",
+        "Add the current year for freshness signals",
+        "Add a benefit or outcome (e.g. 'Complete Guide', 'Step-by-Step')",
+        "Add your brand name at the end separated by a dash"
+      ],
+      "example_bad": "WordPress Tips",
+      "example_good": "15 WordPress Speed Tips That Cut Load Time in Half (2026)"
+    },
+
+    {
+      "id": "title_too_long",
+      "category": "title",
+      "severity": "error",
+      "impact": "medium",
+      "effort": "low",
+      "time_to_fix": "3 minutes",
+      "condition": "title_length > 60",
+      "message": "Your title is {title_length} characters — Google will truncate it at ~60 characters in search results.",
+      "explanation": "Google truncates titles over ~60 characters with an ellipsis (...). This makes your title less compelling in search results and can hurt click-through rates.",
+      "fix_steps": [
+        "Remove filler words: 'a', 'an', 'the', 'and', 'but'",
+        "Move your brand name to the end or remove it",
+        "Use numbers instead of words ('5' not 'five')",
+        "Cut adjectives that don't add meaning"
+      ],
+      "example_bad": "The Ultimate and Complete Beginner's Guide to Starting a WordPress Blog in the Year 2026",
+      "example_good": "Start a WordPress Blog in 2026 — Complete Beginner Guide"
+    },
+
+    {
+      "id": "title_no_keyword",
+      "category": "title",
+      "severity": "error",
+      "impact": "high",
+      "effort": "low",
+      "time_to_fix": "3 minutes",
+      "condition": "keyword_in_title === false",
+      "message": "Your focus keyword '{focus_keyword}' does not appear in the title tag.",
+      "explanation": "Google heavily weights keyword presence in the title tag. It's the strongest on-page signal you can send. Missing it significantly weakens your ability to rank for that term.",
+      "fix_steps": [
+        "Add your focus keyword at the beginning of the title",
+        "If it sounds unnatural at the start, include it within the first 5 words",
+        "Don't stuff — use it once naturally"
+      ],
+      "example_bad": "How I Doubled My Website Traffic Last Month",
+      "example_good": "SEO Traffic: How I Doubled My Website Visitors in 30 Days"
+    },
+
+    {
+      "id": "title_keyword_position",
+      "category": "title",
+      "severity": "warning",
+      "impact": "medium",
+      "effort": "low",
+      "time_to_fix": "2 minutes",
+      "condition": "keyword_position_in_title > 3",
+      "message": "Your focus keyword appears late in the title. Move it closer to the beginning.",
+      "explanation": "Google gives more weight to words at the beginning of the title. Front-loading your keyword — even by a few words — can improve rankings.",
+      "fix_steps": [
+        "Restructure the title to start with or near your keyword",
+        "Consider 'Keyword: Rest of Title' format"
+      ],
+      "example_bad": "The Best Ways to Improve Your WordPress SEO in 2026",
+      "example_good": "WordPress SEO: The Best Ways to Improve Rankings in 2026"
+    },
+
+    {
+      "id": "title_all_caps",
+      "category": "title",
+      "severity": "warning",
+      "impact": "low",
+      "effort": "low",
+      "time_to_fix": "1 minute",
+      "condition": "title_has_all_caps === true",
+      "message": "Your title uses ALL CAPS which looks spammy in search results.",
+      "explanation": "All-caps titles feel aggressive to searchers and reduce click-through rates. Title Case or sentence case performs better.",
+      "fix_steps": ["Change to Title Case — capitalize only the first letter of major words"],
+      "example_bad": "HOW TO START A WORDPRESS BLOG",
+      "example_good": "How to Start a WordPress Blog"
+    },
+
+    {
+      "id": "meta_missing",
+      "category": "meta",
+      "severity": "error",
+      "impact": "high",
+      "effort": "low",
+      "time_to_fix": "5 minutes",
+      "condition": "meta_description_length === 0",
+      "message": "No meta description set. Google will auto-generate one, which is rarely ideal.",
+      "explanation": "While meta descriptions don't directly affect rankings, they heavily influence click-through rates. A well-written meta description acts as ad copy for your page in search results. Google auto-generated snippets often pull irrelevant text.",
+      "fix_steps": [
+        "Write a 150-160 character summary of your page",
+        "Include your focus keyword naturally",
+        "Add a clear call to action (Learn how, Discover, Find out)",
+        "Match the search intent — informational, commercial, or transactional"
+      ],
+      "example_bad": "",
+      "example_good": "Learn how to start a WordPress blog in 2026 with our step-by-step guide. No coding required. Get online in under 30 minutes."
+    },
+
+    {
+      "id": "meta_too_short",
+      "category": "meta",
+      "severity": "warning",
+      "impact": "medium",
+      "effort": "low",
+      "time_to_fix": "5 minutes",
+      "condition": "meta_description_length < 120",
+      "message": "Your meta description is only {meta_length} characters. Aim for 150-160 characters.",
+      "explanation": "Short meta descriptions waste prime real estate in search results. Google gives you ~160 characters to convince someone to click your result over competitors.",
+      "fix_steps": [
+        "Expand with a specific benefit or outcome",
+        "Add social proof ('used by 10,000+ bloggers')",
+        "Include a secondary keyword naturally",
+        "End with an action verb"
+      ],
+      "example_bad": "A guide to WordPress blogs.",
+      "example_good": "Learn to start a WordPress blog in 2026 with zero coding. Follow our proven 7-step process used by 50,000+ successful bloggers. Start free today."
+    },
+
+    {
+      "id": "meta_too_long",
+      "category": "meta",
+      "severity": "warning",
+      "impact": "low",
+      "effort": "low",
+      "time_to_fix": "3 minutes",
+      "condition": "meta_description_length > 160",
+      "message": "Your meta description is {meta_length} characters — Google will truncate it at ~160 characters.",
+      "explanation": "Descriptions over 160 characters get cut off with '...' in search results, potentially cutting off your call to action or key benefit.",
+      "fix_steps": [
+        "Cut to 155 characters to have a safe buffer",
+        "Remove redundant phrases",
+        "Put your most important information first"
+      ],
+      "example_bad": "In this comprehensive and detailed ultimate guide, we will walk you through everything you need to know about starting a WordPress blog from absolute scratch with no experience whatsoever.",
+      "example_good": "Start a WordPress blog from scratch with our step-by-step guide. No experience needed. Be online in 30 minutes."
+    },
+
+    {
+      "id": "meta_no_keyword",
+      "category": "meta",
+      "severity": "warning",
+      "impact": "medium",
+      "effort": "low",
+      "time_to_fix": "3 minutes",
+      "condition": "keyword_in_meta === false",
+      "message": "Your focus keyword doesn't appear in the meta description.",
+      "explanation": "When your keyword appears in the meta description and matches a search query, Google bolds it in the results — making your listing more visually prominent and increasing click-through rates.",
+      "fix_steps": [
+        "Include your focus keyword naturally in the first sentence",
+        "Don't force it — rewrite the description to make it flow"
+      ],
+      "example_bad": "Our step-by-step tutorial will help you get online quickly and easily.",
+      "example_good": "Our WordPress blog setup tutorial walks you through every step. Get online in 30 minutes with no technical knowledge required."
+    },
+
+    {
+      "id": "content_too_short",
+      "category": "content",
+      "severity": "error",
+      "impact": "high",
+      "effort": "high",
+      "time_to_fix": "1-2 hours",
+      "condition": "word_count < 300",
+      "message": "Your content is only {word_count} words. This is too thin to rank competitively.",
+      "explanation": "Google's Helpful Content system actively penalizes thin content. Pages under 300 words rarely provide enough value to satisfy search intent. Most competitive keywords require 800-2000+ words.",
+      "fix_steps": [
+        "Research what the top 3 ranking pages cover for your keyword",
+        "Add sections they cover that you're missing",
+        "Add a FAQ section answering related questions",
+        "Include examples, case studies, or data",
+        "Add step-by-step instructions if applicable"
+      ],
+      "example_bad": "A 150-word post about 'how to do keyword research'",
+      "example_good": "A 1,500-word post covering tools, process, difficulty scoring, and examples"
+    },
+
+    {
+      "id": "content_below_recommended",
+      "category": "content",
+      "severity": "warning",
+      "impact": "medium",
+      "effort": "medium",
+      "time_to_fix": "30-60 minutes",
+      "condition": "word_count >= 300 && word_count < 600",
+      "message": "Your content is {word_count} words. Most top-ranking pages for competitive keywords have 1,000+ words.",
+      "explanation": "Longer content tends to rank better because it covers topics more comprehensively, earns more backlinks, and keeps visitors on the page longer — all positive ranking signals.",
+      "fix_steps": [
+        "Add an FAQ section (aim for 5-8 questions)",
+        "Expand your introduction with context and stakes",
+        "Add a 'Common Mistakes' section",
+        "Include a step-by-step process if applicable"
+      ],
+      "example_bad": "",
+      "example_good": ""
+    },
+
+    {
+      "id": "keyword_missing_first_paragraph",
+      "category": "keyword",
+      "severity": "error",
+      "impact": "high",
+      "effort": "low",
+      "time_to_fix": "5 minutes",
+      "condition": "keyword_in_first_100_words === false",
+      "message": "Focus keyword '{focus_keyword}' not found in the first paragraph.",
+      "explanation": "Google weights keyword placement early in content. The first paragraph — especially the first 100 words — signals to Google what the entire page is about. Missing your keyword here weakens your topical relevance signal.",
+      "fix_steps": [
+        "Add your keyword naturally in the opening sentence",
+        "If the first paragraph is an intro/hook, add the keyword in the second sentence",
+        "Don't force it — rewrite the intro to naturally include the keyword"
+      ],
+      "example_bad": "Many people struggle with online visibility. In this post we'll cover some useful techniques that have helped our clients grow.",
+      "example_good": "WordPress SEO is the most reliable way to grow organic traffic. In this guide, we'll cover the exact WordPress SEO techniques that took our site from 200 to 20,000 monthly visitors."
+    },
+
+    {
+      "id": "keyword_density_low",
+      "category": "keyword",
+      "severity": "warning",
+      "impact": "medium",
+      "effort": "low",
+      "time_to_fix": "10 minutes",
+      "condition": "keyword_density < 0.5",
+      "message": "Focus keyword density is {keyword_density}% — below the recommended 0.5-2.5% range.",
+      "explanation": "Too few keyword mentions can make it unclear to Google what your page is about. Aim to mention your primary keyword naturally throughout the content.",
+      "fix_steps": [
+        "Use your keyword in at least one H2 subheading",
+        "Mention it in the conclusion paragraph",
+        "Use it naturally every 200-300 words",
+        "Also use LSI keywords (related terms) throughout"
+      ],
+      "example_bad": "A 1,500-word article that mentions 'WordPress SEO' only once",
+      "example_good": "A 1,500-word article that mentions 'WordPress SEO' 8-10 times naturally"
+    },
+
+    {
+      "id": "keyword_density_high",
+      "category": "keyword",
+      "severity": "error",
+      "impact": "high",
+      "effort": "medium",
+      "time_to_fix": "15 minutes",
+      "condition": "keyword_density > 3.5",
+      "message": "Keyword density is {keyword_density}% — this looks like keyword stuffing to Google.",
+      "explanation": "Keyword stuffing is a black-hat SEO practice that Google actively penalizes. Excessive keyword repetition makes content read unnaturally and can trigger a manual penalty or algorithmic demotion.",
+      "fix_steps": [
+        "Replace some instances with synonyms and related terms",
+        "Use pronouns ('it', 'this', 'the tool') where natural",
+        "Rewrite sentences that feel forced",
+        "Aim for a density between 0.5% and 2.5%"
+      ],
+      "example_bad": "Our WordPress SEO plugin helps with WordPress SEO. WordPress SEO is important for WordPress SEO success.",
+      "example_good": "Our plugin simplifies on-page optimization. Strong SEO practices help WordPress sites rank higher in Google."
+    },
+
+    {
+      "id": "h1_missing",
+      "category": "headings",
+      "severity": "critical",
+      "impact": "high",
+      "effort": "low",
+      "time_to_fix": "2 minutes",
+      "condition": "h1_count === 0",
+      "message": "No H1 heading found in your content.",
+      "explanation": "The H1 is the most important heading tag and a primary on-page SEO signal. Google uses it to understand the main topic of your page. Most WordPress themes use the post title as H1 — but if your theme doesn't, you need one in the content.",
+      "fix_steps": [
+        "Check if your theme outputs the post title as H1",
+        "If not, add an H1 at the top of your content",
+        "Include your focus keyword in the H1",
+        "Never have more than one H1 per page"
+      ],
+      "example_bad": "Page with no H1 tag",
+      "example_good": "<h1>How to Start a WordPress Blog in 2026</h1>"
+    },
+
+    {
+      "id": "h1_multiple",
+      "category": "headings",
+      "severity": "error",
+      "impact": "medium",
+      "effort": "low",
+      "time_to_fix": "5 minutes",
+      "condition": "h1_count > 1",
+      "message": "Found {h1_count} H1 tags — pages should have exactly one H1.",
+      "explanation": "Multiple H1 tags confuse search engines about your page's primary topic and dilute the SEO signal. Each page should have one clear H1 that defines its main subject.",
+      "fix_steps": [
+        "Keep only one H1 — usually the post title",
+        "Change other H1s to H2 or H3 as appropriate",
+        "Check page builders and widgets that might add extra H1s"
+      ],
+      "example_bad": "H1: 'WordPress SEO Guide' and H1: 'SEO Tips for WordPress'",
+      "example_good": "H1: 'WordPress SEO Guide: 20 Tips to Rank Higher in 2026'"
+    },
+
+    {
+      "id": "h2_missing",
+      "category": "headings",
+      "severity": "warning",
+      "impact": "medium",
+      "effort": "low",
+      "time_to_fix": "15 minutes",
+      "condition": "h2_count === 0 && word_count > 300",
+      "message": "No H2 subheadings found. Long content needs subheadings for structure.",
+      "explanation": "H2 subheadings break content into scannable sections, help Google understand your content structure, and create opportunities to include secondary keywords. They also significantly improve readability.",
+      "fix_steps": [
+        "Add H2s every 200-300 words",
+        "Make each H2 descriptive and keyword-rich",
+        "Think of H2s as chapter titles for your content",
+        "Use H3s for subsections within H2 sections"
+      ],
+      "example_bad": "1,500 words of unbroken text",
+      "example_good": "Content divided into 6-8 H2 sections with descriptive headings"
+    },
+
+    {
+      "id": "keyword_in_h2",
+      "category": "headings",
+      "severity": "warning",
+      "impact": "medium",
+      "effort": "low",
+      "time_to_fix": "5 minutes",
+      "condition": "keyword_in_any_h2 === false && h2_count > 0",
+      "message": "Your focus keyword doesn't appear in any H2 subheading.",
+      "explanation": "Including your keyword in at least one H2 reinforces topical relevance. It also helps Google understand which section of your content is most central to the keyword.",
+      "fix_steps": [
+        "Find your most relevant H2 and naturally include the keyword",
+        "You can use a variation or partial match — doesn't need to be exact",
+        "Avoid forcing it — rewrite the H2 if needed"
+      ],
+      "example_bad": "H2: 'Getting Started' (for a post about WordPress SEO)",
+      "example_good": "H2: 'Getting Started with WordPress SEO'"
+    },
+
+    {
+      "id": "images_missing",
+      "category": "images",
+      "severity": "warning",
+      "impact": "medium",
+      "effort": "medium",
+      "time_to_fix": "15 minutes",
+      "condition": "image_count === 0 && word_count > 500",
+      "message": "No images found in your content.",
+      "explanation": "Images improve engagement metrics (time on page, scroll depth) which are indirect ranking factors. They also rank in Google Images, providing an additional traffic source. Long content without images has higher bounce rates.",
+      "fix_steps": [
+        "Add a featured image — Google often shows it in rich results",
+        "Add at least one image every 300-400 words",
+        "Use screenshots for how-to content",
+        "Use infographics for data-heavy content",
+        "Free sources: Unsplash, Pexels, Pixabay"
+      ],
+      "example_bad": "2,000-word tutorial with no images",
+      "example_good": "2,000-word tutorial with 5-6 screenshots and a summary infographic"
+    },
+
+    {
+      "id": "images_missing_alt",
+      "category": "images",
+      "severity": "error",
+      "impact": "medium",
+      "effort": "low",
+      "time_to_fix": "10 minutes",
+      "condition": "images_without_alt > 0",
+      "message": "{images_without_alt} image(s) are missing alt text.",
+      "explanation": "Alt text is how Google 'sees' images. Without it, images are invisible to search engines and to visually impaired users (accessibility). Images with keyword-rich alt text can rank in Google Images and reinforce page relevance.",
+      "fix_steps": [
+        "Click each image in WordPress editor → click the image → add alt text",
+        "Describe what the image shows literally",
+        "Include your keyword naturally if the image is relevant to it",
+        "Keep alt text under 125 characters",
+        "Don't start with 'image of' or 'picture of' — just describe it"
+      ],
+      "example_bad": "alt='' or alt='IMG_4521.jpg'",
+      "example_good": "alt='WordPress SEO settings page showing the focus keyword field'"
+    },
+
+    {
+      "id": "images_large_files",
+      "category": "images",
+      "severity": "warning",
+      "impact": "high",
+      "effort": "low",
+      "time_to_fix": "15 minutes",
+      "condition": "has_large_images === true",
+      "message": "Some images may be too large and slowing your page load time.",
+      "explanation": "Page speed is a confirmed Google ranking factor. Large uncompressed images are the #1 cause of slow WordPress sites. Every 1 second of load time reduces conversions by 7%.",
+      "fix_steps": [
+        "Install ShortPixel or Smush for automatic compression",
+        "Use WebP format instead of JPEG/PNG",
+        "Target under 100KB per image for photos",
+        "Use lazy loading (WordPress enables this by default since 5.5)"
+      ],
+      "example_bad": "5MB JPEG uploaded directly from camera",
+      "example_good": "120KB WebP version of the same image"
+    },
+
+    {
+      "id": "internal_links_missing",
+      "category": "links",
+      "severity": "warning",
+      "impact": "high",
+      "effort": "medium",
+      "time_to_fix": "15 minutes",
+      "condition": "internal_link_count === 0",
+      "message": "No internal links found. Internal linking is one of the highest-ROI SEO activities.",
+      "explanation": "Internal links pass PageRank between your pages, help Google discover content, and keep visitors on your site longer. Pages with no internal links are effectively orphaned — they receive no link equity from your other content.",
+      "fix_steps": [
+        "Link to 3-5 related posts from within the content",
+        "Use descriptive anchor text containing keywords",
+        "Link from your high-traffic pages to newer pages",
+        "Add a 'Related Posts' section at the bottom"
+      ],
+      "example_bad": "A post with no links to any other page on the site",
+      "example_good": "A post with 4-6 contextual links to related content using keyword-rich anchor text"
+    },
+
+    {
+      "id": "internal_links_generic_anchor",
+      "category": "links",
+      "severity": "warning",
+      "impact": "medium",
+      "effort": "low",
+      "time_to_fix": "10 minutes",
+      "condition": "has_generic_anchor_text === true",
+      "message": "Some internal links use generic anchor text like 'click here' or 'read more'.",
+      "explanation": "Anchor text tells Google what the linked page is about. Generic anchors like 'click here' waste a valuable SEO signal. Descriptive anchors help the linked page rank for those keywords.",
+      "fix_steps": [
+        "Replace 'click here' with the topic of the linked page",
+        "Replace 'read more' with a keyword-rich description",
+        "Vary your anchor text — don't use the exact same phrase every time"
+      ],
+      "example_bad": "<a href='/seo-guide'>Click here</a> for our SEO guide",
+      "example_good": "Read our complete <a href='/seo-guide'>WordPress SEO guide</a> for advanced tips"
+    },
+
+    {
+      "id": "external_links_missing",
+      "category": "links",
+      "severity": "info",
+      "impact": "low",
+      "effort": "low",
+      "time_to_fix": "10 minutes",
+      "condition": "external_link_count === 0 && word_count > 500",
+      "message": "No external links found. Linking to authoritative sources builds trust.",
+      "explanation": "Outbound links to high-quality sources (research papers, government sites, well-known brands) are a trust signal. Google's Quality Rater Guidelines specifically mention citing sources as an expertise indicator.",
+      "fix_steps": [
+        "Link to 2-3 authoritative sources that back up your claims",
+        "Link to original research or statistics you reference",
+        "Use rel='noopener noreferrer' on external links",
+        "Open external links in a new tab to keep visitors on your site"
+      ],
+      "example_bad": "Claiming stats without citing sources",
+      "example_good": "Linking to the Google Search Central blog, Moz, or Ahrefs studies"
+    },
+
+    {
+      "id": "url_too_long",
+      "category": "technical",
+      "severity": "warning",
+      "impact": "medium",
+      "effort": "low",
+      "time_to_fix": "5 minutes",
+      "condition": "url_length > 75",
+      "message": "Your URL slug is too long ({url_length} characters). Keep URLs short and keyword-focused.",
+      "explanation": "Long URLs are harder to share, get truncated in search results, and dilute keyword relevance. Shorter URLs tend to rank better and get more clicks.",
+      "fix_steps": [
+        "Remove stop words: 'a', 'an', 'the', 'and', 'or', 'but', 'in', 'on', 'at'",
+        "Keep only the core keyword phrase",
+        "Use hyphens between words, never underscores",
+        "If changing an existing URL, set up a 301 redirect"
+      ],
+      "example_bad": "/how-to-start-a-successful-wordpress-blog-for-beginners-in-2026-complete-guide",
+      "example_good": "/start-wordpress-blog"
+    },
+
+    {
+      "id": "url_has_keyword",
+      "category": "technical",
+      "severity": "warning",
+      "impact": "medium",
+      "effort": "low",
+      "time_to_fix": "3 minutes",
+      "condition": "keyword_in_url === false",
+      "message": "Your URL doesn't contain the focus keyword.",
+      "explanation": "Including your target keyword in the URL slug is a confirmed ranking factor. It reinforces topical relevance and also helps users know what to expect when they see the URL.",
+      "fix_steps": [
+        "Edit the URL slug to include your focus keyword",
+        "Keep the slug short — just the keyword or keyword phrase",
+        "If changing an existing URL, add a 301 redirect first"
+      ],
+      "example_bad": "/post-12345 or /my-new-article",
+      "example_good": "/wordpress-seo-guide"
+    },
+
+    {
+      "id": "url_has_underscores",
+      "category": "technical",
+      "severity": "error",
+      "impact": "medium",
+      "effort": "low",
+      "time_to_fix": "2 minutes",
+      "condition": "url_has_underscores === true",
+      "message": "URL contains underscores. Use hyphens instead.",
+      "explanation": "Google treats hyphens as word separators but treats underscores as connectors. 'wordpress_seo' is read as one word 'wordpressseo', while 'wordpress-seo' is correctly read as two words.",
+      "fix_steps": [
+        "Replace all underscores with hyphens in the URL slug",
+        "Set up a 301 redirect from the old URL to the new one"
+      ],
+      "example_bad": "/wordpress_seo_guide",
+      "example_good": "/wordpress-seo-guide"
+    },
+
+    {
+      "id": "schema_missing",
+      "category": "schema",
+      "severity": "warning",
+      "impact": "high",
+      "effort": "low",
+      "time_to_fix": "2 minutes",
+      "condition": "has_schema === false",
+      "message": "No structured data (schema markup) detected.",
+      "explanation": "Schema markup tells Google exactly what your content is — an article, product, recipe, FAQ, etc. It's the key to unlocking rich results like star ratings, FAQ dropdowns, and recipe cards in search results, which dramatically increase click-through rates.",
+      "fix_steps": [
+        "Use the SEO Copilot Schema Generator to auto-detect and apply schema",
+        "At minimum, add Article schema to all blog posts",
+        "Add FAQPage schema if your content has Q&A sections",
+        "Add Product schema to all WooCommerce products"
+      ],
+      "example_bad": "A recipe blog post with no Recipe schema",
+      "example_good": "A recipe post with full Recipe schema showing cook time, calories, and ratings in Google"
+    },
+
+    {
+      "id": "readability_score_low",
+      "category": "readability",
+      "severity": "warning",
+      "impact": "medium",
+      "effort": "medium",
+      "time_to_fix": "30 minutes",
+      "condition": "flesch_score < 50",
+      "message": "Readability score is {flesch_score}/100 — your content may be too complex for general audiences.",
+      "explanation": "Content that's hard to read has higher bounce rates and lower engagement metrics. Google uses engagement signals like dwell time and bounce rate as ranking factors. Aim for a Grade 7-8 reading level for general audiences.",
+      "fix_steps": [
+        "Break long sentences into two shorter ones",
+        "Replace complex words with simpler alternatives",
+        "Use bullet points and numbered lists",
+        "Add subheadings every 200-300 words",
+        "Write in active voice, not passive voice"
+      ],
+      "example_bad": "The implementation of comprehensive SEO methodologies necessitates the utilization of multifaceted analytical approaches.",
+      "example_good": "Good SEO requires using several different analysis tools and techniques."
+    },
+
+    {
+      "id": "passive_voice_overuse",
+      "category": "readability",
+      "severity": "warning",
+      "impact": "low",
+      "effort": "medium",
+      "time_to_fix": "20 minutes",
+      "condition": "passive_voice_percentage > 20",
+      "message": "{passive_voice_percentage}% of sentences use passive voice. Aim for under 10%.",
+      "explanation": "Passive voice makes sentences longer, harder to understand, and less engaging. Active voice is more direct, confident, and easier to read — all of which improve user experience.",
+      "fix_steps": [
+        "Find sentences with 'was', 'were', 'is being', 'has been'",
+        "Identify who is doing the action and move them to the subject",
+        "Example: 'The guide was written by experts' → 'Experts wrote this guide'"
+      ],
+      "example_bad": "The results were analyzed by our team and improvements were made.",
+      "example_good": "Our team analyzed the results and made improvements."
+    },
+
+    {
+      "id": "sentences_too_long",
+      "category": "readability",
+      "severity": "warning",
+      "impact": "medium",
+      "effort": "medium",
+      "time_to_fix": "20 minutes",
+      "condition": "avg_sentence_length > 25",
+      "message": "Average sentence length is {avg_sentence_length} words. Aim for under 20 words.",
+      "explanation": "Long sentences are harder to parse and increase cognitive load. Readers often abandon pages where sentences require re-reading. Short, punchy sentences also improve mobile readability.",
+      "fix_steps": [
+        "Find sentences over 30 words and split them at natural breaking points",
+        "Use a period where you'd naturally pause when speaking",
+        "Remove parenthetical asides — make them separate sentences",
+        "Vary length: mix short sentences with medium ones"
+      ],
+      "example_bad": "When you're trying to optimize your WordPress website for search engines it's important to remember that there are many different factors that Google takes into account when determining where to rank your pages.",
+      "example_good": "WordPress SEO involves many ranking factors. Google weighs technical performance, content quality, and link signals when ranking your pages."
+    },
+
+    {
+      "id": "no_paragraph_breaks",
+      "category": "readability",
+      "severity": "warning",
+      "impact": "medium",
+      "effort": "low",
+      "time_to_fix": "10 minutes",
+      "condition": "avg_paragraph_length > 150",
+      "message": "Your paragraphs are too long. Break them up for better readability.",
+      "explanation": "Large blocks of text cause 'wall of text' syndrome — readers skim past them or bounce. Short paragraphs (2-4 sentences) are easier to read, especially on mobile.",
+      "fix_steps": [
+        "Keep paragraphs to 3-4 sentences maximum",
+        "Hit Enter twice in WordPress editor to create a new paragraph",
+        "Start a new paragraph every time you introduce a new idea"
+      ],
+      "example_bad": "10-line paragraphs with no breaks",
+      "example_good": "2-3 sentence paragraphs with clear line breaks"
+    },
+
+    {
+      "id": "no_lists",
+      "category": "readability",
+      "severity": "info",
+      "impact": "low",
+      "effort": "low",
+      "time_to_fix": "15 minutes",
+      "condition": "list_count === 0 && word_count > 600",
+      "message": "No bullet points or numbered lists found. Lists improve scannability and can trigger rich results.",
+      "explanation": "Lists are among the most shared and linked-to content formats. They're also frequently pulled into Google's featured snippets. Content with lists has higher engagement rates.",
+      "fix_steps": [
+        "Convert any series of 3+ items into a bullet list",
+        "Convert step-by-step processes into numbered lists",
+        "Add a 'Quick Takeaways' or 'Key Points' list near the top"
+      ],
+      "example_bad": "You need a domain, hosting, a theme, and plugins to start a WordPress blog.",
+      "example_good": "To start a WordPress blog you need:\n• A domain name\n• Web hosting\n• A WordPress theme\n• Essential plugins"
+    },
+
+    {
+      "id": "featured_image_missing",
+      "category": "technical",
+      "severity": "warning",
+      "impact": "medium",
+      "effort": "low",
+      "time_to_fix": "5 minutes",
+      "condition": "has_featured_image === false",
+      "message": "No featured image set.",
+      "explanation": "Featured images appear in social media shares, Google Discover, and search rich results. Posts with featured images get significantly more social media clicks. Google Discover, which drives millions of visits to content sites, requires a featured image to appear.",
+      "fix_steps": [
+        "Add a featured image in the WordPress editor sidebar",
+        "Use a 1200x630px image for optimal social sharing",
+        "Add alt text to the featured image",
+        "Use an image that visually represents the post topic"
+      ],
+      "example_bad": "Blog post with no featured image — shows blank thumbnail on social media",
+      "example_good": "Blog post with a relevant, high-quality 1200x630 featured image"
+    },
+
+    {
+      "id": "content_no_conclusion",
+      "category": "content",
+      "severity": "info",
+      "impact": "low",
+      "effort": "low",
+      "time_to_fix": "10 minutes",
+      "condition": "has_conclusion === false",
+      "message": "No conclusion detected. Add a summary and call to action.",
+      "explanation": "Conclusions reinforce your main points (good for comprehension and memory), give readers a clear next step (good for conversions), and signal to Google that the content is complete and well-structured.",
+      "fix_steps": [
+        "Add a short 'Conclusion' or 'Final Thoughts' section",
+        "Summarize the 2-3 key takeaways in 2-3 sentences",
+        "Add a call to action: subscribe, share, read another post, leave a comment",
+        "End with a question to encourage comments"
+      ],
+      "example_bad": "Article that just ends after the last tip with no wrap-up",
+      "example_good": "Conclusion section summarizing key points + 'Now it's your turn — which tip will you try first?'"
+    },
+
+    {
+      "id": "content_no_faq",
+      "category": "content",
+      "severity": "info",
+      "impact": "medium",
+      "effort": "medium",
+      "time_to_fix": "20 minutes",
+      "condition": "has_faq_section === false && word_count > 800",
+      "message": "No FAQ section detected. Adding FAQs can trigger rich results in Google.",
+      "explanation": "FAQ sections with FAQPage schema can display as expandable dropdowns in search results, taking up significantly more SERP real estate. They also target 'People Also Ask' queries and voice search answers.",
+      "fix_steps": [
+        "Research 'People Also Ask' questions for your keyword in Google",
+        "Add 4-6 Q&A pairs in a dedicated FAQ section",
+        "Apply FAQPage schema using the SEO Copilot Schema Generator",
+        "Keep answers concise — 40-60 words each"
+      ],
+      "example_bad": "No FAQ section on a comprehensive how-to guide",
+      "example_good": "FAQ section with 6 questions matching 'People Also Ask' results + FAQPage schema"
+    },
+
+    {
+      "id": "content_outdated",
+      "category": "freshness",
+      "severity": "warning",
+      "impact": "high",
+      "effort": "medium",
+      "time_to_fix": "30-60 minutes",
+      "condition": "days_since_updated > 365",
+      "message": "Content hasn't been updated in {days_since_updated} days. Freshness is a ranking factor.",
+      "explanation": "Google's Query Deserves Freshness (QDF) algorithm boosts recently updated content for many queries. Outdated statistics, broken links, and old information also hurt your E-E-A-T score.",
+      "fix_steps": [
+        "Update any statistics or data with current numbers",
+        "Check all external links are still working",
+        "Add a note at the top: 'Updated: [Month Year]'",
+        "Review for any outdated tool recommendations or references",
+        "Add a section covering anything new that's happened in your niche"
+      ],
+      "example_bad": "A 2021 'Best WordPress Plugins' post that still recommends discontinued plugins",
+      "example_good": "Same post updated in 2026 with current plugin recommendations and fresh screenshots"
+    },
+
+    {
+      "id": "ecommerce_no_product_schema",
+      "category": "ecommerce",
+      "severity": "critical",
+      "impact": "high",
+      "effort": "low",
+      "time_to_fix": "5 minutes",
+      "condition": "is_product === true && has_product_schema === false",
+      "message": "WooCommerce product has no Product schema markup.",
+      "explanation": "Product schema enables rich results showing price, availability, and star ratings directly in Google search results. Products without schema miss out on these enhanced listings which significantly increase click-through rates.",
+      "fix_steps": [
+        "Use SEO Copilot to auto-generate Product schema for this product",
+        "Ensure price and availability are set in WooCommerce",
+        "Add product reviews to enable star rating rich results",
+        "Verify the schema with Google's Rich Results Test"
+      ],
+      "example_bad": "Product page with no schema — shows as plain blue link in Google",
+      "example_good": "Product page with schema — shows price, stock status, and 4.5★ rating in Google"
+    },
+
+    {
+      "id": "ecommerce_thin_description",
+      "category": "ecommerce",
+      "severity": "error",
+      "impact": "high",
+      "effort": "medium",
+      "time_to_fix": "30 minutes",
+      "condition": "is_product === true && word_count < 150",
+      "message": "Product description is too short ({word_count} words). Thin product pages rarely rank.",
+      "explanation": "Google's algorithms heavily penalize thin eCommerce pages — pages with little unique content. Manufacturer descriptions copied without modification are also flagged as duplicate content.",
+      "fix_steps": [
+        "Write a unique product description of at least 200 words",
+        "Cover: what it is, who it's for, key features, benefits, use cases",
+        "Add customer FAQs specific to this product",
+        "Include size/color/material details if applicable",
+        "Never copy manufacturer descriptions verbatim"
+      ],
+      "example_bad": "'Blue cotton t-shirt. Available in S, M, L. Machine washable.'",
+      "example_good": "300-word description covering material quality, fit guide, styling suggestions, and care instructions"
+    },
+
+    {
+      "id": "mobile_viewport",
+      "category": "mobile",
+      "severity": "critical",
+      "impact": "high",
+      "effort": "low",
+      "time_to_fix": "5 minutes",
+      "condition": "has_viewport_meta === false",
+      "message": "No viewport meta tag found — your site may not be mobile-friendly.",
+      "explanation": "Google uses mobile-first indexing — it primarily uses the mobile version of your site for ranking. Without a viewport meta tag, your site won't render correctly on mobile devices.",
+      "fix_steps": [
+        "Add to your theme's <head>: <meta name='viewport' content='width=device-width, initial-scale=1'>",
+        "Most modern WordPress themes include this automatically",
+        "Test mobile rendering at Google's Mobile-Friendly Test tool"
+      ],
+      "example_bad": "Site that displays desktop layout on mobile screens",
+      "example_good": "Responsive site that adapts layout for all screen sizes"
+    },
+
+    {
+      "id": "no_https",
+      "category": "technical",
+      "severity": "critical",
+      "impact": "high",
+      "effort": "medium",
+      "time_to_fix": "30-60 minutes",
+      "condition": "is_https === false",
+      "message": "Your site is not using HTTPS. This is a Google ranking factor.",
+      "explanation": "HTTPS is a confirmed Google ranking signal since 2014. Chrome also marks HTTP sites as 'Not Secure' which destroys visitor trust. All reputable hosting providers offer free SSL certificates.",
+      "fix_steps": [
+        "Install a free SSL certificate through your hosting control panel (Let's Encrypt)",
+        "Update WordPress Site URL and Home URL to https:// in Settings → General",
+        "Install Really Simple SSL plugin to handle redirects automatically",
+        "Update Google Search Console with the https version"
+      ],
+      "example_bad": "http://yoursite.com — shows 'Not Secure' in Chrome",
+      "example_good": "https://yoursite.com — shows padlock icon in browser"
+    },
+
+    {
+      "id": "content_no_stats",
+      "category": "content",
+      "severity": "info",
+      "impact": "medium",
+      "effort": "medium",
+      "time_to_fix": "20 minutes",
+      "condition": "has_statistics === false && word_count > 600",
+      "message": "No statistics or data points found. Data-backed content earns more backlinks.",
+      "explanation": "Content with original data, statistics, and research earns 3x more backlinks than opinion-only content. Backlinks remain Google's strongest ranking signal.",
+      "fix_steps": [
+        "Find 2-3 relevant statistics from authoritative sources",
+        "Link to the original research when citing stats",
+        "Present data in a visually compelling way (table, chart, highlighted stat)",
+        "Original surveys or data you collect yourself are most linkable"
+      ],
+      "example_bad": "'Many businesses use social media for marketing'",
+      "example_good": "'According to Hootsuite's 2026 report, 91% of businesses use social media for marketing'"
+    },
+
+    {
+      "id": "content_no_table_of_contents",
+      "category": "content",
+      "severity": "info",
+      "impact": "low",
+      "effort": "low",
+      "time_to_fix": "5 minutes",
+      "condition": "word_count > 1500 && has_toc === false",
+      "message": "Long content (1500+ words) benefits from a Table of Contents.",
+      "explanation": "Tables of Contents improve navigation on long posts, can generate sitelinks in Google search results (additional indented links under your main result), and improve user experience metrics.",
+      "fix_steps": [
+        "Add a Table of Contents plugin like 'Easy Table of Contents'",
+        "Or manually add anchor links to your H2 headings",
+        "Place the TOC after the introduction, before the first H2"
+      ],
+      "example_bad": "3,000-word guide with no navigation",
+      "example_good": "3,000-word guide with a clickable TOC showing all major sections"
+    },
+
+    {
+      "id": "duplicate_meta",
+      "category": "technical",
+      "severity": "critical",
+      "impact": "high",
+      "effort": "low",
+      "time_to_fix": "10 minutes",
+      "condition": "has_duplicate_meta === true",
+      "message": "Duplicate meta description detected — another page on your site uses the same description.",
+      "explanation": "Duplicate meta descriptions tell Google your pages cover the same topic, which can cause them to compete against each other in search results (cannibalization). Each page needs a unique description.",
+      "fix_steps": [
+        "Write a unique meta description specific to this page's content",
+        "Use the post's specific angle, data point, or unique benefit",
+        "Never copy-paste meta descriptions across posts"
+      ],
+      "example_bad": "Same 'Explore our blog for SEO tips and tricks' on every post",
+      "example_good": "Unique description that reflects each post's specific content and keyword"
+    },
+
+    {
+      "id": "content_eeat_author",
+      "category": "content",
+      "severity": "warning",
+      "impact": "high",
+      "effort": "low",
+      "time_to_fix": "10 minutes",
+      "condition": "has_author_bio === false",
+      "message": "No author bio found. E-E-A-T requires demonstrating who wrote this content.",
+      "explanation": "Google's E-E-A-T (Experience, Expertise, Authority, Trust) framework evaluates whether content is written by credible sources. Author bios with credentials, especially on YMYL (Your Money Your Life) topics like health, finance, or legal, are essential for ranking.",
+      "fix_steps": [
+        "Add an author bio box below each post",
+        "Include: name, credentials/experience, photo, and relevant links",
+        "Use Person schema for the author",
+        "Link the author name to an author archive page with full bio"
+      ],
+      "example_bad": "Anonymous posts or 'Posted by Admin'",
+      "example_good": "Author box showing: 'Jane Smith, Certified SEO Specialist with 8 years experience. Contributor to Search Engine Journal.'"
+    },
+
+    {
+      "id": "content_cite_sources",
+      "category": "content",
+      "severity": "info",
+      "impact": "medium",
+      "effort": "low",
+      "time_to_fix": "15 minutes",
+      "condition": "external_link_count < 2 && word_count > 600",
+      "message": "Content lacks citations to authoritative sources.",
+      "explanation": "Google's Quality Rater Guidelines specifically look for cited sources as an expertise signal. Content that makes claims without backing them up with authoritative sources scores lower on E-E-A-T.",
+      "fix_steps": [
+        "Link to the original source for any statistics you mention",
+        "Link to authoritative references: Google, government sites, research papers",
+        "Use 'According to [Source]...' framing for cited information"
+      ],
+      "example_bad": "'Studies show that page speed affects rankings'",
+      "example_good": "'According to Google's PageSpeed documentation, Core Web Vitals are a ranking factor'"
+    },
+
+    {
+      "id": "missing_focus_keyword",
+      "category": "keyword",
+      "severity": "error",
+      "impact": "high",
+      "effort": "low",
+      "time_to_fix": "2 minutes",
+      "condition": "focus_keyword === null || focus_keyword === ''",
+      "message": "No focus keyword set. SEO Copilot can't optimize without a target keyword.",
+      "explanation": "Without a focus keyword, all keyword-based checks are disabled. Setting a focus keyword allows SEO Copilot to check keyword placement in title, meta, headings, content, and URL — and gives Google a clear signal about your page's topic.",
+      "fix_steps": [
+        "Enter your target keyword in the SEO Copilot metabox",
+        "Choose a keyword that people actually search for",
+        "Use Google Search Console or Keyword Planner to verify search volume",
+        "One primary keyword per post — use related keywords throughout"
+      ],
+      "example_bad": "No focus keyword set",
+      "example_good": "Focus keyword: 'wordpress seo guide' (1,900 monthly searches)"
+    }
+
+  ]
+}

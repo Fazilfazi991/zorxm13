@@ -1,0 +1,247 @@
+{
+    "content": [
+        {
+            "id": "section_hero",
+            "elType": "section",
+            "settings": {
+                "layout": "full_width",
+                "gap": "no"
+            },
+            "elements": [
+                {
+                    "id": "column_hero",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_zorx_hero",
+                            "elType": "widget",
+                            "widgetType": "zorx_hero",
+                            "settings": {
+                                "badge_text": "Trusted by UAE Businesses",
+                                "heading": "Driving Digital Growth for <span class=\"text-primary\">Ambitious Brands</span> in Dubai",
+                                "description": "We help businesses scale with data-driven digital marketing, performance ads, SEO, and creative strategies that convert.",
+                                "btn_primary_text": "Get a Free Strategy Call",
+                                "btn_primary_link": {
+                                    "url": "#"
+                                },
+                                "btn_secondary_text": "View Our Services",
+                                "btn_secondary_link": {
+                                    "url": "#"
+                                }
+                            }
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        },
+        {
+            "id": "section_about",
+            "elType": "section",
+            "settings": {
+                "layout": "boxed"
+            },
+            "elements": [
+                {
+                    "id": "column_about",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_zorx_about",
+                            "elType": "widget",
+                            "widgetType": "zorx_about",
+                            "settings": {
+                                "badge_text": "About Us",
+                                "heading": "Who We Are"
+                            }
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        },
+        {
+            "id": "section_services",
+            "elType": "section",
+            "settings": {
+                "layout": "boxed"
+            },
+            "elements": [
+                {
+                    "id": "column_services",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_zorx_services",
+                            "elType": "widget",
+                            "widgetType": "zorx_services",
+                            "settings": {
+                                "badge_text": "Our Services",
+                                "heading": "Our Digital Marketing Services"
+                            }
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        },
+        {
+            "id": "section_why_choose",
+            "elType": "section",
+            "settings": {
+                "layout": "boxed"
+            },
+            "elements": [
+                {
+                    "id": "column_why_choose",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_zorx_why_choose",
+                            "elType": "widget",
+                            "widgetType": "zorx_why_choose",
+                            "settings": {
+                                "badge_text": "Why ZORX",
+                                "heading": "Why Brands Choose ZORX"
+                            }
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        },
+        {
+            "id": "section_process",
+            "elType": "section",
+            "settings": {
+                "layout": "boxed"
+            },
+            "elements": [
+                {
+                    "id": "column_process",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_zorx_process",
+                            "elType": "widget",
+                            "widgetType": "zorx_process",
+                            "settings": {
+                                "badge_text": "Our Process",
+                                "heading": "Our Proven Process"
+                            }
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        },
+        {
+            "id": "section_stats",
+            "elType": "section",
+            "settings": {
+                "layout": "full_width"
+            },
+            "elements": [
+                {
+                    "id": "column_stats",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_zorx_stats",
+                            "elType": "widget",
+                            "widgetType": "zorx_stats",
+                            "settings": {}
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        },
+        {
+            "id": "section_testimonials",
+            "elType": "section",
+            "settings": {
+                "layout": "boxed"
+            },
+            "elements": [
+                {
+                    "id": "column_testimonials",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_zorx_testimonials",
+                            "elType": "widget",
+                            "widgetType": "zorx_testimonials",
+                            "settings": {
+                                "badge_text": "Testimonials",
+                                "heading": "What Our Clients Say"
+                            }
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        },
+        {
+            "id": "section_cta",
+            "elType": "section",
+            "settings": {
+                "layout": "boxed"
+            },
+            "elements": [
+                {
+                    "id": "column_cta",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_zorx_cta",
+                            "elType": "widget",
+                            "widgetType": "zorx_cta",
+                            "settings": {
+                                "heading": "Ready to Grow Your Business Online?",
+                                "btn_primary_text": "Book a Free Consultation"
+                            }
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        }
+    ],
+    "page_settings": [],
+    "version": "0.4",
+    "title": "Zorx Homepage Full",
+    "type": "page"
+}

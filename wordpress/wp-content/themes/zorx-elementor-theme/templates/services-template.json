@@ -1,0 +1,168 @@
+{
+    "content": [
+        {
+            "id": "section_services_hero",
+            "elType": "section",
+            "settings": {
+                "layout": "full_width",
+                "gap": "no"
+            },
+            "elements": [
+                {
+                    "id": "column_services_hero",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_services_hero",
+                            "elType": "widget",
+                            "widgetType": "zorx_hero",
+                            "settings": {
+                                "badge_text": "Our Services",
+                                "heading": "World-Class <span class=\"text-primary\">Digital Solutions</span>",
+                                "description": "From SEO to Social Media, we provide end-to-end digital marketing services tailored to your business goals.",
+                                "btn_primary_text": "Start a Project",
+                                "btn_primary_link": {
+                                    "url": "#contact"
+                                },
+                                "btn_secondary_text": "See Our Process",
+                                "btn_secondary_link": {
+                                    "url": "#process"
+                                }
+                            }
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        },
+        {
+            "id": "section_breadcrumbs",
+            "elType": "section",
+            "settings": {
+                "layout": "boxed",
+                "gap": "no",
+                "padding": {
+                    "unit": "px",
+                    "top": "0",
+                    "right": "0",
+                    "bottom": "0",
+                    "left": "0",
+                    "isLinked": true
+                }
+            },
+            "elements": [
+                {
+                    "id": "column_breadcrumbs",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_breadcrumbs",
+                            "elType": "widget",
+                            "widgetType": "zorx_breadcrumb",
+                            "settings": {}
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        },
+        {
+            "id": "section_services_grid",
+            "elType": "section",
+            "settings": {
+                "layout": "boxed"
+            },
+            "elements": [
+                {
+                    "id": "column_services_grid",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_services_grid",
+                            "elType": "widget",
+                            "widgetType": "zorx_services",
+                            "settings": {
+                                "badge_text": "What We Do",
+                                "heading": "Our Expertise",
+                                "description": "Comprehensive digital solutions designed to grow your business.",
+                                "columns": "3"
+                            }
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        },
+        {
+            "id": "section_process",
+            "elType": "section",
+            "settings": {
+                "layout": "boxed"
+            },
+            "elements": [
+                {
+                    "id": "column_process",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_process",
+                            "elType": "widget",
+                            "widgetType": "zorx_process",
+                            "settings": {}
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        },
+        {
+            "id": "section_cta",
+            "elType": "section",
+            "settings": {
+                "layout": "boxed"
+            },
+            "elements": [
+                {
+                    "id": "column_cta",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_zorx_cta",
+                            "elType": "widget",
+                            "widgetType": "zorx_cta",
+                            "settings": {
+                                "heading": "Need a Custom Solution?",
+                                "description": "We can tailor a package specifically for your business needs."
+                            }
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        }
+    ],
+    "page_settings": [],
+    "version": "0.4",
+    "title": "Zorx Services Page",
+    "type": "page"
+}

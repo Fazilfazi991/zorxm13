@@ -1,0 +1,961 @@
+{
+  "version": "1.0.0",
+  "total_templates": 50,
+  "instructions": "Each template provides a complete content structure. Variables in {brackets} are auto-filled from post data. Writers fill in the [...] placeholders.",
+  "templates": [
+
+    {
+      "id": 1,
+      "name": "How-To Tutorial",
+      "slug": "how-to-tutorial",
+      "content_types": ["tutorial", "guide"],
+      "ideal_word_count": "1500-2500",
+      "ideal_sections": 8,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Open with the problem or pain point the reader is experiencing. State what they will be able to do by the end. Include focus keyword in first 100 words. 100-150 words." },
+        { "type": "h2", "heading": "What You Need Before You Start", "guidance": "List prerequisites, tools, or knowledge needed. Use a bullet list. Keep it short — 3-5 items max. 50-100 words." },
+        { "type": "h2", "heading": "Step 1: [First Major Action]", "guidance": "Start with the easiest or most foundational step. Include a screenshot or image. Explain WHY this step matters, not just how to do it. 150-200 words." },
+        { "type": "h2", "heading": "Step 2: [Second Major Action]", "guidance": "Continue the logical sequence. Add a pro tip box here. 150-200 words." },
+        { "type": "h2", "heading": "Step 3: [Third Major Action]", "guidance": "Mid-point of the process. This is often the most complex step — break it into substeps using H3. 150-250 words." },
+        { "type": "h2", "heading": "Step 4: [Fourth Major Action]", "guidance": "150-200 words." },
+        { "type": "h2", "heading": "Step 5: [Fifth Major Action]", "guidance": "The final or near-final step. 150-200 words." },
+        { "type": "h2", "heading": "Common Mistakes to Avoid", "guidance": "List 3-5 mistakes people make with this process. Each with a brief explanation. Highly shareable section. 150-200 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "Answer 4-5 questions from Google's People Also Ask for this topic. 40-60 words per answer. Apply FAQPage schema." },
+        { "type": "conclusion", "heading": "Final Thoughts", "guidance": "Summarize key steps in 2-3 sentences. End with an action-oriented question to encourage comments. 75-100 words." }
+      ],
+      "seo_notes": "Focus keyword must appear in: title, intro, at least one H2, conclusion. Include year in title for freshness. Add numbered list of steps near top for featured snippet potential."
+    },
+
+    {
+      "id": 2,
+      "name": "Listicle / Roundup",
+      "slug": "listicle-roundup",
+      "content_types": ["blog", "roundup"],
+      "ideal_word_count": "2000-3500",
+      "ideal_sections": 12,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "State the list topic and why it matters. Preview the selection criteria (why these specific items made the list). 100-150 words." },
+        { "type": "h2", "heading": "Quick Summary Table", "guidance": "Add a comparison table showing all items with 3-4 key attributes. Great for featured snippets and skimmers." },
+        { "type": "h2", "heading": "1. [Item Name] — [One-Line Description]", "guidance": "For each list item: what it is, key features/benefits, who it's best for, any downsides, and a verdict. 150-250 words per item." },
+        { "type": "repeat", "note": "Repeat the item structure for each entry in the list. Aim for 7-15 items total for comprehensive coverage." },
+        { "type": "h2", "heading": "How We Selected These [Items]", "guidance": "Explain your evaluation criteria. Builds credibility and E-E-A-T. 100-150 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "4-5 FAQs about the list topic. Apply FAQPage schema." },
+        { "type": "conclusion", "heading": "Which [Item] Is Right for You?", "guidance": "Give a decision framework based on reader type/needs. Recommend 1-2 top picks for different scenarios. 100-150 words." }
+      ],
+      "seo_notes": "Use exact number in title (e.g., '11 Best...', not 'Top'). Update annually. Link to individual reviews for each item where they exist."
+    },
+
+    {
+      "id": 3,
+      "name": "Ultimate Pillar Guide",
+      "slug": "ultimate-pillar-guide",
+      "content_types": ["pillar", "guide"],
+      "ideal_word_count": "4000-8000",
+      "ideal_sections": 15,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Define the topic, explain why it matters in {year}, and preview exactly what the guide covers. Include a Table of Contents with anchor links. 200-300 words." },
+        { "type": "h2", "heading": "What Is {keyword}?", "guidance": "Clear definition. Include history/context. Explain why it matters now more than ever. 200-300 words." },
+        { "type": "h2", "heading": "How {keyword} Works", "guidance": "The mechanics. Use diagrams or flowcharts if possible. 300-400 words." },
+        { "type": "h2", "heading": "Chapter 1: [Foundational Concept]", "guidance": "First major subtopic. Comprehensive coverage with examples. 400-600 words." },
+        { "type": "h2", "heading": "Chapter 2: [Core Strategy]", "guidance": "Second major subtopic. 400-600 words." },
+        { "type": "h2", "heading": "Chapter 3: [Advanced Tactics]", "guidance": "Third major subtopic. 400-600 words." },
+        { "type": "h2", "heading": "Chapter 4: [Tools and Resources]", "guidance": "Recommended tools, software, or resources. Can be a listicle within the guide. 300-400 words." },
+        { "type": "h2", "heading": "Chapter 5: [Common Mistakes]", "guidance": "What not to do. Very shareable section. 300-400 words." },
+        { "type": "h2", "heading": "Chapter 6: [Real-World Examples]", "guidance": "Case studies or examples showing the concepts in action. 300-500 words." },
+        { "type": "h2", "heading": "{keyword} Checklist", "guidance": "Actionable summary checklist readers can bookmark. Highly shareable. 200-300 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "6-8 FAQs covering the full breadth of the topic. Apply FAQPage schema." },
+        { "type": "conclusion", "heading": "Next Steps", "guidance": "What to do first after reading. Link to related posts for further reading. 150-200 words." }
+      ],
+      "seo_notes": "This is a pillar page — it should link out to all cluster content on subtopics. Include Table of Contents. Target broad head keywords (1-2 words). Aim for the featured snippet on 'what is X' queries."
+    },
+
+    {
+      "id": 4,
+      "name": "Product / Tool Review",
+      "slug": "product-tool-review",
+      "content_types": ["review"],
+      "ideal_word_count": "2000-3500",
+      "ideal_sections": 10,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Who you are, how long you've used the product, and your overall verdict upfront (don't bury the lead). 100-150 words." },
+        { "type": "h2", "heading": "Quick Verdict", "guidance": "Score out of 10, pros list (5 items), cons list (3 items), best for, not for. Use a styled box. Skimmers read this first." },
+        { "type": "h2", "heading": "What Is {product}?", "guidance": "Brief overview — what it does, who makes it, pricing tiers. 100-150 words." },
+        { "type": "h2", "heading": "Key Features", "guidance": "Go through 5-8 main features in depth. For each: describe it, show a screenshot, give your honest experience. 600-900 words." },
+        { "type": "h2", "heading": "Pricing and Plans", "guidance": "Break down all pricing tiers clearly. Include a comparison table. Mention free trial or money-back guarantee. 150-200 words." },
+        { "type": "h2", "heading": "How It Compares to Alternatives", "guidance": "Compare briefly to 2-3 top competitors. Use a table. 200-300 words." },
+        { "type": "h2", "heading": "Who Should Use {product}?", "guidance": "Be specific — give 3 audience types it's perfect for and 2 it's not for. 100-150 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "5-6 FAQs about the product. Apply FAQPage schema." },
+        { "type": "conclusion", "heading": "Final Verdict", "guidance": "Restate your recommendation. Include a CTA to try the product. Mention your overall score. 100-150 words." }
+      ],
+      "seo_notes": "Add Review schema with your rating. Include the product name + 'review' + year in title. Link to the official product page. Include your real screenshots — not stock photos."
+    },
+
+    {
+      "id": 5,
+      "name": "Comparison Post (A vs B)",
+      "slug": "comparison-a-vs-b",
+      "content_types": ["comparison"],
+      "ideal_word_count": "2500-4000",
+      "ideal_sections": 10,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "State the comparison, why it matters, and who this guide is for. Give a quick bottom line up front. 100-150 words." },
+        { "type": "h2", "heading": "Quick Comparison Table", "guidance": "Side-by-side table with 8-10 key criteria. Use checkmarks and X marks. This is your featured snippet target." },
+        { "type": "h2", "heading": "{Option A} Overview", "guidance": "What it is, who makes it, main strengths, main weaknesses, pricing. 200-300 words." },
+        { "type": "h2", "heading": "{Option B} Overview", "guidance": "Same structure as Option A. 200-300 words." },
+        { "type": "h2", "heading": "Feature-by-Feature Comparison", "guidance": "Go through 6-8 key feature categories and compare both options for each. Use H3 for each category. 600-800 words." },
+        { "type": "h2", "heading": "Pricing Comparison", "guidance": "Detailed pricing breakdown for both. Include total cost of ownership. 200-300 words." },
+        { "type": "h2", "heading": "When to Choose {Option A}", "guidance": "3-4 specific scenarios where Option A clearly wins. Be specific about the type of user. 150-200 words." },
+        { "type": "h2", "heading": "When to Choose {Option B}", "guidance": "3-4 specific scenarios where Option B wins. 150-200 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "5 FAQs about the comparison. Apply FAQPage schema." },
+        { "type": "conclusion", "heading": "Our Recommendation", "guidance": "Give a clear winner for 2-3 specific audience types. Don't sit on the fence — readers want a decision. 100-150 words." }
+      ],
+      "seo_notes": "Target '[Option A] vs [Option B]' exact keyword. Include both product names in URL. Add comparison table near top for featured snippet. Update pricing quarterly."
+    },
+
+    {
+      "id": 6,
+      "name": "Case Study",
+      "slug": "case-study",
+      "content_types": ["case_study"],
+      "ideal_word_count": "2000-4000",
+      "ideal_sections": 8,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "State the result upfront (e.g., '312% traffic increase in 6 months'). Brief context on who was involved. Establish credibility. 100-150 words." },
+        { "type": "h2", "heading": "The Challenge", "guidance": "What problem were you trying to solve? What was the starting state? Include baseline metrics. 200-250 words." },
+        { "type": "h2", "heading": "Our Strategy", "guidance": "What approach did you take? Why did you choose this over alternatives? Be specific — this is your expertise showcase. 300-400 words." },
+        { "type": "h2", "heading": "Implementation: What We Did Step by Step", "guidance": "The exact actions taken in chronological order. Include timelines. The more specific, the more trustworthy. 400-600 words." },
+        { "type": "h2", "heading": "The Results", "guidance": "Show the data. Use charts, screenshots, or tables. Include before/after comparisons. Be specific with numbers. 200-300 words." },
+        { "type": "h2", "heading": "Key Takeaways", "guidance": "3-5 lessons learned that apply broadly to readers. This is what makes the case study universally valuable. 200-300 words." },
+        { "type": "h2", "heading": "What We Would Do Differently", "guidance": "Honest reflection on mistakes or missed opportunities. Builds trust enormously. 150-200 words." },
+        { "type": "conclusion", "heading": "Can You Replicate These Results?", "guidance": "Set realistic expectations. Explain what factors contributed most to success. CTA to try the approach. 100-150 words." }
+      ],
+      "seo_notes": "Include specific metrics in title and meta description. Use before/after data as pull quotes. Highly linkable — pitch to industry publications after publishing."
+    },
+
+    {
+      "id": 7,
+      "name": "Beginner's Guide",
+      "slug": "beginners-guide",
+      "content_types": ["guide", "tutorial"],
+      "ideal_word_count": "2000-3000",
+      "ideal_sections": 9,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Immediately reassure the reader this is designed for beginners. Define what they'll know by the end. Validate their starting point — no shame in being new. 100-150 words." },
+        { "type": "h2", "heading": "What Is {keyword}? (And Why Does It Matter?)", "guidance": "Plain English definition. Real-world analogy to explain the concept. Why it matters in {year}. 200-250 words." },
+        { "type": "h2", "heading": "Key Terms You Need to Know", "guidance": "A mini glossary of 6-10 essential terms. Readers will bookmark this. 200-300 words." },
+        { "type": "h2", "heading": "How {keyword} Works (Simply Explained)", "guidance": "The mechanism, explained simply. Use an analogy. No jargon. 200-300 words." },
+        { "type": "h2", "heading": "Getting Started: Your First Steps", "guidance": "The 3-5 actions a complete beginner should take first. Very specific and actionable. 300-400 words." },
+        { "type": "h2", "heading": "Common Beginner Mistakes", "guidance": "5 mistakes new people make. Validate that they're common — makes readers feel less alone. 200-250 words." },
+        { "type": "h2", "heading": "Recommended Tools for Beginners", "guidance": "3-5 beginner-friendly tools. Focus on free or cheap options. 150-200 words." },
+        { "type": "h2", "heading": "What to Learn Next", "guidance": "A clear learning path with links to intermediate resources. 100-150 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "5 questions beginners always ask. Apply FAQPage schema." },
+        { "type": "conclusion", "heading": null, "guidance": "Encouragement. Recap the key first steps. Ask what their biggest challenge is in the comments. 75-100 words." }
+      ],
+      "seo_notes": "Use 'beginners', 'for beginners', 'getting started' in title and headings. Avoid jargon in the entire piece. Short sentences, simple words throughout."
+    },
+
+    {
+      "id": 8,
+      "name": "SEO-Optimized Blog Post",
+      "slug": "seo-blog-post",
+      "content_types": ["blog"],
+      "ideal_word_count": "1500-2500",
+      "ideal_sections": 7,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Hook with a surprising stat, bold claim, or relatable problem. State what the post covers. Include focus keyword. 100-150 words." },
+        { "type": "h2", "heading": "[Main Point or Concept 1]", "guidance": "First major point. Start with the most important or surprising insight. 200-300 words." },
+        { "type": "h2", "heading": "[Main Point or Concept 2]", "guidance": "Second point that builds on the first. 200-300 words." },
+        { "type": "h2", "heading": "[Main Point or Concept 3]", "guidance": "Third point. Include a real example or data point here. 200-300 words." },
+        { "type": "h2", "heading": "[Actionable Strategy or Tactic]", "guidance": "What should the reader actually DO with this information? The practical application section. 200-300 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "3-4 FAQs. Apply FAQPage schema." },
+        { "type": "conclusion", "heading": null, "guidance": "Summarize key points. End with a question to drive comments. Optional CTA to related content. 75-100 words." }
+      ],
+      "seo_notes": "Keyword in title (front-loaded), URL, meta, H1, first paragraph, one H2, conclusion. Target one primary keyword. Use LSI keywords throughout."
+    },
+
+    {
+      "id": 9,
+      "name": "What Is / Definition Post",
+      "slug": "what-is-definition",
+      "content_types": ["blog", "guide"],
+      "ideal_word_count": "1200-2000",
+      "ideal_sections": 7,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Give the direct answer immediately in the first paragraph — Google often pulls this for featured snippets. 50-100 words." },
+        { "type": "h2", "heading": "What Is {keyword}? (Full Explanation)", "guidance": "Expanded definition with context and examples. 200-300 words." },
+        { "type": "h2", "heading": "How {keyword} Works", "guidance": "The mechanism or process explained simply. 200-250 words." },
+        { "type": "h2", "heading": "Types of {keyword}", "guidance": "If applicable — categorize the concept into 3-5 types with brief explanations. 200-300 words." },
+        { "type": "h2", "heading": "Why {keyword} Matters", "guidance": "Real-world importance and consequences of understanding or ignoring it. 150-200 words." },
+        { "type": "h2", "heading": "{keyword} Examples", "guidance": "3-5 real-world examples. Concrete examples are the most shared parts of definition posts. 200-300 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "5 FAQs. Apply FAQPage schema. Target PAA questions from Google." },
+        { "type": "conclusion", "heading": null, "guidance": "One-paragraph summary. Link to related deeper-dive posts. 75-100 words." }
+      ],
+      "seo_notes": "Put the concise definition in the first paragraph for featured snippet targeting. Use 'What is X' or 'X definition' as keyword. Include 40-50 word summary at top."
+    },
+
+    {
+      "id": 10,
+      "name": "Checklist Post",
+      "slug": "checklist-post",
+      "content_types": ["checklist", "blog"],
+      "ideal_word_count": "1500-3000",
+      "ideal_sections": 8,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Why this checklist exists and who it's for. How to use it. 75-100 words." },
+        { "type": "h2", "heading": "Quick Checklist (Print-Friendly)", "guidance": "A condensed version of the full checklist — just the action items without explanation. Users can print or screenshot this. Highly shareable." },
+        { "type": "h2", "heading": "Section 1: [Category of Checklist Items]", "guidance": "5-8 checklist items with brief explanations (2-3 sentences each). 200-350 words." },
+        { "type": "h2", "heading": "Section 2: [Second Category]", "guidance": "5-8 more checklist items. 200-350 words." },
+        { "type": "h2", "heading": "Section 3: [Third Category]", "guidance": "5-8 more checklist items. 200-350 words." },
+        { "type": "h2", "heading": "Common Questions About This Checklist", "guidance": "3-4 FAQs. Apply FAQPage schema." },
+        { "type": "conclusion", "heading": "How to Use This Checklist", "guidance": "Recommended workflow for working through the checklist. Frequency recommendation. 75-100 words." }
+      ],
+      "seo_notes": "Include the word 'checklist' in title, URL, and H1. Structure is perfect for featured snippets. Add downloadable PDF version as a lead magnet."
+    },
+
+    {
+      "id": 11,
+      "name": "Troubleshooting / Fix Guide",
+      "slug": "troubleshooting-fix-guide",
+      "content_types": ["tutorial", "blog"],
+      "ideal_word_count": "1500-2500",
+      "ideal_sections": 8,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Validate the reader's frustration immediately. State the problem clearly. Brief overview of solutions covered. 75-100 words." },
+        { "type": "h2", "heading": "Why This Problem Happens", "guidance": "Explain the root causes. Understanding why helps readers prevent recurrence. 150-200 words." },
+        { "type": "h2", "heading": "Quick Fixes to Try First", "guidance": "3-4 simple solutions that solve the problem 80% of the time. Try these before the advanced fixes. 200-300 words." },
+        { "type": "h2", "heading": "Fix 1: [Specific Solution]", "guidance": "Step-by-step fix. Include screenshots. State when this fix applies. 150-250 words." },
+        { "type": "h2", "heading": "Fix 2: [Specific Solution]", "guidance": "Step-by-step fix. 150-250 words." },
+        { "type": "h2", "heading": "Fix 3: [Specific Solution]", "guidance": "Step-by-step fix. 150-250 words." },
+        { "type": "h2", "heading": "When to Ask for Help", "guidance": "Signs the problem is beyond a DIY fix and needs professional attention. Links to support resources. 100-150 words." },
+        { "type": "h2", "heading": "How to Prevent This Problem", "guidance": "Proactive steps to ensure this doesn't happen again. Very valuable section. 150-200 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "4-5 FAQs. Apply FAQPage schema." }
+      ],
+      "seo_notes": "Target error message text as keywords — people search the exact error. Title format: '[Error/Problem]: How to Fix It'. High commercial intent."
+    },
+
+    {
+      "id": 12,
+      "name": "Expert Roundup",
+      "slug": "expert-roundup",
+      "content_types": ["roundup", "blog"],
+      "ideal_word_count": "3000-6000",
+      "ideal_sections": 15,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Introduce the question you asked experts. Why this question matters now. Brief bio of the types of experts included. 100-150 words." },
+        { "type": "h2", "heading": "Key Themes from the Experts", "guidance": "Summary of the most common or interesting patterns in the responses. 200-300 words. Great for skimmers." },
+        { "type": "h2", "heading": "[Expert Name], [Title] at [Company]", "guidance": "For each expert: their headshot, title, company, and their full response. 100-300 words per expert. Aim for 15-25 experts." },
+        { "type": "repeat", "note": "Repeat expert entry structure for all experts" },
+        { "type": "conclusion", "heading": "Our Takeaway", "guidance": "Your own synthesis of the expert advice. What's the actionable conclusion? 150-200 words." }
+      ],
+      "seo_notes": "Extremely linkable — email each expert after publishing asking them to share. Each expert's mention = potential backlink. Include expert names in meta description."
+    },
+
+    {
+      "id": 13,
+      "name": "Tools Roundup",
+      "slug": "tools-roundup",
+      "content_types": ["roundup", "tools"],
+      "ideal_word_count": "3000-5000",
+      "ideal_sections": 15,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Why these tools, how they were selected, brief overview of categories covered. 100-150 words." },
+        { "type": "h2", "heading": "Quick Comparison Table", "guidance": "Table showing all tools with: price, best for, free plan availability, rating. Skimmers read this first." },
+        { "type": "h2", "heading": "1. {Tool Name} — Best for [Use Case]", "guidance": "For each tool: what it does, standout features, pricing, pros, cons, best for. 200-350 words per tool." },
+        { "type": "repeat", "note": "Repeat for all tools. Group into categories if covering many tools." },
+        { "type": "h2", "heading": "How to Choose the Right Tool", "guidance": "Decision framework based on team size, budget, and use case. 200-300 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "5 FAQs about the tool category. Apply FAQPage schema." },
+        { "type": "conclusion", "heading": "Our Top Picks", "guidance": "Final recommendations for different reader types. 100-150 words." }
+      ],
+      "seo_notes": "Target 'best [tool type] tools' keyword. Update annually. Include affiliate links where applicable — clearly disclosed. High commercial intent."
+    },
+
+    {
+      "id": 14,
+      "name": "Statistics Roundup",
+      "slug": "statistics-roundup",
+      "content_types": ["blog", "resource"],
+      "ideal_word_count": "2000-4000",
+      "ideal_sections": 8,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Why these stats matter. How and when data was collected. State the key headline stat immediately. 100-150 words." },
+        { "type": "h2", "heading": "Key {keyword} Statistics (Quick Summary)", "guidance": "5-7 most impressive stats as highlighted callouts. Highly shareable and screenshot-worthy." },
+        { "type": "h2", "heading": "{Category 1} Statistics", "guidance": "Group stats by theme. For each stat: the number, the source, and a brief interpretation. 300-400 words." },
+        { "type": "h2", "heading": "{Category 2} Statistics", "guidance": "Second category of stats. 300-400 words." },
+        { "type": "h2", "heading": "{Category 3} Statistics", "guidance": "Third category. 300-400 words." },
+        { "type": "h2", "heading": "What These Statistics Mean for You", "guidance": "Practical takeaways from the data. This is what makes it actionable. 200-300 words." },
+        { "type": "conclusion", "heading": null, "guidance": "When you'll next update this post. Invite readers to submit missing stats. 75-100 words." }
+      ],
+      "seo_notes": "Extremely linkable — people link to stats posts constantly. Update annually. Title: '{Number} {Topic} Statistics You Need to Know in {Year}'. Each stat should link to its primary source."
+    },
+
+    {
+      "id": 15,
+      "name": "News / Trend Post",
+      "slug": "news-trend-post",
+      "content_types": ["news", "blog"],
+      "ideal_word_count": "800-1500",
+      "ideal_sections": 5,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "The news or trend, stated clearly upfront. What happened and why it matters. Lead with the most important information (inverted pyramid). 100-150 words." },
+        { "type": "h2", "heading": "What Changed (And Why)", "guidance": "Full context of the change or trend. Background for readers who missed earlier coverage. 200-300 words." },
+        { "type": "h2", "heading": "What This Means for {audience}", "guidance": "Direct implications for the reader. Be specific. 200-300 words." },
+        { "type": "h2", "heading": "What You Should Do Now", "guidance": "3-5 specific action items the reader should take in response. 150-250 words." },
+        { "type": "conclusion", "heading": null, "guidance": "Invite discussion. What does the reader think? Link to related posts. 50-75 words." }
+      ],
+      "seo_notes": "Publish FAST — news SEO is time-sensitive. Include the date/year in the URL for evergreen tracking. Submit URL to Google Search Console for faster indexing."
+    },
+
+    {
+      "id": 16,
+      "name": "WooCommerce Product Page",
+      "slug": "woocommerce-product-page",
+      "content_types": ["product", "ecommerce"],
+      "ideal_word_count": "300-600",
+      "ideal_sections": 4,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Lead with the product's #1 benefit — not features. Who is this for and what problem does it solve? First sentence should be a benefit statement. 50-75 words." },
+        { "type": "h2", "heading": "What's Included", "guidance": "Everything in the box or package. Use a bullet list. Be specific about dimensions, materials, quantities. 50-100 words." },
+        { "type": "h2", "heading": "Key Features and Benefits", "guidance": "5-7 features, each written as a benefit (what it does FOR the customer). Avoid spec sheets — translate specs into outcomes. 100-150 words." },
+        { "type": "h2", "heading": "Who This Is For", "guidance": "2-3 specific customer types. Also mention who it's NOT for — builds trust. 50-75 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "4-5 product-specific FAQs. Reduces pre-sale anxiety and returns. Apply FAQPage schema." }
+      ],
+      "seo_notes": "Apply full Product schema with price, availability, and aggregate rating. Target '[product name]' and '[product category] [use case]' keywords. Unique description — never copy manufacturer text."
+    },
+
+    {
+      "id": 17,
+      "name": "Local Business Landing Page",
+      "slug": "local-business-landing-page",
+      "content_types": ["landing_page"],
+      "ideal_word_count": "500-1000",
+      "ideal_sections": 6,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Service + location in the first sentence. Primary benefit. Phone number or CTA visible above fold. 50-75 words." },
+        { "type": "h2", "heading": "{Service} in {Location} — What We Offer", "guidance": "Clear list of services. Use bullets. Include service areas. 150-200 words." },
+        { "type": "h2", "heading": "Why Choose Us for {Service} in {Location}", "guidance": "3-5 differentiators. Years in business, certifications, guarantees, response time. 150-200 words." },
+        { "type": "h2", "heading": "Our Recent Work in {Location}", "guidance": "2-3 brief case studies or project descriptions with outcomes. Photos if possible. 150-200 words." },
+        { "type": "h2", "heading": "What Our {Location} Customers Say", "guidance": "3-5 customer testimonials. Include full name and neighborhood if possible. 100-150 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "4-5 FAQs specific to local service. Apply FAQPage schema." },
+        { "type": "conclusion", "heading": "Get a Free Quote Today", "guidance": "Clear CTA. Phone number, email, or form. Business hours. Address with embedded map. 75-100 words." }
+      ],
+      "seo_notes": "Apply LocalBusiness schema with full NAP (Name, Address, Phone). Target '[service] [city]' keyword. Include Google Maps embed. NAP must match Google Business Profile exactly."
+    },
+
+    {
+      "id": 18,
+      "name": "Glossary / Dictionary Post",
+      "slug": "glossary-post",
+      "content_types": ["resource", "blog"],
+      "ideal_word_count": "2000-5000",
+      "ideal_sections": 10,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Why this glossary was created, who it's for, and how to use it. 75-100 words." },
+        { "type": "h2", "heading": "A", "guidance": "All terms starting with A. Each term: bold the term, 1-2 sentence plain English definition, optional example. 100-200 words per letter." },
+        { "type": "repeat", "note": "Continue A-Z. Focus on letters with the most industry terms. Skip letters with no relevant terms." },
+        { "type": "conclusion", "heading": null, "guidance": "Invite readers to submit missing terms. 50 words." }
+      ],
+      "seo_notes": "Extremely linkable — writers link to glossaries constantly. Add anchor links for each letter. Target '[industry] glossary' and '[industry] terminology' keywords. Add DefinedTerm schema for each entry."
+    },
+
+    {
+      "id": 19,
+      "name": "Interview Post",
+      "slug": "interview-post",
+      "content_types": ["interview", "blog"],
+      "ideal_word_count": "2000-3500",
+      "ideal_sections": 8,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Who the interviewee is, why they're worth listening to, and the key topic of conversation. 100-150 words." },
+        { "type": "h2", "heading": "About {Interviewee Name}", "guidance": "Brief bio — credentials, experience, notable achievements. Link to their website/social. 100-150 words." },
+        { "type": "h2", "heading": "The Interview", "guidance": "Q&A format. Bold each question. Keep questions conversational but insightful. 1500-2500 words total across all Q&As." },
+        { "type": "h2", "heading": "Key Takeaways", "guidance": "Top 3-5 insights from the interview in bullet format. Excellent for skimmers. 100-150 words." },
+        { "type": "conclusion", "heading": null, "guidance": "Thank the interviewee. Link to their resources. Ask readers what they thought. 75-100 words." }
+      ],
+      "seo_notes": "The interviewee's name is a long-tail keyword. Ask interviewee to share on social — this drives initial traffic. Include interview date in the post."
+    },
+
+    {
+      "id": 20,
+      "name": "Infographic Post",
+      "slug": "infographic-post",
+      "content_types": ["infographic", "blog"],
+      "ideal_word_count": "500-1000",
+      "ideal_sections": 3,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Brief context for the infographic. What information does it contain and why does it matter? 50-75 words." },
+        { "type": "visual", "heading": null, "guidance": "The infographic image with descriptive alt text containing focus keyword." },
+        { "type": "h2", "heading": "Key Highlights from the Infographic", "guidance": "Text version of the main infographic points — essential for SEO since Google can't read image text. 200-400 words." },
+        { "type": "h2", "heading": "Share This Infographic", "guidance": "Embed code for other bloggers to share. This earns backlinks. 25 words + embed code." },
+        { "type": "conclusion", "heading": null, "guidance": "CTA to related content. 25-50 words." }
+      ],
+      "seo_notes": "Text content is critical — Google indexes the text, not the image. Include embed code to earn backlinks. Alt text must be descriptive and keyword-rich."
+    },
+
+    {
+      "id": 21,
+      "name": "Opinion / Thought Leadership",
+      "slug": "opinion-thought-leadership",
+      "content_types": ["blog", "opinion"],
+      "ideal_word_count": "1000-2000",
+      "ideal_sections": 5,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "State your opinion boldly upfront. Don't hedge. Tell the reader exactly what you believe and why they should care. 100-150 words." },
+        { "type": "h2", "heading": "Why Most People Get This Wrong", "guidance": "The conventional wisdom you're challenging. Be respectful but direct. 200-300 words." },
+        { "type": "h2", "heading": "Here's What I Actually Think", "guidance": "Your position, fully argued with evidence, examples, or personal experience. 300-400 words." },
+        { "type": "h2", "heading": "The Evidence That Changed My Mind", "guidance": "Data, research, or experiences that support your view. Intellectual honesty builds trust. 200-300 words." },
+        { "type": "h2", "heading": "What This Means Going Forward", "guidance": "Implications of your position. What should readers do differently? 150-200 words." },
+        { "type": "conclusion", "heading": null, "guidance": "Invite disagreement. Ask readers for their take. Controversial = more comments = more engagement signals. 75-100 words." }
+      ],
+      "seo_notes": "Bold takes earn more social shares and links than safe takes. The controversy itself can be a traffic driver. Include your byline with credentials — E-E-A-T matters here."
+    },
+
+    {
+      "id": 22,
+      "name": "Year in Review / Annual Report",
+      "slug": "year-in-review",
+      "content_types": ["blog", "roundup"],
+      "ideal_word_count": "2000-4000",
+      "ideal_sections": 8,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "The headline metric or achievement from the year. Set the tone — honest and reflective. 100-150 words." },
+        { "type": "h2", "heading": "By the Numbers: {Year} Highlights", "guidance": "Key metrics: traffic, revenue, subscribers, products launched, posts published. Use a stat box or table. 150-200 words." },
+        { "type": "h2", "heading": "What Worked Well", "guidance": "Your top 3-5 wins with specific results. 300-400 words." },
+        { "type": "h2", "heading": "What Didn't Work", "guidance": "Be honest about failures. Readers appreciate transparency and it's rare — makes you memorable. 200-300 words." },
+        { "type": "h2", "heading": "Lessons Learned", "guidance": "Distilled wisdom from both successes and failures. 200-300 words." },
+        { "type": "h2", "heading": "Plans for {Next Year}", "guidance": "Goals and experiments planned. Creates accountability. 200-300 words." },
+        { "type": "conclusion", "heading": null, "guidance": "Thank your audience. Ask about their year. 75-100 words." }
+      ],
+      "seo_notes": "Publish between Dec 20 - Jan 10 for maximum reach. 'Year in Review' searches spike massively in this window. Include the year in the title and URL."
+    },
+
+    {
+      "id": 23,
+      "name": "Resource Page / Link Roundup",
+      "slug": "resource-page",
+      "content_types": ["resource", "roundup"],
+      "ideal_word_count": "1000-3000",
+      "ideal_sections": 6,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "What this resource page covers, who curated it, and how often it's updated. 75-100 words." },
+        { "type": "h2", "heading": "Essential {Category} Resources", "guidance": "Top-tier resources in this category with a brief description of why each is valuable. 300-500 words." },
+        { "type": "h2", "heading": "Recommended {Category} Tools", "guidance": "Tools, software, or platforms. Same format. 200-400 words." },
+        { "type": "h2", "heading": "Best {Category} Books", "guidance": "Books worth reading. Include author and a one-sentence description. 150-300 words." },
+        { "type": "h2", "heading": "Courses and Training", "guidance": "Educational resources. Free and paid. 150-250 words." },
+        { "type": "h2", "heading": "Communities and Forums", "guidance": "Where to connect with others in this space. 100-150 words." },
+        { "type": "conclusion", "heading": null, "guidance": "How often this page is updated. Invite suggestions. 50 words." }
+      ],
+      "seo_notes": "Resource pages are highly linkable — outreach campaigns love them. Email every resource you mention asking for a share. Update quarterly. Target '[topic] resources' keyword."
+    },
+
+    {
+      "id": 24,
+      "name": "Newsletter Issue / Email Content",
+      "slug": "newsletter-issue",
+      "content_types": ["newsletter", "email"],
+      "ideal_word_count": "400-800",
+      "ideal_sections": 4,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Personal, conversational opener. What's on your mind this week? 50-75 words." },
+        { "type": "section", "heading": "This Week's Main Idea", "guidance": "One core insight, tip, or story. Focused — don't try to cover everything. 150-250 words." },
+        { "type": "section", "heading": "What I'm Reading/Watching/Using", "guidance": "2-3 curated recommendations with brief context for each. 75-150 words." },
+        { "type": "section", "heading": "One Question for You", "guidance": "A single question to invite replies. Replies improve deliverability and build relationship. 25-50 words." }
+      ],
+      "seo_notes": "Newsletters aren't indexed by Google — focus on subscriber value. High-performing newsletters can be repurposed into blog posts for SEO."
+    },
+
+    {
+      "id": 25,
+      "name": "Podcast Show Notes",
+      "slug": "podcast-show-notes",
+      "content_types": ["podcast", "blog"],
+      "ideal_word_count": "500-1500",
+      "ideal_sections": 5,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Episode title, guest name (if applicable), 2-3 sentence summary of what's covered. 75-100 words." },
+        { "type": "h2", "heading": "What You'll Learn in This Episode", "guidance": "3-5 bullet points of key takeaways. Highly skimmable. 75-150 words." },
+        { "type": "h2", "heading": "Episode Highlights", "guidance": "Timestamped key moments. Example: '00:15:30 — How [Guest] grew from 0 to 10,000 subscribers'. 200-400 words." },
+        { "type": "h2", "heading": "Resources Mentioned", "guidance": "Everything mentioned in the episode with links. Very useful for listeners. 100-200 words." },
+        { "type": "h2", "heading": "Full Transcript", "guidance": "Include full or edited transcript. Google indexes transcripts — massive SEO benefit. 500-3000 words." }
+      ],
+      "seo_notes": "Transcripts are the most important SEO element of show notes. Target the episode topic as the primary keyword. Include guest's name for branded searches."
+    },
+
+    {
+      "id": 26,
+      "name": "Video Script / YouTube Description",
+      "slug": "video-script",
+      "content_types": ["video", "youtube"],
+      "ideal_word_count": "1500-3000",
+      "ideal_sections": 6,
+      "structure": [
+        { "type": "intro", "heading": "HOOK (First 15 seconds)", "guidance": "State the payoff immediately — what will the viewer learn/get. Create a pattern interrupt. Never start with 'Hey guys welcome back'. 50-75 words." },
+        { "type": "section", "heading": "INTRO (15-60 seconds)", "guidance": "Expand on what's covered and why the viewer should keep watching. Brief credibility statement. 75-100 words." },
+        { "type": "h2", "heading": "Main Point 1", "guidance": "First major section. Script each point fully. Add '(PAUSE FOR B-ROLL)' notes. 300-500 words." },
+        { "type": "h2", "heading": "Main Point 2", "guidance": "Second section. Include an example or demonstration. 300-500 words." },
+        { "type": "h2", "heading": "Main Point 3", "guidance": "Third section. 300-500 words." },
+        { "type": "section", "heading": "OUTRO (Last 30 seconds)", "guidance": "Summary of key points. Ask for like/subscribe/comment. Preview next video. 75-100 words." }
+      ],
+      "seo_notes": "YouTube description: keyword in first 2 lines (above fold), full description 250+ words, tags, chapter markers. Title: primary keyword in first 60 characters."
+    },
+
+    {
+      "id": 27,
+      "name": "FAQ Page",
+      "slug": "faq-page",
+      "content_types": ["faq", "landing_page"],
+      "ideal_word_count": "1500-3000",
+      "ideal_sections": 10,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Brief intro — what questions this FAQ covers, who it's for. 50-75 words." },
+        { "type": "h2", "heading": "General Questions", "guidance": "5-8 broad questions about your product/service/topic. Q&A format. 40-60 words per answer." },
+        { "type": "h2", "heading": "Pricing and Plans", "guidance": "4-6 pricing-related questions. Very important for conversions." },
+        { "type": "h2", "heading": "Technical Questions", "guidance": "4-6 technical or setup questions." },
+        { "type": "h2", "heading": "Account and Billing", "guidance": "4-6 account management questions." },
+        { "type": "conclusion", "heading": "Still Have Questions?", "guidance": "Contact information or support link. 25-50 words." }
+      ],
+      "seo_notes": "Apply FAQPage schema to entire page. Target 'X FAQ' and question-format keywords. Source questions from actual customer support tickets and Google PAA."
+    },
+
+    {
+      "id": 28,
+      "name": "About Page",
+      "slug": "about-page",
+      "content_types": ["about", "landing_page"],
+      "ideal_word_count": "400-800",
+      "ideal_sections": 4,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Lead with the reader's problem or aspiration — not 'We were founded in...'. Make it about them first. 75-100 words." },
+        { "type": "h2", "heading": "Our Story", "guidance": "How you started, what problem you set out to solve, and why you're uniquely qualified to solve it. 150-250 words." },
+        { "type": "h2", "heading": "Who We Help", "guidance": "Specific description of your audience. The more specific, the more the right people feel seen. 100-150 words." },
+        { "type": "h2", "heading": "Meet the Team", "guidance": "Photos and brief bios. Human faces dramatically increase trust. 100-200 words." },
+        { "type": "conclusion", "heading": null, "guidance": "CTA — what should the visitor do next? 25-50 words." }
+      ],
+      "seo_notes": "Apply Organization schema. Include your primary keyword naturally. Link to your most important content pages. About pages are often a top-5 visited page — optimize for conversion."
+    },
+
+    {
+      "id": 29,
+      "name": "Seasonal / Holiday Content",
+      "slug": "seasonal-holiday-content",
+      "content_types": ["blog", "roundup"],
+      "ideal_word_count": "1500-3000",
+      "ideal_sections": 7,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Connect the topic to the season or holiday. Establish relevance and urgency. 75-100 words." },
+        { "type": "h2", "heading": "Why {Season/Holiday} Matters for {topic}", "guidance": "Context and relevance. 150-200 words." },
+        { "type": "h2", "heading": "{Seasonal Content Section 1}", "guidance": "Main seasonal content. 300-400 words." },
+        { "type": "h2", "heading": "{Seasonal Content Section 2}", "guidance": "Second section. 300-400 words." },
+        { "type": "h2", "heading": "{Seasonal Content Section 3}", "guidance": "Third section. 200-300 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "4-5 season-specific FAQs. Apply FAQPage schema." },
+        { "type": "conclusion", "heading": null, "guidance": "Time-sensitive CTA. 50-75 words." }
+      ],
+      "seo_notes": "Publish 6-8 weeks before the season/holiday for maximum ranking time. Use evergreen URLs without the year so the post ranks every year. Update annually."
+    },
+
+    {
+      "id": 30,
+      "name": "Personal Finance / Money Post",
+      "slug": "personal-finance-post",
+      "content_types": ["guide", "blog"],
+      "ideal_word_count": "2000-4000",
+      "ideal_sections": 9,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "State the financial outcome readers will achieve. Include your qualifications upfront — YMYL content requires E-E-A-T. 100-150 words." },
+        { "type": "disclaimer", "heading": null, "guidance": "Standard disclaimer: 'This content is for educational purposes only. Consult a licensed financial advisor before making financial decisions.' Required for YMYL." },
+        { "type": "h2", "heading": "Understanding {Financial Topic}", "guidance": "Clear explanation of the financial concept. No jargon without definition. 200-300 words." },
+        { "type": "h2", "heading": "The Numbers: What You Need to Know", "guidance": "Specific figures, rates, thresholds, or benchmarks. Tables or charts work well here. 200-300 words." },
+        { "type": "h2", "heading": "Step-by-Step: How to {Financial Action}", "guidance": "Actionable steps. Very specific. 300-500 words." },
+        { "type": "h2", "heading": "Common Mistakes That Cost People Money", "guidance": "3-5 costly mistakes to avoid. Highly engaging and shareable. 200-300 words." },
+        { "type": "h2", "heading": "Real Examples", "guidance": "Worked examples with numbers. Makes abstract concepts concrete. 200-300 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "5-6 FAQs. Apply FAQPage schema." },
+        { "type": "conclusion", "heading": null, "guidance": "Recap key points. Remind reader to consult a professional for their specific situation. 75-100 words." }
+      ],
+      "seo_notes": "YMYL content — E-E-A-T is critical. Include author credentials. Cite authoritative sources (IRS, SEC, official government sites). Review and update whenever tax laws or regulations change."
+    },
+
+    {
+      "id": 31,
+      "name": "Health and Wellness Post",
+      "slug": "health-wellness-post",
+      "content_types": ["guide", "blog"],
+      "ideal_word_count": "2000-3500",
+      "ideal_sections": 8,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "State the health topic and what readers will learn. Author credentials required upfront. 100-150 words." },
+        { "type": "disclaimer", "heading": null, "guidance": "Medical disclaimer: 'This content is for informational purposes only and should not replace professional medical advice. Consult your healthcare provider before making health decisions.'" },
+        { "type": "h2", "heading": "What the Research Says About {topic}", "guidance": "Cite peer-reviewed studies. Link to PubMed, NHS, Mayo Clinic, or similar authoritative sources. 200-300 words." },
+        { "type": "h2", "heading": "Signs and Symptoms to Know", "guidance": "If applicable. When to seek immediate medical attention. 150-250 words." },
+        { "type": "h2", "heading": "Evidence-Based Approaches", "guidance": "What actually works — backed by research. 300-400 words." },
+        { "type": "h2", "heading": "What to Avoid", "guidance": "Common myths debunked. Products or practices to avoid. 200-300 words." },
+        { "type": "h2", "heading": "When to See a Doctor", "guidance": "Clear guidance on when professional help is needed. 150-200 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "5-6 FAQs. Apply FAQPage schema." },
+        { "type": "conclusion", "heading": null, "guidance": "Remind readers to consult healthcare providers. 75 words." }
+      ],
+      "seo_notes": "YMYL content — highest E-E-A-T requirements. Medical reviewer credentials must be displayed. Cite studies with PubMed links. Reviewed-by-medical-expert byline dramatically improves rankings for health content."
+    },
+
+    {
+      "id": 32,
+      "name": "Travel Guide",
+      "slug": "travel-guide",
+      "content_types": ["guide", "blog"],
+      "ideal_word_count": "2500-5000",
+      "ideal_sections": 10,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Why this destination? Set the scene with vivid, specific details. When you visited and your overall impression. 100-150 words." },
+        { "type": "h2", "heading": "Quick Facts About {Destination}", "guidance": "Best time to visit, how to get there, currency, language, timezone, visa requirements. Table format works well." },
+        { "type": "h2", "heading": "Where to Stay in {Destination}", "guidance": "3-4 accommodation recommendations across budget levels. Include neighborhoods to stay in. 300-400 words." },
+        { "type": "h2", "heading": "Top Things to Do in {Destination}", "guidance": "8-12 activities or attractions with practical details (address, hours, cost). 500-700 words." },
+        { "type": "h2", "heading": "Where to Eat in {Destination}", "guidance": "Restaurant recommendations by meal type or neighborhood. 300-400 words." },
+        { "type": "h2", "heading": "Getting Around {Destination}", "guidance": "Transport options, costs, apps to download. 150-250 words." },
+        { "type": "h2", "heading": "{Destination} Travel Tips", "guidance": "Insider tips from your experience. Safety, etiquette, money-saving hacks. 200-300 words." },
+        { "type": "h2", "heading": "Sample {duration} Itinerary", "guidance": "Day-by-day schedule. Very practical and highly shareable. 300-500 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "5-6 FAQs about visiting. Apply FAQPage schema." },
+        { "type": "conclusion", "heading": null, "guidance": "Final recommendation. Invite readers to share their tips. 75-100 words." }
+      ],
+      "seo_notes": "Target '{destination} travel guide {year}', 'things to do in {destination}', '{destination} itinerary'. Add TouristAttraction schema for key sites mentioned. Update annually — tourism info changes."
+    },
+
+    {
+      "id": 33,
+      "name": "Recipe Post",
+      "slug": "recipe-post",
+      "content_types": ["recipe", "food"],
+      "ideal_word_count": "800-1500",
+      "ideal_sections": 6,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "A brief personal story or context for the recipe. Why you love it. What makes this version special. 75-150 words. (Don't write too much before the recipe — readers hate scrolling.)" },
+        { "type": "h2", "heading": "Why You'll Love This Recipe", "guidance": "3-5 bullet points: quick, easy, kid-friendly, etc. 50-75 words." },
+        { "type": "h2", "heading": "Ingredients", "guidance": "Full ingredient list. Include weights not just cups. Note substitutions for dietary restrictions. 100-150 words." },
+        { "type": "h2", "heading": "Step-by-Step Instructions", "guidance": "Numbered steps. Each step = one action. Include temperatures and timing. Photos at key stages. 200-400 words." },
+        { "type": "h2", "heading": "Tips and Variations", "guidance": "Pro tips for best results. Common variations (vegan, gluten-free, etc.). Storage instructions. 150-200 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "4-5 recipe-specific FAQs. Apply FAQPage schema." }
+      ],
+      "seo_notes": "Apply full Recipe schema (prepTime, cookTime, calories, yield, ingredients). This unlocks rich results with recipe card in Google. Recipe title should be the keyword. Include high-quality food photography."
+    },
+
+    {
+      "id": 34,
+      "name": "Software / App Tutorial",
+      "slug": "software-app-tutorial",
+      "content_types": ["tutorial", "guide"],
+      "ideal_word_count": "1500-3000",
+      "ideal_sections": 8,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "What software/app is being covered, what the reader will achieve, version number covered. 75-100 words." },
+        { "type": "h2", "heading": "System Requirements and Setup", "guidance": "Minimum requirements, how to download/install, initial setup. 150-200 words." },
+        { "type": "h2", "heading": "Getting Started: The Interface Overview", "guidance": "Key areas of the UI labeled with a screenshot. 150-250 words." },
+        { "type": "h2", "heading": "Step 1: [First Key Task]", "guidance": "The most common or first task users need to complete. Screenshot each step. 200-300 words." },
+        { "type": "h2", "heading": "Step 2: [Second Key Task]", "guidance": "Second task. 200-300 words." },
+        { "type": "h2", "heading": "Step 3: [Third Key Task]", "guidance": "Third task. 200-300 words." },
+        { "type": "h2", "heading": "Tips and Shortcuts", "guidance": "Power user tips, keyboard shortcuts, hidden features. 150-200 words." },
+        { "type": "h2", "heading": "Troubleshooting Common Issues", "guidance": "3-5 issues users commonly encounter with solutions. 150-250 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "4-5 FAQs. Apply FAQPage schema." }
+      ],
+      "seo_notes": "Include software version in title (e.g., 'Photoshop 2026'). Screenshots must show the exact current UI. Update when software gets major updates — outdated tutorials rank poorly."
+    },
+
+    {
+      "id": 35,
+      "name": "Template / Framework Reveal",
+      "slug": "template-framework-reveal",
+      "content_types": ["resource", "blog"],
+      "ideal_word_count": "1500-2500",
+      "ideal_sections": 7,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "What problem this template/framework solves. The result you achieved using it. 75-100 words." },
+        { "type": "h2", "heading": "The Complete Template", "guidance": "The actual template in full. Use a styled box or code block. This is what readers came for — don't hide it." },
+        { "type": "h2", "heading": "How to Use This Template", "guidance": "Step-by-step guide to filling it in or applying it. 300-400 words." },
+        { "type": "h2", "heading": "Why This Template Works", "guidance": "The psychology or logic behind why each element is structured the way it is. 200-300 words." },
+        { "type": "h2", "heading": "Real Examples", "guidance": "2-3 filled-in examples showing it in action. 200-350 words." },
+        { "type": "h2", "heading": "Variations for Different Use Cases", "guidance": "How to adapt the template for different situations. 150-200 words." },
+        { "type": "conclusion", "heading": null, "guidance": "How to get the downloadable version (lead magnet opportunity). 50-75 words." }
+      ],
+      "seo_notes": "Title: '[Topic] Template (Free Download)' or 'The [Name] Framework'. Template posts earn 3x more links than average blog posts. Gate the downloadable version for email capture."
+    },
+
+    {
+      "id": 36,
+      "name": "Prediction / Forecast Post",
+      "slug": "prediction-forecast",
+      "content_types": ["blog", "opinion"],
+      "ideal_word_count": "2000-3500",
+      "ideal_sections": 8,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Why predictions matter now. Your qualifications to make them. Brief preview of top predictions. 100-150 words." },
+        { "type": "h2", "heading": "State of {Industry} in {Current Year}", "guidance": "Where things stand right now — the baseline. 200-300 words." },
+        { "type": "h2", "heading": "Prediction 1: [Specific Prediction]", "guidance": "State the prediction boldly. Evidence supporting it. Confidence level (high/medium/low). Impact if true. 200-300 words." },
+        { "type": "repeat", "note": "Repeat for 5-8 predictions total" },
+        { "type": "h2", "heading": "What to Do to Prepare", "guidance": "Actionable advice based on these predictions. 200-300 words." },
+        { "type": "conclusion", "heading": "My Track Record", "guidance": "If you've made predictions before — how did you do? Honesty builds credibility. 75-100 words." }
+      ],
+      "seo_notes": "Publish in Q4 or Q1 when '[year] [industry] predictions' searches surge. Bold predictions get more links and shares than hedged ones. Update with results at year end."
+    },
+
+    {
+      "id": 37,
+      "name": "Email Outreach / Cold Email Guide",
+      "slug": "email-outreach-guide",
+      "content_types": ["guide", "tutorial"],
+      "ideal_word_count": "2000-3500",
+      "ideal_sections": 9,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "The problem with most cold emails. Your results using the approach you're about to share. 100-150 words." },
+        { "type": "h2", "heading": "Why Most Cold Emails Fail", "guidance": "Common mistakes. What recipients actually want. 200-250 words." },
+        { "type": "h2", "heading": "The Anatomy of a Perfect Cold Email", "guidance": "Break down each element: subject line, opener, value prop, CTA. 250-350 words." },
+        { "type": "h2", "heading": "Subject Lines That Get Opened", "guidance": "10+ proven subject line formulas with examples. 200-300 words." },
+        { "type": "h2", "heading": "{Number} Cold Email Templates That Work", "guidance": "Full email templates for different scenarios. The more templates, the more linkable. 400-600 words." },
+        { "type": "h2", "heading": "The Follow-Up Sequence", "guidance": "How many follow-ups, timing, what to say. 200-300 words." },
+        { "type": "h2", "heading": "How to Personalize at Scale", "guidance": "Tools and techniques for mass personalization. 150-250 words." },
+        { "type": "h2", "heading": "Measuring Success: Key Metrics", "guidance": "Open rate, reply rate, conversion rate benchmarks. 150-200 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "5 FAQs. Apply FAQPage schema." }
+      ],
+      "seo_notes": "Templates are the most shared element — make them prominent. Target 'cold email template' and '[use case] outreach email' keywords."
+    },
+
+    {
+      "id": 38,
+      "name": "Affiliate / Commission Content",
+      "slug": "affiliate-content",
+      "content_types": ["review", "roundup"],
+      "ideal_word_count": "2500-5000",
+      "ideal_sections": 10,
+      "structure": [
+        { "type": "disclosure", "heading": null, "guidance": "FTC-required affiliate disclosure at the very top: 'This post contains affiliate links. If you purchase through my links, I may earn a commission at no extra cost to you.'" },
+        { "type": "intro", "heading": null, "guidance": "Your experience with the product category. Why you're qualified to review it. Bottom-line recommendation upfront. 100-150 words." },
+        { "type": "h2", "heading": "Quick Picks", "guidance": "Top 3 recommendations for different buyer types. High skimmability." },
+        { "type": "h2", "heading": "How I Tested These Products", "guidance": "Your evaluation process and criteria. Builds credibility for recommendations. 150-200 words." },
+        { "type": "h2", "heading": "Full Reviews", "guidance": "Individual reviews of each product. Features, pros, cons, pricing, verdict. 200-350 words each." },
+        { "type": "h2", "heading": "Buying Guide: What to Look For", "guidance": "Decision criteria for a buyer in this category. 200-300 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "5-6 buyer FAQs. Apply FAQPage schema." },
+        { "type": "conclusion", "heading": "Our Top Recommendation", "guidance": "Final verdict with clear CTA. 100-150 words." }
+      ],
+      "seo_notes": "FTC disclosure is legally required. Target 'best [product category]' and '[product] review' keywords. Include real photos — not just press kit images. Update when products are discontinued or replaced."
+    },
+
+    {
+      "id": 39,
+      "name": "SaaS Landing Page",
+      "slug": "saas-landing-page",
+      "content_types": ["landing_page"],
+      "ideal_word_count": "500-1200",
+      "ideal_sections": 7,
+      "structure": [
+        { "type": "hero", "heading": null, "guidance": "Headline: The specific transformation your software creates. Subheadline: Who it's for and how it works in one sentence. CTA button above the fold." },
+        { "type": "h2", "heading": "The Problem", "guidance": "Agitate the pain your software solves. Specific and emotional. 75-150 words." },
+        { "type": "h2", "heading": "How {Product} Works", "guidance": "3-step simple process. Keep it simple: 1. Do X → 2. Do Y → 3. Get Z. 75-150 words." },
+        { "type": "h2", "heading": "Key Features", "guidance": "3-6 features written as benefits. Icon + headline + 2 sentences each." },
+        { "type": "h2", "heading": "Social Proof", "guidance": "3-5 customer testimonials with specific results. Include photos and company names." },
+        { "type": "h2", "heading": "Pricing", "guidance": "Clear pricing tiers. Highlight the recommended plan. Annual discount clearly shown." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "6-8 conversion-focused FAQs. Apply FAQPage schema. Address the most common objections." },
+        { "type": "conclusion", "heading": null, "guidance": "Final CTA with risk reversal (free trial, money-back guarantee). 50-75 words." }
+      ],
+      "seo_notes": "Target your primary keyword in H1. Apply SoftwareApplication schema. Landing pages need fewer links and more conversion focus — don't link out to competitors."
+    },
+
+    {
+      "id": 40,
+      "name": "Pillar Page for Topic Cluster",
+      "slug": "pillar-page-topic-cluster",
+      "content_types": ["pillar", "guide"],
+      "ideal_word_count": "3000-6000",
+      "ideal_sections": 12,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Broad overview of the topic. Why it matters. Table of contents with links to all sections. 150-200 words." },
+        { "type": "h2", "heading": "What Is {Broad Topic}?", "guidance": "Clear definition targeting 'what is' search queries. 150-250 words." },
+        { "type": "h2", "heading": "{Sub-Topic 1} [Link to cluster post]", "guidance": "300-400 word overview of this subtopic. Link to the dedicated cluster post for full coverage." },
+        { "type": "h2", "heading": "{Sub-Topic 2} [Link to cluster post]", "guidance": "300-400 word overview. Link to cluster post." },
+        { "type": "h2", "heading": "{Sub-Topic 3} [Link to cluster post]", "guidance": "300-400 word overview. Link to cluster post." },
+        { "type": "h2", "heading": "{Sub-Topic 4} [Link to cluster post]", "guidance": "300-400 word overview. Link to cluster post." },
+        { "type": "h2", "heading": "{Sub-Topic 5} [Link to cluster post]", "guidance": "300-400 word overview. Link to cluster post." },
+        { "type": "h2", "heading": "Getting Started with {Broad Topic}", "guidance": "Actionable first steps. 200-300 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "6-8 FAQs covering the full breadth. Apply FAQPage schema." },
+        { "type": "conclusion", "heading": null, "guidance": "Next steps. Point to the most relevant cluster posts based on reader goal. 100-150 words." }
+      ],
+      "seo_notes": "This page links TO all cluster posts. All cluster posts link BACK to this page. Target broad 1-2 word head keyword. Update whenever a new cluster post is published."
+    },
+
+    {
+      "id": 41,
+      "name": "Myth-Busting Post",
+      "slug": "myth-busting-post",
+      "content_types": ["blog", "guide"],
+      "ideal_word_count": "2000-3500",
+      "ideal_sections": 8,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Why myths about this topic are dangerous or costly. How many myths will be debunked. Your qualification to assess them. 100-150 words." },
+        { "type": "h2", "heading": "Myth 1: [Common False Belief]", "guidance": "State the myth. Explain why people believe it. Present the evidence against it. The truth. 200-300 words." },
+        { "type": "repeat", "note": "Repeat for 7-10 myths total" },
+        { "type": "h2", "heading": "Where These Myths Come From", "guidance": "Why misinformation spreads in this field. 150-200 words." },
+        { "type": "conclusion", "heading": "The Bottom Line", "guidance": "Summary of what's actually true. 75-100 words." }
+      ],
+      "seo_notes": "Highly linkable and shareable. Target '[topic] myths' keyword. The more authoritative your myth-busting evidence, the more links you'll attract."
+    },
+
+    {
+      "id": 42,
+      "name": "Salary / Pricing Guide",
+      "slug": "salary-pricing-guide",
+      "content_types": ["guide", "resource"],
+      "ideal_word_count": "2000-4000",
+      "ideal_sections": 8,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Why this data matters and how it was collected. Date of data collection. 75-100 words." },
+        { "type": "h2", "heading": "{Topic} Salary / Pricing Overview", "guidance": "High-level averages with a summary table. The most-searched data points up front. 200-300 words." },
+        { "type": "h2", "heading": "By Experience Level", "guidance": "Entry, mid, senior breakdowns. 200-300 words." },
+        { "type": "h2", "heading": "By Location", "guidance": "Top cities or regions compared. 200-300 words." },
+        { "type": "h2", "heading": "By Industry or Niche", "guidance": "How different industries affect rates. 150-250 words." },
+        { "type": "h2", "heading": "Factors That Affect {Salary/Price}", "guidance": "What drives numbers up or down. 200-300 words." },
+        { "type": "h2", "heading": "How to Negotiate", "guidance": "Practical negotiation advice. Very high engagement section. 200-300 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "5-6 FAQs. Apply FAQPage schema." }
+      ],
+      "seo_notes": "Very high-intent searches. Update annually — stale salary data destroys credibility. Include the year prominently in title and URL. Target '[role] salary {year}' keywords."
+    },
+
+    {
+      "id": 43,
+      "name": "Best Practices Post",
+      "slug": "best-practices-post",
+      "content_types": ["guide", "blog"],
+      "ideal_word_count": "2000-3500",
+      "ideal_sections": 10,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Why best practices matter for this topic. What following them achieves. 75-100 words." },
+        { "type": "h2", "heading": "Best Practice 1: [Specific Practice]", "guidance": "What it is, why it matters, and how to implement it. 200-300 words each." },
+        { "type": "repeat", "note": "Repeat for 8-12 best practices total" },
+        { "type": "h2", "heading": "Common Violations to Avoid", "guidance": "What NOT to do — the flip side of best practices. 150-250 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "4-5 FAQs. Apply FAQPage schema." },
+        { "type": "conclusion", "heading": null, "guidance": "Prioritization advice — if the reader can only do 3 things from this list, which 3? 75-100 words." }
+      ],
+      "seo_notes": "Target '[topic] best practices {year}'. Very evergreen content. Update annually. Great for establishing topical authority."
+    },
+
+    {
+      "id": 44,
+      "name": "Interview Prep Guide",
+      "slug": "interview-prep-guide",
+      "content_types": ["guide", "resource"],
+      "ideal_word_count": "2500-4000",
+      "ideal_sections": 9,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "What this guide covers, what type of interview, success rate context. 75-100 words." },
+        { "type": "h2", "heading": "What to Expect", "guidance": "Interview format, stages, typical timeline. 150-200 words." },
+        { "type": "h2", "heading": "How to Prepare (2-Week Plan)", "guidance": "Day-by-day or week-by-week prep schedule. Very actionable. 200-300 words." },
+        { "type": "h2", "heading": "Common Interview Questions (With Answers)", "guidance": "15-25 questions with sample answers. This is what people came for. 600-1000 words." },
+        { "type": "h2", "heading": "Questions to Ask the Interviewer", "guidance": "10-15 smart questions to ask at the end. 150-200 words." },
+        { "type": "h2", "heading": "What to Do After the Interview", "guidance": "Follow-up email template, timeline expectations. 100-150 words." },
+        { "type": "h2", "heading": "Red Flags to Watch For", "guidance": "Signs the company or role isn't right. 100-150 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "5-6 FAQs. Apply FAQPage schema." }
+      ],
+      "seo_notes": "Very high intent — people searching this are actively job hunting. Target '[role] interview questions'. Include the actual Q&As as they are what earn the featured snippets."
+    },
+
+    {
+      "id": 45,
+      "name": "Content Upgrade / Lead Magnet Landing Page",
+      "slug": "content-upgrade-landing-page",
+      "content_types": ["landing_page", "resource"],
+      "ideal_word_count": "300-600",
+      "ideal_sections": 4,
+      "structure": [
+        { "type": "hero", "heading": null, "guidance": "Headline: The specific thing they're getting. Sub-headline: The specific benefit. Opt-in form above fold." },
+        { "type": "h2", "heading": "What's Inside", "guidance": "Bullet list of exactly what's included. Specific > vague. 50-100 words." },
+        { "type": "h2", "heading": "Who This Is For", "guidance": "2-3 specific reader types this is designed for. 50-75 words." },
+        { "type": "section", "heading": "Privacy Note", "guidance": "One-line privacy reassurance: 'We never spam. Unsubscribe anytime.' Required for trust." }
+      ],
+      "seo_notes": "These pages are conversion-optimized, not SEO-optimized. Minimal text, minimal links. Focus on the single action: email opt-in."
+    },
+
+    {
+      "id": 46,
+      "name": "Roundup of Industry News",
+      "slug": "industry-news-roundup",
+      "content_types": ["roundup", "news"],
+      "ideal_word_count": "800-1500",
+      "ideal_sections": 6,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "The week/month in one sentence. The single biggest story. 50-75 words." },
+        { "type": "h2", "heading": "The Big Story: [Headline]", "guidance": "The most important news item in full context. 150-200 words." },
+        { "type": "h2", "heading": "Also in the News", "guidance": "4-6 shorter news items with brief commentary. 200-300 words." },
+        { "type": "h2", "heading": "What to Watch Next Week", "guidance": "Upcoming events, announcements, or trends to monitor. 75-100 words." },
+        { "type": "conclusion", "heading": null, "guidance": "Ask readers what they're watching. 25-50 words." }
+      ],
+      "seo_notes": "Consistent publishing schedule builds returning audience. Target '[industry] news [week/month year]'. These posts compound — readers bookmark and return."
+    },
+
+    {
+      "id": 47,
+      "name": "Course / Training Program Overview",
+      "slug": "course-overview",
+      "content_types": ["landing_page", "education"],
+      "ideal_word_count": "800-1500",
+      "ideal_sections": 7,
+      "structure": [
+        { "type": "hero", "heading": null, "guidance": "What the student will be able to DO after completing this course. Specific outcome. CTA above fold." },
+        { "type": "h2", "heading": "What You'll Learn", "guidance": "Module-by-module breakdown. Specific skills and outcomes per module. 200-300 words." },
+        { "type": "h2", "heading": "Who This Course Is For", "guidance": "Ideal student profile. Also who it's NOT for — reduces refunds. 100-150 words." },
+        { "type": "h2", "heading": "What's Included", "guidance": "Videos, downloads, community access, coaching calls, lifetime access. 75-150 words." },
+        { "type": "h2", "heading": "Student Results", "guidance": "3-5 testimonials with specific outcomes. 'I went from X to Y' format. 150-200 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "8-10 pre-purchase FAQs. Address every objection. Apply FAQPage schema." },
+        { "type": "conclusion", "heading": null, "guidance": "Final CTA with urgency element and risk reversal (money-back guarantee). 75-100 words." }
+      ],
+      "seo_notes": "Apply Course schema. Target '[topic] course' and '[topic] training' keywords. Student testimonials with specific results are your strongest conversion element."
+    },
+
+    {
+      "id": 48,
+      "name": "Retrospective / Lessons Learned",
+      "slug": "retrospective-lessons-learned",
+      "content_types": ["blog", "case_study"],
+      "ideal_word_count": "1500-3000",
+      "ideal_sections": 7,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "What is being reviewed (project, year, campaign). Time period. Your honest overall assessment. 75-100 words." },
+        { "type": "h2", "heading": "What We Set Out to Do", "guidance": "Original goals and expectations. 100-150 words." },
+        { "type": "h2", "heading": "What Actually Happened", "guidance": "Honest account of the reality vs expectations. 200-300 words." },
+        { "type": "h2", "heading": "The Wins", "guidance": "What genuinely went well and why. Be specific. 200-300 words." },
+        { "type": "h2", "heading": "The Failures", "guidance": "What didn't work. The more honest, the more trust you build. 200-300 words." },
+        { "type": "h2", "heading": "The Lessons", "guidance": "What you'd do differently. Distilled wisdom. 200-300 words." },
+        { "type": "conclusion", "heading": "What's Next", "guidance": "How these lessons will be applied going forward. 75-100 words." }
+      ],
+      "seo_notes": "Authenticity and transparency are the engagement drivers here. Readers appreciate honesty about failures. First-person account builds E-E-A-T."
+    },
+
+    {
+      "id": 49,
+      "name": "Job Description / Hiring Post",
+      "slug": "job-description-hiring",
+      "content_types": ["hiring", "resource"],
+      "ideal_word_count": "400-800",
+      "ideal_sections": 5,
+      "structure": [
+        { "type": "intro", "heading": null, "guidance": "Role title, company culture in 2-3 sentences. Why this is a great opportunity. 50-75 words." },
+        { "type": "h2", "heading": "What You'll Do", "guidance": "5-8 specific responsibilities. Use action verbs. 100-150 words." },
+        { "type": "h2", "heading": "What We're Looking For", "guidance": "Must-have requirements (short list). Nice-to-have skills (separate list). 100-150 words." },
+        { "type": "h2", "heading": "What We Offer", "guidance": "Salary range, benefits, remote policy, growth opportunities. 75-150 words." },
+        { "type": "conclusion", "heading": "How to Apply", "guidance": "Clear application instructions. Deadline if applicable. 50-75 words." }
+      ],
+      "seo_notes": "Apply JobPosting schema with salary range (required by Google for Jobs eligibility). Target '[role title] job' keywords. Include salary — job posts with salary listed get 75% more applications."
+    },
+
+    {
+      "id": 50,
+      "name": "Agency Service Page",
+      "slug": "agency-service-page",
+      "content_types": ["landing_page", "service"],
+      "ideal_word_count": "600-1200",
+      "ideal_sections": 7,
+      "structure": [
+        { "type": "hero", "heading": null, "guidance": "Service name + the outcome it delivers. Who you serve. Single CTA. 50-75 words." },
+        { "type": "h2", "heading": "The Problem We Solve", "guidance": "Paint the pain without the service. Be specific to your ideal client's situation. 100-150 words." },
+        { "type": "h2", "heading": "Our {Service} Process", "guidance": "3-5 step process with clear descriptions of what happens at each stage. 200-300 words." },
+        { "type": "h2", "heading": "What's Included", "guidance": "Specific deliverables. Clients want to know exactly what they're paying for. 100-200 words." },
+        { "type": "h2", "heading": "Client Results", "guidance": "3-5 case study snippets with specific outcomes (traffic %, revenue, rankings). 150-250 words." },
+        { "type": "h2", "heading": "Frequently Asked Questions", "guidance": "6-8 service-specific FAQs. Address pricing objections. Apply FAQPage schema." },
+        { "type": "conclusion", "heading": null, "guidance": "Clear next step CTA. Free consultation, audit, or quote. 50-75 words." }
+      ],
+      "seo_notes": "Apply Service schema or LocalBusiness schema. Target '[service type] agency' and '[service] services'. Include specific results — vague promises don't rank or convert."
+    }
+
+  ]
+}

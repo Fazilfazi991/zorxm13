@@ -1,0 +1,50 @@
+{
+    "content": [
+        {
+            "id": "section_site_header",
+            "elType": "section",
+            "settings": {
+                "layout": "full_width",
+                "gap": "no",
+                "padding": {
+                    "unit": "px",
+                    "top": "0",
+                    "right": "0",
+                    "bottom": "0",
+                    "left": "0",
+                    "isLinked": true
+                }
+            },
+            "elements": [
+                {
+                    "id": "column_site_header",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_site_header",
+                            "elType": "widget",
+                            "widgetType": "zorx_header",
+                            "settings": {
+                                "logo_text": "ZORX",
+                                "show_cta": "yes",
+                                "cta_text": "Get Started",
+                                "cta_link": {
+                                    "url": "#contact"
+                                }
+                            }
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        }
+    ],
+    "page_settings": [],
+    "version": "0.4",
+    "title": "Zorx Global Header",
+    "type": "page"
+}

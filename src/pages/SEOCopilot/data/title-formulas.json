@@ -1,0 +1,619 @@
+{
+  "version": "1.0.0",
+  "total_formulas": 50,
+  "variables": {
+    "{keyword}": "Your focus keyword or topic",
+    "{year}": "Current year (auto-filled)",
+    "{number}": "A specific number relevant to the content",
+    "{audience}": "Your target reader (beginners, experts, small businesses, etc)",
+    "{benefit}": "The main outcome or benefit",
+    "{timeframe}": "How long it takes (30 days, one weekend, 5 minutes)",
+    "{site_name}": "Your website or brand name",
+    "{modifier}": "Ultimate, Complete, Definitive, Expert, Proven",
+    "{niche}": "The specific industry or topic area",
+    "{tool}": "A specific tool, software, or method name"
+  },
+  "formulas": [
+
+    {
+      "id": 1,
+      "category": "how_to",
+      "content_types": ["tutorial", "guide", "blog"],
+      "template": "How to {keyword} in {year} (Step-by-Step Guide)",
+      "example": "How to Start a WordPress Blog in 2026 (Step-by-Step Guide)",
+      "best_for": "Instructional content where the reader wants a clear process",
+      "char_estimate": 55,
+      "power_words": ["Step-by-Step"],
+      "notes": "Best performing format for how-to searches. The year signals freshness."
+    },
+
+    {
+      "id": 2,
+      "category": "how_to",
+      "content_types": ["tutorial", "guide"],
+      "template": "How to {keyword}: {number} Steps for {audience}",
+      "example": "How to Do Keyword Research: 7 Steps for Beginners",
+      "best_for": "Beginners searching for structured guidance",
+      "char_estimate": 52,
+      "power_words": [],
+      "notes": "The audience qualifier filters for higher-intent searchers"
+    },
+
+    {
+      "id": 3,
+      "category": "how_to",
+      "content_types": ["tutorial", "case_study"],
+      "template": "How to {keyword} (Even If {common_objection})",
+      "example": "How to Rank on Google (Even If You're a Complete Beginner)",
+      "best_for": "Overcoming the biggest barrier readers face",
+      "char_estimate": 58,
+      "power_words": ["Even If"],
+      "notes": "The 'even if' formula directly addresses and removes objections"
+    },
+
+    {
+      "id": 4,
+      "category": "how_to",
+      "content_types": ["tutorial", "guide"],
+      "template": "How to {keyword} in {timeframe} — No {pain_point} Required",
+      "example": "How to Build a Website in One Weekend — No Coding Required",
+      "best_for": "Removing a specific fear or barrier",
+      "char_estimate": 57,
+      "power_words": ["No ... Required"],
+      "notes": "Extremely effective when the pain point is a known barrier to entry"
+    },
+
+    {
+      "id": 5,
+      "category": "listicle",
+      "content_types": ["blog", "roundup"],
+      "template": "{number} {keyword} Tips to {benefit} in {year}",
+      "example": "17 WordPress SEO Tips to Double Your Traffic in 2026",
+      "best_for": "Traffic and sharing on social media",
+      "char_estimate": 53,
+      "power_words": ["Double"],
+      "notes": "Odd numbers (7, 11, 17, 23) get more clicks than round numbers"
+    },
+
+    {
+      "id": 6,
+      "category": "listicle",
+      "content_types": ["blog", "roundup", "tools"],
+      "template": "{number} Best {keyword} for {audience} in {year}",
+      "example": "11 Best SEO Tools for Small Businesses in 2026",
+      "best_for": "Product and tool roundups, comparison content",
+      "char_estimate": 50,
+      "power_words": ["Best"],
+      "notes": "High commercial intent — attracts buyers ready to make decisions"
+    },
+
+    {
+      "id": 7,
+      "category": "listicle",
+      "content_types": ["blog", "checklist"],
+      "template": "{number} {keyword} Mistakes to Avoid in {year}",
+      "example": "9 WordPress Security Mistakes to Avoid in 2026",
+      "best_for": "Fear-based motivation — readers want to avoid failure",
+      "char_estimate": 48,
+      "power_words": ["Mistakes", "Avoid"],
+      "notes": "Negative framing ('mistakes') often outperforms positive framing in CTR"
+    },
+
+    {
+      "id": 8,
+      "category": "listicle",
+      "content_types": ["blog", "roundup"],
+      "template": "{number} {keyword} Examples That Actually Work",
+      "example": "13 Landing Page Examples That Actually Convert",
+      "best_for": "Inspiration and validation content — readers want proof",
+      "char_estimate": 48,
+      "power_words": ["Actually Work"],
+      "notes": "'Actually work' implies most don't — creates credibility"
+    },
+
+    {
+      "id": 9,
+      "category": "listicle",
+      "content_types": ["blog", "tools"],
+      "template": "{number} Free {keyword} Tools You Need in {year}",
+      "example": "14 Free SEO Tools You Need in 2026",
+      "best_for": "Budget-conscious audiences, high shareability",
+      "char_estimate": 44,
+      "power_words": ["Free"],
+      "notes": "'Free' is one of the most powerful words in any headline"
+    },
+
+    {
+      "id": 10,
+      "category": "listicle",
+      "content_types": ["blog"],
+      "template": "{number} Reasons Your {keyword} Isn't Working (And How to Fix It)",
+      "example": "7 Reasons Your SEO Isn't Working (And How to Fix It)",
+      "best_for": "Troubleshooting content, problem-aware audiences",
+      "char_estimate": 57,
+      "power_words": ["Fix It"],
+      "notes": "Combines problem identification with solution promise"
+    },
+
+    {
+      "id": 11,
+      "category": "ultimate_guide",
+      "content_types": ["guide", "pillar"],
+      "template": "The {modifier} Guide to {keyword} in {year}",
+      "example": "The Ultimate Guide to WordPress SEO in 2026",
+      "best_for": "Comprehensive pillar content targeting broad keywords",
+      "char_estimate": 47,
+      "power_words": ["Ultimate", "Definitive", "Complete"],
+      "notes": "Works best for 2000+ word comprehensive guides. Signals authority."
+    },
+
+    {
+      "id": 12,
+      "category": "ultimate_guide",
+      "content_types": ["guide", "pillar"],
+      "template": "{keyword}: The Complete {year} Guide for {audience}",
+      "example": "Content Marketing: The Complete 2026 Guide for Beginners",
+      "best_for": "Year-specific comprehensive guides with clear audience targeting",
+      "char_estimate": 57,
+      "power_words": ["Complete"],
+      "notes": "Front-loading the keyword maximizes ranking relevance"
+    },
+
+    {
+      "id": 13,
+      "category": "ultimate_guide",
+      "content_types": ["guide", "tutorial"],
+      "template": "{keyword} 101: Everything You Need to Know in {year}",
+      "example": "Technical SEO 101: Everything You Need to Know in 2026",
+      "best_for": "Introductory comprehensive guides for beginners",
+      "char_estimate": 53,
+      "power_words": ["Everything You Need to Know"],
+      "notes": "The '101' signals a beginner-friendly, foundational guide"
+    },
+
+    {
+      "id": 14,
+      "category": "comparison",
+      "content_types": ["comparison", "review"],
+      "template": "{tool_a} vs {tool_b}: Which Is Better for {audience} in {year}?",
+      "example": "Ahrefs vs Semrush: Which Is Better for Bloggers in 2026?",
+      "best_for": "High buying-intent comparison searches",
+      "char_estimate": 58,
+      "power_words": [],
+      "notes": "One of the highest commercial intent search formats. Converts well."
+    },
+
+    {
+      "id": 15,
+      "category": "comparison",
+      "content_types": ["comparison", "review"],
+      "template": "{keyword}: {number} Top Options Compared ({year})",
+      "example": "WordPress Hosting: 8 Top Options Compared (2026)",
+      "best_for": "Category pages comparing multiple options",
+      "char_estimate": 48,
+      "power_words": ["Compared"],
+      "notes": "Good for 'best X' searches where reader is comparing multiple options"
+    },
+
+    {
+      "id": 16,
+      "category": "comparison",
+      "content_types": ["comparison", "blog"],
+      "template": "{keyword} vs {alternative}: An Honest Comparison",
+      "example": "WordPress vs Wix: An Honest Comparison for 2026",
+      "best_for": "Decision-stage searchers choosing between two options",
+      "char_estimate": 50,
+      "power_words": ["Honest"],
+      "notes": "'Honest' implies others are biased — builds immediate credibility"
+    },
+
+    {
+      "id": 17,
+      "category": "review",
+      "content_types": ["review", "blog"],
+      "template": "{tool} Review {year}: Is It Worth It? (Honest Take)",
+      "example": "Semrush Review 2026: Is It Worth It? (Honest Take)",
+      "best_for": "Software and tool review content",
+      "char_estimate": 50,
+      "power_words": ["Honest", "Worth It"],
+      "notes": "'Is it worth it' targets the exact thought of buyers evaluating a purchase"
+    },
+
+    {
+      "id": 18,
+      "category": "review",
+      "content_types": ["review", "case_study"],
+      "template": "I Tried {tool} for {timeframe}. Here's What Happened.",
+      "example": "I Tried Ahrefs for 90 Days. Here's What Happened.",
+      "best_for": "Personal experience reviews — high trust, high click rate",
+      "char_estimate": 48,
+      "power_words": [],
+      "notes": "First-person experience format aligns perfectly with E-E-A-T requirements"
+    },
+
+    {
+      "id": 19,
+      "category": "case_study",
+      "content_types": ["case_study", "blog"],
+      "template": "How We {achieved_result} with {keyword} ({timeframe} Case Study)",
+      "example": "How We Grew Organic Traffic 312% with SEO Content (6-Month Case Study)",
+      "best_for": "Proven results that demonstrate expertise",
+      "char_estimate": 67,
+      "power_words": [],
+      "notes": "Specific numbers make case studies highly credible and clickable"
+    },
+
+    {
+      "id": 20,
+      "category": "case_study",
+      "content_types": ["case_study", "blog"],
+      "template": "{number}% {metric} in {timeframe}: Our {keyword} Strategy Revealed",
+      "example": "218% More Traffic in 6 Months: Our Content Strategy Revealed",
+      "best_for": "High-performing result showcases that build authority",
+      "char_estimate": 58,
+      "power_words": ["Revealed"],
+      "notes": "'Revealed' creates curiosity — implies insider information being shared"
+    },
+
+    {
+      "id": 21,
+      "category": "checklist",
+      "content_types": ["checklist", "blog"],
+      "template": "The {keyword} Checklist: {number} Things to Do Before You {action}",
+      "example": "The WordPress Launch Checklist: 21 Things to Do Before You Go Live",
+      "best_for": "Pre-action checklists — high utility and shareability",
+      "char_estimate": 65,
+      "power_words": ["Checklist"],
+      "notes": "Checklists are the most bookmarked and saved content type"
+    },
+
+    {
+      "id": 22,
+      "category": "checklist",
+      "content_types": ["checklist", "blog"],
+      "template": "{number}-Point {keyword} Checklist ({year} Edition)",
+      "example": "27-Point SEO Audit Checklist (2026 Edition)",
+      "best_for": "Audit and review checklists for professionals",
+      "char_estimate": 45,
+      "power_words": [],
+      "notes": "High numbers (27, 33, 47) signal thoroughness and comprehensiveness"
+    },
+
+    {
+      "id": 23,
+      "category": "beginner",
+      "content_types": ["guide", "tutorial", "blog"],
+      "template": "{keyword} for Beginners: A Simple {year} Guide",
+      "example": "Google Analytics for Beginners: A Simple 2026 Guide",
+      "best_for": "Content targeting people brand new to a topic",
+      "char_estimate": 50,
+      "power_words": ["Simple"],
+      "notes": "'Simple' reduces intimidation — very effective for complex topics"
+    },
+
+    {
+      "id": 24,
+      "category": "beginner",
+      "content_types": ["guide", "tutorial"],
+      "template": "What Is {keyword}? A Beginner's Guide to {benefit}",
+      "example": "What Is SEO? A Beginner's Guide to Getting Free Google Traffic",
+      "best_for": "Definitional content targeting awareness-stage searches",
+      "char_estimate": 58,
+      "power_words": [],
+      "notes": "'What is X?' is often the first search a new audience member makes"
+    },
+
+    {
+      "id": 25,
+      "category": "advanced",
+      "content_types": ["guide", "tutorial", "blog"],
+      "template": "Advanced {keyword} Strategies for {audience} in {year}",
+      "example": "Advanced Link Building Strategies for SaaS Companies in 2026",
+      "best_for": "Content targeting experienced practitioners",
+      "char_estimate": 56,
+      "power_words": ["Advanced", "Strategies"],
+      "notes": "Filters out beginners — attracts high-value experienced audience"
+    },
+
+    {
+      "id": 26,
+      "category": "advanced",
+      "content_types": ["guide", "blog"],
+      "template": "{number} {keyword} Hacks the Pros Don't Talk About",
+      "example": "11 WordPress Speed Hacks the Pros Don't Talk About",
+      "best_for": "Insider knowledge content — high shareability",
+      "char_estimate": 51,
+      "power_words": ["Hacks", "Pros"],
+      "notes": "Implies exclusive knowledge not found in standard guides"
+    },
+
+    {
+      "id": 27,
+      "category": "ecommerce",
+      "content_types": ["product", "landing_page"],
+      "template": "Buy {product} Online — {benefit} | {site_name}",
+      "example": "Buy Ergonomic Office Chair Online — Free Shipping | FurnitureCo",
+      "best_for": "Transactional product pages with a key selling point",
+      "char_estimate": 55,
+      "power_words": ["Buy", "Free"],
+      "notes": "Transactional intent signals for product pages — direct and action-oriented"
+    },
+
+    {
+      "id": 28,
+      "category": "ecommerce",
+      "content_types": ["category", "landing_page"],
+      "template": "Best {product_category} — Top {number} Picks for {year}",
+      "example": "Best Running Shoes — Top 12 Picks for 2026",
+      "best_for": "Category pages targeting high-volume product searches",
+      "char_estimate": 47,
+      "power_words": ["Best"],
+      "notes": "Combines category targeting with editorial credibility"
+    },
+
+    {
+      "id": 29,
+      "category": "ecommerce",
+      "content_types": ["blog", "guide"],
+      "template": "How to Choose the Right {product}: {number} Things to Look For",
+      "example": "How to Choose the Right WordPress Theme: 9 Things to Look For",
+      "best_for": "Pre-purchase decision content — mid-funnel buyers",
+      "char_estimate": 60,
+      "power_words": [],
+      "notes": "Targets buyers who are researching but not yet ready to buy"
+    },
+
+    {
+      "id": 30,
+      "category": "problem_solution",
+      "content_types": ["blog", "tutorial"],
+      "template": "Why Your {keyword} Isn't Working (And {number} Ways to Fix It)",
+      "example": "Why Your WordPress Site Is Slow (And 6 Ways to Fix It Fast)",
+      "best_for": "Troubleshooting content for frustrated users",
+      "char_estimate": 58,
+      "power_words": ["Fix"],
+      "notes": "The word 'why' in the title signals an explanation is coming — very clickable"
+    },
+
+    {
+      "id": 31,
+      "category": "problem_solution",
+      "content_types": ["blog", "tutorial"],
+      "template": "{problem}? Here's What to Do (And What to Avoid)",
+      "example": "Google Penalized Your Site? Here's What to Do (And What to Avoid)",
+      "best_for": "Crisis or problem-state content",
+      "char_estimate": 57,
+      "power_words": [],
+      "notes": "Question format creates instant identification with the reader's situation"
+    },
+
+    {
+      "id": 32,
+      "category": "speed_simplicity",
+      "content_types": ["tutorial", "blog"],
+      "template": "{keyword} in {timeframe}: A Quick-Start Guide",
+      "example": "WordPress SEO in 30 Minutes: A Quick-Start Guide",
+      "best_for": "Busy readers who want results fast",
+      "char_estimate": 47,
+      "power_words": ["Quick-Start"],
+      "notes": "Specific timeframes ('30 minutes' not 'quickly') are more convincing"
+    },
+
+    {
+      "id": 33,
+      "category": "speed_simplicity",
+      "content_types": ["tutorial", "blog"],
+      "template": "The Fastest Way to {keyword} (Without {pain_point})",
+      "example": "The Fastest Way to Grow Email List (Without Paid Ads)",
+      "best_for": "Speed-focused readers who want shortcuts",
+      "char_estimate": 56,
+      "power_words": ["Fastest"],
+      "notes": "Combining 'fastest' with 'without X' creates a doubly compelling promise"
+    },
+
+    {
+      "id": 34,
+      "category": "results_driven",
+      "content_types": ["blog", "case_study"],
+      "template": "{keyword}: How to Get Results in {timeframe}",
+      "example": "Content Marketing: How to Get Results in 90 Days",
+      "best_for": "Results-focused content with a clear timeline",
+      "char_estimate": 48,
+      "power_words": ["Results"],
+      "notes": "Specific timeframes make the promise concrete and believable"
+    },
+
+    {
+      "id": 35,
+      "category": "results_driven",
+      "content_types": ["blog", "case_study"],
+      "template": "We Tested {number} {keyword} Strategies. Here Are the Results.",
+      "example": "We Tested 47 SEO Strategies. Here Are the Results.",
+      "best_for": "Data-driven content with authority",
+      "char_estimate": 52,
+      "power_words": ["Tested", "Results"],
+      "notes": "Testing framing implies scientific rigor and original data"
+    },
+
+    {
+      "id": 36,
+      "category": "agency_freelance",
+      "content_types": ["guide", "blog"],
+      "template": "How to {keyword} for Clients: A Freelancer's Guide",
+      "example": "How to Run SEO Audits for Clients: A Freelancer's Guide",
+      "best_for": "Agency and freelancer audience",
+      "char_estimate": 54,
+      "power_words": [],
+      "notes": "Targeting freelancers and agencies specifically increases relevance"
+    },
+
+    {
+      "id": 37,
+      "category": "agency_freelance",
+      "content_types": ["guide", "blog"],
+      "template": "{number} Ways to {benefit} (For Agencies and Freelancers)",
+      "example": "8 Ways to Automate Client Reporting (For Agencies and Freelancers)",
+      "best_for": "Professional services audience looking for efficiency",
+      "char_estimate": 60,
+      "power_words": ["Automate"],
+      "notes": "Dual audience targeting catches both agency employees and independent consultants"
+    },
+
+    {
+      "id": 38,
+      "category": "local_seo",
+      "content_types": ["guide", "blog", "landing_page"],
+      "template": "{keyword} in {location}: {number} Tips to Rank Locally",
+      "example": "Plumber SEO in Dubai: 7 Tips to Rank Locally in 2026",
+      "best_for": "Local business SEO content",
+      "char_estimate": 52,
+      "power_words": [],
+      "notes": "Location specificity dramatically increases local search relevance"
+    },
+
+    {
+      "id": 39,
+      "category": "news_trend",
+      "content_types": ["blog", "news"],
+      "template": "{keyword} in {year}: What's Changed and What to Do Now",
+      "example": "Google Algorithm in 2026: What's Changed and What to Do Now",
+      "best_for": "Timely content covering recent changes or updates",
+      "char_estimate": 57,
+      "power_words": [],
+      "notes": "Perfect for algorithm updates, platform changes, industry news"
+    },
+
+    {
+      "id": 40,
+      "category": "news_trend",
+      "content_types": ["blog", "roundup"],
+      "template": "{number} {keyword} Trends to Watch in {year}",
+      "example": "11 SEO Trends to Watch in 2026",
+      "best_for": "Trend prediction content — highly shareable at year start",
+      "char_estimate": 38,
+      "power_words": ["Trends"],
+      "notes": "Publish in Q4 or Q1 for maximum reach — people search for trends at year boundaries"
+    },
+
+    {
+      "id": 41,
+      "category": "woocommerce",
+      "content_types": ["guide", "tutorial"],
+      "template": "WooCommerce {keyword}: The Complete Setup Guide ({year})",
+      "example": "WooCommerce SEO: The Complete Setup Guide (2026)",
+      "best_for": "WooCommerce-specific how-to content",
+      "char_estimate": 52,
+      "power_words": ["Complete"],
+      "notes": "WooCommerce-prefixed titles immediately signal platform specificity"
+    },
+
+    {
+      "id": 42,
+      "category": "woocommerce",
+      "content_types": ["blog", "roundup"],
+      "template": "{number} Best WooCommerce {category} Plugins in {year}",
+      "example": "9 Best WooCommerce Payment Gateway Plugins in 2026",
+      "best_for": "WooCommerce plugin roundups — high commercial intent",
+      "char_estimate": 52,
+      "power_words": ["Best"],
+      "notes": "WooCommerce plugin searches have very high buying intent"
+    },
+
+    {
+      "id": 43,
+      "category": "authority",
+      "content_types": ["blog", "guide"],
+      "template": "What {number} {experts} Say About {keyword}",
+      "example": "What 23 SEO Experts Say About Link Building in 2026",
+      "best_for": "Expert roundup content — extremely linkable",
+      "char_estimate": 50,
+      "power_words": ["Experts"],
+      "notes": "Expert roundups earn links from every expert featured — powerful link bait"
+    },
+
+    {
+      "id": 44,
+      "category": "authority",
+      "content_types": ["guide", "blog"],
+      "template": "The {adjective} {keyword} Guide Backed by {number} Studies",
+      "example": "The Data-Driven SEO Guide Backed by 47 Studies",
+      "best_for": "Science-backed, data-heavy content",
+      "char_estimate": 50,
+      "power_words": ["Data-Driven", "Studies"],
+      "notes": "Citing research numbers builds immediate credibility"
+    },
+
+    {
+      "id": 45,
+      "category": "templates",
+      "content_types": ["resource", "blog"],
+      "template": "{number} {keyword} Templates You Can Use Right Now",
+      "example": "15 Email Marketing Templates You Can Use Right Now",
+      "best_for": "Resource content with downloadable or copyable assets",
+      "char_estimate": 51,
+      "power_words": ["Right Now"],
+      "notes": "'Right Now' creates urgency and implies immediate utility"
+    },
+
+    {
+      "id": 46,
+      "category": "templates",
+      "content_types": ["resource", "guide"],
+      "template": "Free {keyword} Template (Ready to Copy and Use)",
+      "example": "Free SEO Report Template (Ready to Copy and Use)",
+      "best_for": "Single downloadable template resources",
+      "char_estimate": 48,
+      "power_words": ["Free", "Copy"],
+      "notes": "'Ready to copy and use' eliminates perceived effort from the reader"
+    },
+
+    {
+      "id": 47,
+      "category": "roi_value",
+      "content_types": ["guide", "blog"],
+      "template": "Is {keyword} Worth It in {year}? (The Real ROI)",
+      "example": "Is Paid SEO Software Worth It in 2026? (The Real ROI)",
+      "best_for": "Investment decision content — high buyer intent",
+      "char_estimate": 50,
+      "power_words": ["Worth It", "ROI"],
+      "notes": "Decision-stage content for people evaluating whether to invest"
+    },
+
+    {
+      "id": 48,
+      "category": "storytelling",
+      "content_types": ["blog", "case_study"],
+      "template": "I Did {action} for {timeframe}. Here's Exactly What Happened.",
+      "example": "I Published 100 Blog Posts in 100 Days. Here's Exactly What Happened.",
+      "best_for": "Personal experience content — builds authentic authority",
+      "char_estimate": 62,
+      "power_words": ["Exactly"],
+      "notes": "'Exactly' implies full transparency and detail — high curiosity trigger"
+    },
+
+    {
+      "id": 49,
+      "category": "storytelling",
+      "content_types": ["blog"],
+      "template": "The {keyword} Mistake That Cost Me {consequence}",
+      "example": "The SEO Mistake That Cost Me 60% of My Traffic Overnight",
+      "best_for": "Warning/cautionary content — extremely high click-through",
+      "char_estimate": 55,
+      "power_words": ["Mistake", "Cost"],
+      "notes": "Loss aversion is a powerful psychological trigger — people fear losses more than they desire gains"
+    },
+
+    {
+      "id": 50,
+      "category": "definitive",
+      "content_types": ["guide", "pillar"],
+      "template": "{keyword}: {year} Definitive Guide ({number} Chapters)",
+      "example": "WordPress SEO: 2026 Definitive Guide (12 Chapters)",
+      "best_for": "Mega-guides and pillar content",
+      "char_estimate": 50,
+      "power_words": ["Definitive"],
+      "notes": "Signaling chapter count implies comprehensiveness — great for pillar pages"
+    }
+
+  ]
+}

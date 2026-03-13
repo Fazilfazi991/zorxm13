@@ -1,0 +1,206 @@
+{
+    "content": [
+        {
+            "id": "section_contact_hero",
+            "elType": "section",
+            "settings": {
+                "layout": "full_width",
+                "gap": "no"
+            },
+            "elements": [
+                {
+                    "id": "column_contact_hero",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_contact_hero",
+                            "elType": "widget",
+                            "widgetType": "zorx_hero",
+                            "settings": {
+                                "badge_text": "Contact Us",
+                                "heading": "Let's Start a <span class=\"text-primary\">Conversation</span>",
+                                "description": "Have a project in mind? We'd love to hear from you. Reach out to us and let's discuss how we can help you grow.",
+                                "btn_primary_text": "Email Us",
+                                "btn_primary_link": {
+                                    "url": "mailto:hello@zorx.com"
+                                },
+                                "btn_secondary_text": "Call Us",
+                                "btn_secondary_link": {
+                                    "url": "tel:+971500000000"
+                                }
+                            }
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        },
+        {
+            "id": "section_breadcrumbs",
+            "elType": "section",
+            "settings": {
+                "layout": "boxed",
+                "gap": "no",
+                "padding": {
+                    "unit": "px",
+                    "top": "0",
+                    "right": "0",
+                    "bottom": "0",
+                    "left": "0",
+                    "isLinked": true
+                }
+            },
+            "elements": [
+                {
+                    "id": "column_breadcrumbs",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_breadcrumbs",
+                            "elType": "widget",
+                            "widgetType": "zorx_breadcrumb",
+                            "settings": {}
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        },
+        {
+            "id": "section_contact_content",
+            "elType": "section",
+            "settings": {
+                "layout": "boxed"
+            },
+            "elements": [
+                {
+                    "id": "column_contact_details",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_contact_methods",
+                            "elType": "widget",
+                            "widgetType": "zorx_services",
+                            "settings": {
+                                "badge_text": "Get In Touch",
+                                "heading": "Contact Information",
+                                "description": "We are available 24/7 to answer your queries.",
+                                "services": [
+                                    {
+                                        "service_title": "Email Us",
+                                        "service_description": "hello@zorx.com\nsupport@zorx.com",
+                                        "service_icon": {
+                                            "value": "fas fa-envelope",
+                                            "library": "fa-solid"
+                                        }
+                                    },
+                                    {
+                                        "service_title": "Call Us",
+                                        "service_description": "+971 50 000 0000\n+971 4 000 0000",
+                                        "service_icon": {
+                                            "value": "fas fa-phone",
+                                            "library": "fa-solid"
+                                        }
+                                    },
+                                    {
+                                        "service_title": "Visit Us",
+                                        "service_description": "Business Bay, Dubai, UAE\nP.O. Box 12345",
+                                        "service_icon": {
+                                            "value": "fas fa-map-marker-alt",
+                                            "library": "fa-solid"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        },
+        {
+            "id": "section_contact_form_area",
+            "elType": "section",
+            "settings": {
+                "layout": "boxed",
+                "structure": "20",
+                "background_color": "#F9FAFB"
+            },
+            "elements": [
+                {
+                    "id": "column_form_header",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "heading_form",
+                            "elType": "widget",
+                            "widgetType": "heading",
+                            "settings": {
+                                "title": "Send us a Message"
+                            }
+                        },
+                        {
+                            "id": "text_form_placeholder",
+                            "elType": "widget",
+                            "widgetType": "text-editor",
+                            "settings": {
+                                "editor": "<p>Drag your Contact Form 7 or WPForms widget here.</p>"
+                            }
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        },
+        {
+            "id": "section_cta",
+            "elType": "section",
+            "settings": {
+                "layout": "boxed"
+            },
+            "elements": [
+                {
+                    "id": "column_cta",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_zorx_cta",
+                            "elType": "widget",
+                            "widgetType": "zorx_cta",
+                            "settings": {
+                                "heading": "Start Your Growth Journey",
+                                "description": "Book a free strategy session with our experts today.",
+                                "btn_primary_text": "Book Consultation"
+                            }
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        }
+    ],
+    "page_settings": [],
+    "version": "0.4",
+    "title": "Zorx Contact Page",
+    "type": "page"
+}

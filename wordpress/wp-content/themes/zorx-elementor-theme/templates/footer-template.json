@@ -1,0 +1,47 @@
+{
+    "content": [
+        {
+            "id": "section_site_footer",
+            "elType": "section",
+            "settings": {
+                "layout": "full_width",
+                "gap": "no",
+                "padding": {
+                    "unit": "px",
+                    "top": "0",
+                    "right": "0",
+                    "bottom": "0",
+                    "left": "0",
+                    "isLinked": true
+                }
+            },
+            "elements": [
+                {
+                    "id": "column_site_footer",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_site_footer",
+                            "elType": "widget",
+                            "widgetType": "zorx_footer",
+                            "settings": {
+                                "description": "Dubai's leading digital marketing agency. We help ambitious brands scale with data-driven strategies that convert.",
+                                "email": "hello@zorx.ae",
+                                "phone": "+971 XXX XXX XXX"
+                            }
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        }
+    ],
+    "page_settings": [],
+    "version": "0.4",
+    "title": "Zorx Global Footer",
+    "type": "page"
+}

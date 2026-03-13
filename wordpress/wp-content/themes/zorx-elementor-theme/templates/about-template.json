@@ -1,0 +1,372 @@
+{
+    "content": [
+        {
+            "id": "section_about_hero",
+            "elType": "section",
+            "settings": {
+                "layout": "full_width",
+                "gap": "no"
+            },
+            "elements": [
+                {
+                    "id": "column_about_hero",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_about_hero",
+                            "elType": "widget",
+                            "widgetType": "zorx_hero",
+                            "settings": {
+                                "badge_text": "About ZORX",
+                                "heading": "Empowering Brands Through <span class=\"text-primary\">Digital Excellence</span>",
+                                "description": "We're a passionate team of digital marketing experts based in Dubai, dedicated to helping businesses achieve extraordinary growth through innovative strategies and data-driven solutions.",
+                                "btn_primary_text": "Our Story",
+                                "btn_primary_link": {
+                                    "url": "#story"
+                                },
+                                "btn_secondary_text": "Contact Us",
+                                "btn_secondary_link": {
+                                    "url": "#contact"
+                                }
+                            }
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        },
+        {
+            "id": "section_breadcrumbs",
+            "elType": "section",
+            "settings": {
+                "layout": "boxed",
+                "gap": "no",
+                "padding": {
+                    "unit": "px",
+                    "top": "0",
+                    "right": "0",
+                    "bottom": "0",
+                    "left": "0",
+                    "isLinked": true
+                }
+            },
+            "elements": [
+                {
+                    "id": "column_breadcrumbs",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_breadcrumbs",
+                            "elType": "widget",
+                            "widgetType": "zorx_breadcrumb",
+                            "settings": {}
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        },
+        {
+            "id": "section_about_story",
+            "elType": "section",
+            "settings": {
+                "layout": "boxed"
+            },
+            "elements": [
+                {
+                    "id": "column_about_story",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_about_story",
+                            "elType": "widget",
+                            "widgetType": "zorx_about",
+                            "settings": {
+                                "badge_text": "Our Story",
+                                "heading": "Building the Future of Digital Marketing in Dubai",
+                                "description_1": "Founded in the heart of Dubai, ZORX emerged from a simple yet powerful vision: to bridge the gap between traditional business practices and the digital-first world we live in today.",
+                                "description_2": "What started as a small team of passionate marketers has grown into a full-service digital agency trusted by businesses across the UAE and beyond.",
+                                "highlights": [
+                                    {
+                                        "list_title": "150+ Successful Projects",
+                                        "list_icon": {
+                                            "value": "fas fa-check-circle",
+                                            "library": "fa-solid"
+                                        }
+                                    },
+                                    {
+                                        "list_title": "50+ Happy Clients",
+                                        "list_icon": {
+                                            "value": "fas fa-smile",
+                                            "library": "fa-solid"
+                                        }
+                                    },
+                                    {
+                                        "list_title": "15+ Experts",
+                                        "list_icon": {
+                                            "value": "fas fa-user-tie",
+                                            "library": "fa-solid"
+                                        }
+                                    },
+                                    {
+                                        "list_title": "5+ Years Experience",
+                                        "list_icon": {
+                                            "value": "fas fa-history",
+                                            "library": "fa-solid"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        },
+        {
+            "id": "section_mission_vision",
+            "elType": "section",
+            "settings": {
+                "layout": "boxed"
+            },
+            "elements": [
+                {
+                    "id": "column_mission_vision",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_mission_vision",
+                            "elType": "widget",
+                            "widgetType": "zorx_services",
+                            "settings": {
+                                "badge_text": "Our Purpose",
+                                "heading": "Mission & Vision",
+                                "description": "Guided by purpose, driven by results",
+                                "columns": "2",
+                                "services": [
+                                    {
+                                        "service_title": "Our Mission",
+                                        "service_description": "To empower businesses of all sizes with cutting-edge digital marketing strategies that drive measurable growth.",
+                                        "service_icon": {
+                                            "value": "fas fa-bullseye",
+                                            "library": "fa-solid"
+                                        }
+                                    },
+                                    {
+                                        "service_title": "Our Vision",
+                                        "service_description": "To be the most trusted and innovative digital marketing agency in the Middle East.",
+                                        "service_icon": {
+                                            "value": "fas fa-rocket",
+                                            "library": "fa-solid"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        },
+        {
+            "id": "section_core_values",
+            "elType": "section",
+            "settings": {
+                "layout": "boxed"
+            },
+            "elements": [
+                {
+                    "id": "column_core_values",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_core_values",
+                            "elType": "widget",
+                            "widgetType": "zorx_services",
+                            "settings": {
+                                "badge_text": "What Drives Us",
+                                "heading": "Our Core Values",
+                                "description": "The principles that guide everything we do",
+                                "columns": "2",
+                                "services": [
+                                    {
+                                        "service_title": "Results-Driven",
+                                        "service_description": "We measure success by your growth. Every strategy is designed to deliver tangible outcomes.",
+                                        "service_icon": {
+                                            "value": "fas fa-chart-line",
+                                            "library": "fa-solid"
+                                        }
+                                    },
+                                    {
+                                        "service_title": "Innovation First",
+                                        "service_description": "We stay ahead of digital trends, constantly evolving our methods to give you a competitive edge.",
+                                        "service_icon": {
+                                            "value": "fas fa-lightbulb",
+                                            "library": "fa-solid"
+                                        }
+                                    },
+                                    {
+                                        "service_title": "Transparency",
+                                        "service_description": "Clear communication, honest reporting, and full visibility into your campaigns and results.",
+                                        "service_icon": {
+                                            "value": "fas fa-shield-alt",
+                                            "library": "fa-solid"
+                                        }
+                                    },
+                                    {
+                                        "service_title": "Client Success",
+                                        "service_description": "Your success is our success. We're invested in your growth and celebrate your wins as our own.",
+                                        "service_icon": {
+                                            "value": "fas fa-heart",
+                                            "library": "fa-solid"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        },
+        {
+            "id": "section_about_why_choose",
+            "elType": "section",
+            "settings": {
+                "layout": "boxed"
+            },
+            "elements": [
+                {
+                    "id": "column_about_why_choose",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_about_why_choose",
+                            "elType": "widget",
+                            "widgetType": "zorx_services",
+                            "settings": {
+                                "badge_text": "The ZORX Advantage",
+                                "heading": "Why Partner With Us?",
+                                "description": "What sets us apart in the digital marketing landscape",
+                                "services": [
+                                    {
+                                        "service_title": "Dubai Market Expertise",
+                                        "service_description": "Deep understanding of the UAE market, local consumer behavior, and regional digital trends.",
+                                        "service_icon": {
+                                            "value": "fas fa-map-marker-alt",
+                                            "library": "fa-solid"
+                                        }
+                                    },
+                                    {
+                                        "service_title": "Expert Team",
+                                        "service_description": "Certified specialists in SEO, PPC, social media, content marketing, and analytics.",
+                                        "service_icon": {
+                                            "value": "fas fa-users",
+                                            "library": "fa-solid"
+                                        }
+                                    },
+                                    {
+                                        "service_title": "Proven Track Record",
+                                        "service_description": "150+ successful campaigns, 50+ satisfied clients, and an average 200% ROI.",
+                                        "service_icon": {
+                                            "value": "fas fa-award",
+                                            "library": "fa-solid"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        },
+        {
+            "id": "section_team",
+            "elType": "section",
+            "settings": {
+                "layout": "boxed"
+            },
+            "elements": [
+                {
+                    "id": "column_team",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_team",
+                            "elType": "widget",
+                            "widgetType": "zorx_team",
+                            "settings": {
+                                "badge_text": "Our Team",
+                                "heading": "Meet the Experts",
+                                "description": "Dedicated professionals committed to your success."
+                            }
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        },
+        {
+            "id": "section_cta",
+            "elType": "section",
+            "settings": {
+                "layout": "boxed"
+            },
+            "elements": [
+                {
+                    "id": "column_cta",
+                    "elType": "column",
+                    "settings": {
+                        "_column_size": 100
+                    },
+                    "elements": [
+                        {
+                            "id": "widget_zorx_cta",
+                            "elType": "widget",
+                            "widgetType": "zorx_cta",
+                            "settings": {
+                                "heading": "Ready to Transform Your Digital Presence?",
+                                "btn_primary_text": "Get Started Today"
+                            }
+                        }
+                    ],
+                    "isInner": false
+                }
+            ],
+            "isInner": false
+        }
+    ],
+    "page_settings": [],
+    "version": "0.4",
+    "title": "Zorx About Page Full",
+    "type": "page"
+}

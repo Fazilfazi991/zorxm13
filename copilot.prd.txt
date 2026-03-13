@@ -1,0 +1,511 @@
+I want to build a fully functional SEO Copilot tools page inside 
+the existing Next.js + TypeScript + Tailwind project.
+
+The SEO Copilot folder already exists in the project root. 
+Build everything inside: zorxmedias-main/SEO Copilot/
+
+═══════════════════════════════════════════════════════════
+STEP 1 — SETUP
+═══════════════════════════════════════════════════════════
+
+First, read the existing project structure:
+- Check package.json for dependencies already installed
+- Check tailwind.config to understand existing design tokens
+- Check tsconfig.app.json for path aliases
+- Check vite.config.ts or next.config for routing setup
+- Ask me how routing works in this project (Next.js pages 
+  router, app router, or Vite SPA) before creating files
+
+Then create this file structure inside SEO Copilot/:
+
+SEO Copilot/
+├── page.tsx                  (main page — or index.tsx 
+│                              depending on router)
+├── components/
+│   ├── SEOCopilotPage.tsx    (root component)
+│   ├── TabNav.tsx            (tab switcher)
+│   ├── HeroSection.tsx       (top hero)
+│   ├── CTABanner.tsx         (plugin conversion banner)
+│   ├── tools/
+│   │   ├── SEORulesChecker.tsx
+│   │   ├── TitleFormulaGenerator.tsx
+│   │   └── ContentBriefBuilder.tsx
+│   └── ui/
+│       ├── ScoreRing.tsx
+│       ├── SeverityBadge.tsx
+│       ├── ImpactBadge.tsx
+│       └── CopyButton.tsx
+├── data/
+│   ├── rules.json
+│   ├── title-formulas.json
+│   ├── content-brief-templates.json
+│   └── word-complexity-lookup.json
+├── hooks/
+│   ├── useRulesChecker.ts
+│   ├── useTitleGenerator.ts
+│   └── useBriefBuilder.ts
+├── types/
+│   └── seo-copilot.types.ts
+└── utils/
+    ├── textAnalyzer.ts
+    ├── readabilityScorer.ts
+    └── keywordAnalyzer.ts
+
+═══════════════════════════════════════════════════════════
+STEP 2 — DESIGN SYSTEM
+═══════════════════════════════════════════════════════════
+
+Match the existing site's design language but use this 
+SEO Copilot color palette:
+
+Primary:     #4F46E5  (indigo)
+Success:     #10B981  (green)
+Warning:     #F59E0B  (amber)
+Danger:      #EF4444  (red)
+Info:        #3B82F6  (blue)
+Dark bg:     #0F0F1A
+Card bg:     #1E1B4B
+Text:        #F8FAFC
+
+Typography:
+- Headings: font-bold tracking-tight
+- Body: text-sm leading-relaxed text-slate-300
+- Labels: text-xs uppercase tracking-wider text-slate-500
+
+Components to build once and reuse:
+- Score ring (SVG circle with percentage fill)
+- Severity badge (critical=red, error=orange, 
+  warning=yellow, info=blue, good=green)
+- Impact badge (high/medium/low)
+- Expandable rule card (collapsed by default, 
+  click to see fix steps)
+- Copy button (copies text to clipboard with 
+  checkmark confirmation)
+- Tab pill (active = indigo bg, inactive = ghost)
+- Plugin CTA banner (indigo gradient, 
+  "Get the Plugin →" button)
+
+═══════════════════════════════════════════════════════════
+STEP 3 — PAGE LAYOUT
+═══════════════════════════════════════════════════════════
+
+The page has 4 sections in order:
+
+1. HERO
+   Headline: "Free SEO Tools — Powered by the Same 
+              Engine as SEO Copilot"
+   Subheadline: "Audit your content, generate winning 
+                  titles, and build content briefs. 
+                  No login required."
+   3 stat pills: "48 SEO Rules" | "50 Title Formulas" 
+                  | "50 Brief Templates"
+   Small note: "Want AI-powered results in 2 seconds? 
+                ↓ Get the WordPress Plugin"
+
+2. TAB NAVIGATION
+   3 tabs: 
+   [🔍 SEO Rules Checker] [✍️ Title Generator] 
+   [📋 Content Brief Builder]
+   Active tab = indigo underline + bold
+   Smooth content transition on tab switch
+
+3. TOOL PANEL (changes per tab — detailed below)
+
+4. FOOTER CTA
+   "Liked these tools? The SEO Copilot WordPress 
+    plugin does all of this automatically — plus 
+    AI-powered rewrites, rank tracking, and more."
+   Button: "Get SEO Copilot Plugin →" 
+   (links to #plugin for now — owner will update URL)
+
+═══════════════════════════════════════════════════════════
+STEP 4 — TAB 1: SEO RULES CHECKER
+═══════════════════════════════════════════════════════════
+
+FILE: tools/SEORulesChecker.tsx
+HOOK: hooks/useRulesChecker.ts
+DATA: data/rules.json
+
+INPUT PANEL:
+Two input modes toggled by radio buttons:
+  Mode A — "Paste Content": 
+    - Focus Keyword (text input, required)
+    - Post Title (text input)
+    - Meta Description (textarea, 160 char counter)
+    - Content (large textarea, word count live display)
+    - URL Slug (text input)
+    - Content Type dropdown: Blog Post / Product Page / 
+      Landing Page / WooCommerce Product
+    - [Analyze Content] button (indigo, full width)
+
+  Mode B — "Quick Check" (basic fields only):
+    - Focus Keyword
+    - Title
+    - Word count (number input)
+    - [Quick Analyze] button
+
+ANALYSIS LOGIC (useRulesChecker.ts):
+Load rules.json. For each rule, evaluate its condition 
+against the user's inputs using this mapping:
+
+  title_length          = postTitle.length
+  meta_description_length = metaDesc.length  
+  word_count            = count words in content textarea
+  keyword_in_title      = postTitle.toLowerCase()
+                          .includes(focusKeyword.toLowerCase())
+  keyword_in_meta       = metaDesc.toLowerCase()
+                          .includes(focusKeyword.toLowerCase())
+  keyword_in_first_100_words = first 100 words of content
+                               .includes(keyword)
+  keyword_density       = (keyword occurrences / total words) * 100
+  h1_count              = count <h1> or # markdown headings
+  h2_count              = count <h2> or ## markdown headings  
+  image_count           = count ![  or <img in content
+  images_without_alt    = images with empty alt=""
+  internal_link_count   = count [text](/ links
+  url_length            = urlSlug.length
+  keyword_in_url        = urlSlug.includes(keyword)
+  url_has_underscores   = urlSlug.includes('_')
+  has_schema            = always false (can't detect from paste)
+  flesch_score          = calculate using readabilityScorer.ts
+  passive_voice_percentage = calculate from content
+  avg_sentence_length   = calculate from content
+  focus_keyword         = focusKeyword (empty = show missing rule)
+
+Evaluate ALL 48 rules. For each rule that fires 
+(condition is true / problem detected), add it to results.
+
+OUTPUT PANEL (shown after analysis):
+
+A. SCORE SUMMARY (top)
+   Overall SEO Score: calculated as:
+   - Start at 100
+   - Deduct per fired rule: critical=-15, error=-10, 
+     warning=-5, info=-2
+   - Floor at 0, cap at 100
+   Display as: large score ring (SVG) + score number
+   + grade label: 90-100=Excellent, 70-89=Good, 
+     50-69=Needs Work, 0-49=Poor
+
+B. STATS ROW
+   4 pills showing counts:
+   🔴 X Critical  🟠 X Errors  🟡 X Warnings  🔵 X Info
+
+C. ISSUES LIST
+   Sorted by severity (critical first)
+   For each fired rule show an expandable card:
+   
+   COLLAPSED STATE:
+   [Severity Badge] [Rule message with variables filled in]
+   [Impact Badge] [Effort Badge] [Time to fix]
+   
+   EXPANDED STATE (click to expand):
+   - Explanation paragraph
+   - "How to Fix" numbered list (from fix_steps array)
+   - Example Bad (red tinted box if present)
+   - Example Good (green tinted box if present)
+   
+   Rules that PASS (condition not fired) show in a 
+   collapsed "✅ Passing Checks ({count})" section at 
+   the bottom — green, collapsed by default
+
+D. CONVERSION NUDGE (after results)
+   Indigo box: "These {X} issues can be fixed 
+   automatically with SEO Copilot plugin. 
+   It checks every post on publish."
+   Button: "Get the Plugin →"
+
+═══════════════════════════════════════════════════════════
+STEP 5 — TAB 2: TITLE FORMULA GENERATOR
+═══════════════════════════════════════════════════════════
+
+FILE: tools/TitleFormulaGenerator.tsx
+HOOK: hooks/useTitleGenerator.ts
+DATA: data/title-formulas.json
+
+INPUT PANEL:
+- Focus Keyword (text input, required)
+  Placeholder: "e.g. WordPress SEO"
+- Content Type (multi-select checkboxes):
+  Tutorial / Guide / Listicle / Comparison / Review / 
+  Case Study / Checklist / eCommerce / Blog
+- Target Audience (text input, optional)
+  Placeholder: "e.g. beginners, agency owners"
+- Number field (optional)
+  Placeholder: "e.g. 7 (used in listicle formulas)"
+- Current Year: auto-filled, editable
+- [Generate Titles] button
+
+GENERATION LOGIC (useTitleGenerator.ts):
+1. Filter formulas by selected content types
+   (match formula.content_types against selected)
+2. If no content type selected, use all formulas
+3. For each matching formula, populate template:
+   Replace {keyword} with focus keyword
+   Replace {year} with year input
+   Replace {number} with number input (or random 
+   odd number 7-23 if blank)
+   Replace {audience} with audience input 
+   (or "beginners" if blank)
+   Replace {modifier} with "Ultimate"
+   Replace {benefit} with "grow your traffic"
+   Replace {timeframe} with "30 days"
+   Replace {site_name} with "Your Site"
+4. Calculate character count for each generated title
+5. Flag titles over 60 chars with warning
+6. Return top 15 results (prioritize formulas where 
+   char_estimate fits within 60 chars)
+
+OUTPUT PANEL:
+
+A. RESULTS HEADER
+   "15 Title Ideas for '{keyword}'"
+   Filter pills: All | Under 60 chars | 60+ chars
+
+B. TITLE CARDS (grid, 2 cols on desktop)
+   For each generated title:
+   - The title text (large, copyable)
+   - Character count badge (green if ≤60, red if >60)
+   - Formula category label (small, muted)
+   - Power words highlighted in indigo
+   - [Copy] button → copies to clipboard
+   - [Use This] button → opens meta preview modal
+
+C. META PREVIEW MODAL (on "Use This" click)
+   Shows a simulated Google SERP result:
+   - Blue link: the title (truncated at 60 chars)
+   - Green URL: yoursite.com/your-url-slug
+   - Grey description: placeholder meta text
+   Note: "Tip: This is how your title appears in Google"
+
+D. CONVERSION NUDGE
+   "Want Claude AI to generate custom titles for your 
+   specific content in 2 seconds? That's what the 
+   SEO Copilot plugin does."
+   Button: "Get the Plugin →"
+
+═══════════════════════════════════════════════════════════
+STEP 6 — TAB 3: CONTENT BRIEF BUILDER
+═══════════════════════════════════════════════════════════
+
+FILE: tools/ContentBriefBuilder.tsx
+HOOK: hooks/useBriefBuilder.ts
+DATA: data/content-brief-templates.json
+
+INPUT PANEL:
+- Topic / Keyword (text input, required)
+  Placeholder: "e.g. WordPress SEO Guide"
+- Content Type (single select dropdown):
+  How-To Tutorial / Ultimate Guide / Listicle / 
+  Product Review / Comparison / Case Study / 
+  Beginner's Guide / SEO Blog Post / Checklist / 
+  FAQ Page / Troubleshooting Guide / WooCommerce Product /
+  Local Business Page / Recipe / Statistics Roundup /
+  Expert Roundup / Tools Roundup / News Post /
+  SaaS Landing Page / Agency Service Page
+  (all 50 templates available)
+- Target Audience (text input)
+  Placeholder: "e.g. WordPress beginners"
+- Target Word Count (select):
+  500-800 / 800-1200 / 1200-2000 / 2000-3500 / 3500+
+- Primary Goal (select):
+  Rank on Google / Drive Conversions / Build Authority / 
+  Generate Backlinks / Educate Audience
+- [Build My Brief] button
+
+GENERATION LOGIC (useBriefBuilder.ts):
+1. Find template matching selected content type 
+   (match by template.slug)
+2. Replace {keyword} with topic input throughout
+3. Replace {audience} with audience input
+4. Replace {year} with current year
+5. Calculate recommended word count from template 
+   ideal_word_count range
+6. Return the full structure array with populated text
+
+OUTPUT PANEL:
+
+A. BRIEF HEADER
+   Box showing:
+   Topic: {keyword}
+   Content Type: {selected type}
+   Target Words: {recommended range}
+   Est. Reading Time: {word_count / 200} min
+   SEO Difficulty: Low/Medium/High 
+   (based on word count — longer = harder)
+
+B. CONTENT STRUCTURE (main output)
+   Numbered section list. For each section in 
+   template.structure:
+   
+   Section card showing:
+   - Section type icon (H1/H2/H3/intro/conclusion)
+   - Heading text (populated with keyword)
+   - Guidance text (the writing instructions)
+   - Recommended word count for that section
+   - Expand/collapse toggle
+   
+   Use color coding:
+   - intro = blue left border
+   - h2 = indigo left border  
+   - h3 = purple left border
+   - conclusion = green left border
+   - disclaimer = red left border
+
+C. SEO NOTES BOX
+   From template.seo_notes — displayed in an 
+   amber/warning styled box at the bottom of the brief
+   Title: "⚡ SEO Notes for This Content Type"
+
+D. WORD COMPLEXITY CHECKER (bonus feature)
+   Text area: "Paste a paragraph to check for 
+   complex words"
+   Load word-complexity-lookup.json
+   Scan pasted text for any words matching the lookup
+   Highlight matches and show simpler alternatives
+   Show readability impact estimate
+
+E. ACTION BAR (sticky bottom on mobile)
+   [📋 Copy Full Brief] — copies entire brief as 
+   formatted text
+   [⬇️ Download as .txt] — downloads brief file
+   [Get AI Brief →] — plugin CTA
+
+F. CONVERSION NUDGE
+   "This brief was built from templates. The SEO 
+   Copilot plugin generates AI briefs using real 
+   competitor data and live keyword metrics."
+   Button: "Get the Plugin →"
+
+═══════════════════════════════════════════════════════════
+STEP 7 — UTILITY FILES
+═══════════════════════════════════════════════════════════
+
+utils/textAnalyzer.ts — Export these functions:
+  countWords(text: string): number
+  countSentences(text: string): number  
+  avgWordsPerSentence(text: string): number
+  countHeadings(text: string, level: 1|2|3): number
+  countImages(text: string): number
+  countLinks(text: string, type: 'internal'|'external'): number
+  extractFirstNWords(text: string, n: number): string
+  countKeywordOccurrences(text: string, keyword: string): number
+  hasPassiveVoice(text: string): {count: number, percentage: number}
+  checkComplexWords(text: string, lookup: object): ComplexWordResult[]
+
+utils/readabilityScorer.ts — Export:
+  fleschReadingEase(text: string): number
+  // Formula: 206.835 - 1.015*(words/sentences) 
+  //          - 84.6*(syllables/words)
+  countSyllables(word: string): number
+  getReadabilityGrade(score: number): string
+  // 90-100: Very Easy, 80-89: Easy, 70-79: Fairly Easy
+  // 60-69: Standard, 50-59: Fairly Difficult
+  // 30-49: Difficult, 0-29: Very Difficult
+
+utils/keywordAnalyzer.ts — Export:
+  getKeywordDensity(text: string, keyword: string): number
+  isKeywordInFirstNWords(text: string, keyword: string, n: number): boolean
+  getKeywordPositionInTitle(title: string, keyword: string): number
+  getLSIKeywords(keyword: string): string[]
+  // Returns hardcoded related terms for common keyword patterns
+
+═══════════════════════════════════════════════════════════
+STEP 8 — LOCKING MECHANISM (build but disable)
+═══════════════════════════════════════════════════════════
+
+In SEOCopilotPage.tsx, add this at the top:
+
+// FEATURE FLAG — set to true to enable access gating
+const ENABLE_ACCESS_GATE = false
+
+// When true: show email capture modal after 3 uses
+// When false: fully public, unlimited use
+// To enable: change ENABLE_ACCESS_GATE to true
+
+Build the gate component but wrap everything in:
+{ENABLE_ACCESS_GATE ? <GatedContent /> : <FreeContent />}
+
+The GatedContent component should:
+- Track usage count in localStorage
+- After 3 tool uses, show a modal:
+  "You've used 3 free analyses. Enter your email 
+   to unlock unlimited access."
+  Email input + "Unlock Free Access" button
+  Small text: "No spam. Unsubscribe anytime."
+- On email submit: store email in localStorage, 
+  set unlimited flag, hide modal forever
+
+═══════════════════════════════════════════════════════════
+STEP 9 — PERFORMANCE & POLISH
+═══════════════════════════════════════════════════════════
+
+- Load all 4 JSON files at build time (import directly 
+  in TypeScript — no fetch calls needed)
+- All analysis runs client-side — no API calls, 
+  instant results
+- Use React.memo on heavy components
+- Smooth tab transitions: opacity + translateY animation
+- Loading state: skeleton cards while analysis runs 
+  (even if instant — UX feels more premium)
+- Empty states: friendly messages when no results yet
+- Mobile responsive: stack columns, full-width inputs, 
+  sticky action bar on mobile
+- Error states: friendly messages if inputs are invalid
+
+═══════════════════════════════════════════════════════════
+STEP 10 — PLUGIN CTA COMPONENT
+═══════════════════════════════════════════════════════════
+
+CTABanner.tsx — reusable, appears in 4 places:
+  Props: variant ('inline' | 'full' | 'nudge')
+  
+  inline: small indigo box, one line + button
+  full: full-width gradient banner, larger text
+  nudge: floating bottom-right corner card (on mobile)
+
+CTA text variants based on current tab:
+  Tab 1 (Rules): "Fix these issues automatically 
+                   on every post — get the plugin"
+  Tab 2 (Titles): "Generate AI titles in 2 seconds 
+                    — get the plugin"  
+  Tab 3 (Briefs): "Get AI briefs with live competitor 
+                    data — get the plugin"
+
+All CTA buttons link to: 
+  const PLUGIN_URL = "https://seocopilot.io" 
+  // owner updates this when ready
+
+═══════════════════════════════════════════════════════════
+IMPORTANT NOTES FOR CURSOR
+═══════════════════════════════════════════════════════════
+
+1. Before writing any code, read the existing files:
+   - package.json (check if Next.js or Vite/React)
+   - tailwind.config (existing theme tokens)
+   - src/ folder structure (existing component patterns)
+   - Any existing components in components/ folder
+   Match the coding style and patterns already in use.
+
+2. The 4 JSON data files (rules.json, title-formulas.json, 
+   content-brief-templates.json, word-complexity-lookup.json) 
+   will be placed in SEO Copilot/data/ by the developer.
+   Import them as static JSON — do not fetch them.
+
+3. Do NOT create a new Next.js or Vite project. 
+   This is a new PAGE/ROUTE inside the existing project.
+
+4. Ask before creating the routing file — the developer 
+   will confirm whether this is App Router (app/) or 
+   Pages Router (pages/) or a Vite SPA with React Router.
+
+5. Use Tailwind classes only — no separate CSS files 
+   unless the project already uses them.
+
+6. TypeScript strict mode — no 'any' types. Define all 
+   types in types/seo-copilot.types.ts first.
+
+7. After building, provide:
+   - The route URL where the page will be accessible
+   - Any npm packages that need to be installed
+   - Instructions to place the 4 JSON data files
