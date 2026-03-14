@@ -118,7 +118,7 @@ export function GoogleRankingsSection({ report }: GoogleRankingsSectionProps) {
                       kw.opportunity === 'medium' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
                       'bg-zinc-500/10 text-zinc-400 border border-zinc-500/20'
                     }`}>
-                      {kw.opportunity.toUpperCase()}
+                      {(kw.opportunity || '').toUpperCase()}
                     </span>
                   </td>
                 </tr>

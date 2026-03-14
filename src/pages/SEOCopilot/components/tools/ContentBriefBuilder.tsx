@@ -76,7 +76,7 @@ export function ContentBriefBuilder() {
     text += `========================================================\n\n`;
     
     brief.structure.forEach((section, i) => {
-      text += `${i + 1}. [${section.type.toUpperCase()}] ${section.heading}\n`;
+      text += `${i + 1}. [${(section.type || '').toUpperCase()}] ${section.heading}\n`;
       text += `   Guidance: ${section.guidance}\n`;
       text += `   Target Length: ${section.word_count_min}-${section.word_count_max} words\n\n`;
     });

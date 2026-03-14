@@ -407,7 +407,7 @@ function IssueCard({ issue, analyzedUrl }: { issue: SEOIssue, analyzedUrl?: stri
           </div>
           <div>
             <h5 className="text-white font-semibold text-base leading-tight group-hover:text-indigo-300 transition-colors uppercase tracking-tight mb-1 flex items-center gap-2">
-               {issue.severity.toUpperCase()} <span className="text-[10px] text-zinc-500 font-mono font-normal tracking-wide bg-black/30 px-2 py-0.5 rounded">Fix: {issue.timeToFix}</span>
+               {(issue.severity || '').toUpperCase()} <span className="text-[10px] text-zinc-500 font-mono font-normal tracking-wide bg-black/30 px-2 py-0.5 rounded">Fix: {issue.timeToFix}</span>
             </h5>
             <p className="text-zinc-300 font-dm text-[15px]">{issue.title}</p>
             {!isExpanded && <p className="text-zinc-500 text-[13px] mt-1 font-dm truncate max-w-[400px]">{issue.summary}</p>}
@@ -468,11 +468,11 @@ function IssueCard({ issue, analyzedUrl }: { issue: SEOIssue, analyzedUrl?: stri
           <div className="mt-5 pt-5 border-t border-white/5 flex flex-wrap items-center gap-6">
             <div className="flex items-center gap-2">
               <span className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">Impact:</span>
-              <span className={cn("text-xs font-bold font-mono", issue.impact === 'high' ? 'text-rose-400' : 'text-amber-400')}>{issue.impact.toUpperCase()}</span>
+              <span className={cn("text-xs font-bold font-mono", issue.impact === 'high' ? 'text-rose-400' : 'text-amber-400')}>{(issue.impact || '').toUpperCase()}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">Effort:</span>
-              <span className="text-xs font-bold font-mono text-zinc-300">{issue.effort.toUpperCase()}</span>
+              <span className="text-xs font-bold font-mono text-zinc-300">{(issue.effort || '').toUpperCase()}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">⏱ Estimated time:</span>

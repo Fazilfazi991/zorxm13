@@ -738,7 +738,7 @@ export function buildClaudeSummaryPrompt(
     .map(i => i.title)
     const topIssues = allIssues
       .slice(0, 5)
-      .map(i => `${i.severity.toUpperCase()}: ${i.title}`)
+      .map(i => `${(i.severity || '').toUpperCase()}: ${i.title}`)
 
   return `
 Write a comprehensive executive summary for an SEO 
