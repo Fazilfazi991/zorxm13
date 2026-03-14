@@ -1035,11 +1035,18 @@ IMPORTANT RULES:
   in that space (e.g. for web design: Toptal, Upwork,
   Clutch, etc.)
 
+SCORING GUIDANCE for ${domain}:
+- For BRAND keywords (the person's name, domain/company name): mentioned=true if the site has any real web presence
+- For LOCATION-SPECIFIC keywords (e.g. 'business coach Dubai'): mentioned=true if the site is actively targeting that location
+- For NICHE/LONG-TAIL keywords that exactly match site content: mentioned=true if the domain clearly specializes in that topic
+- For GENERIC, broad keywords: mentioned=false unless the site is very well known
+- DO NOT return all false — that would mean zero web presence, which is unrealistic for a live site
+- Return AT LEAST 2-3 keywords as mentioned=true if the site has real content and a web presence
+
 CRITICAL FORMATTING RULES:
 - "mentioned" MUST be a strict JSON boolean (true or false), NEVER a string ("true" or "false").
 - The "keyword" field MUST match EXACTLY the keyword given to you.
-- Do NOT wrap your response in any extra objects. Pay attention to the required JSON structure.
-- For most generic keywords, "mentioned" should be false. Be realistic about what AI models cite.
+- Do NOT wrap your response in any extra objects.
 `
 }
 
@@ -1091,11 +1098,17 @@ Respond with ONLY this JSON:
   ]
 }
 
+SCORING GUIDANCE for ${domain}:
+- For BRAND keywords (person's name, domain/company name): mentioned=true if the site has any real web presence
+- For LOCATION-SPECIFIC niche keywords: mentioned=true if the site targets that location specifically
+- For NICHE/LONG-TAIL keywords matching site content: mentioned=true if domain clearly specializes in that area
+- For broadly generic keywords (e.g. 'marketing'): mentioned=false unless very well known
+- DO NOT return all false — return AT LEAST 2-3 keywords as mentioned=true for any live site
+
 CRITICAL FORMATTING RULES:
 - "mentioned" MUST be a strict JSON boolean (true or false), NEVER a string ("true" or "false").
 - The "keyword" field MUST match EXACTLY the keyword given to you.
-- Do NOT wrap your response in any extra objects. Pay attention to the required JSON structure.
-- For most generic keywords, "mentioned" should be false. Be realistic about what AI models cite.
+- Do NOT wrap your response in any extra objects.
 `
 }
 
@@ -1141,10 +1154,16 @@ Respond with ONLY this JSON:
   ]
 }
 
+SCORING GUIDANCE for ${domain}:
+- Since Perplexity uses live search, mentioned=true if the domain likely ranks in top 10 for that keyword in ${country.name}
+- For brand/name keywords: mentioned=true (Perplexity would find and cite the site directly)
+- For niche local keywords where site is established: mentioned=true
+- For broad generic keywords: mentioned=false unless domain is very strong
+- DO NOT return all false — return AT LEAST 2-3 keywords as mentioned=true for any indexed site
+
 CRITICAL FORMATTING RULES:
 - "mentioned" MUST be a strict JSON boolean (true or false), NEVER a string ("true" or "false").
 - The "keyword" field MUST match EXACTLY the keyword given to you.
-- Do NOT wrap your response in any extra objects. Pay attention to the required JSON structure.
-- For most generic keywords, "mentioned" should be false. Be realistic about what AI models cite.
+- Do NOT wrap your response in any extra objects.
 `
 }

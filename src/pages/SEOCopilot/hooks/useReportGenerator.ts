@@ -463,7 +463,10 @@ export function useReportGenerator() {
         
         targetCountry,
         siteCrawl,
-        googleRankings,
+        googleRankings: {
+          ...googleRankings,
+          keywords: googleRankings?.keywords ?? googleRankings?.results ?? googleRankings?.keywordResults ?? []
+        },
         llmVisibilityReport,
 
         overallScore,
