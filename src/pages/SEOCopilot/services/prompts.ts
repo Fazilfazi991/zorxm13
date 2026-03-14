@@ -1012,6 +1012,12 @@ IMPORTANT RULES:
 - competitorsMentioned should be realistic big players
   in that space (e.g. for web design: Toptal, Upwork,
   Clutch, etc.)
+
+CRITICAL FORMATTING RULES:
+- "mentioned" MUST be a strict JSON boolean (true or false), NEVER a string ("true" or "false").
+- The "keyword" field MUST match EXACTLY the keyword given to you.
+- Do NOT wrap your response in any extra objects. Pay attention to the required JSON structure.
+- For most generic keywords, "mentioned" should be false. Be realistic about what AI models cite.
 `
 }
 
@@ -1062,6 +1068,12 @@ Respond with ONLY this JSON:
     }
   ]
 }
+
+CRITICAL FORMATTING RULES:
+- "mentioned" MUST be a strict JSON boolean (true or false), NEVER a string ("true" or "false").
+- The "keyword" field MUST match EXACTLY the keyword given to you.
+- Do NOT wrap your response in any extra objects. Pay attention to the required JSON structure.
+- For most generic keywords, "mentioned" should be false. Be realistic about what AI models cite.
 `
 }
 
@@ -1106,5 +1118,11 @@ Respond with ONLY this JSON:
     }
   ]
 }
+
+CRITICAL FORMATTING RULES:
+- "mentioned" MUST be a strict JSON boolean (true or false), NEVER a string ("true" or "false").
+- The "keyword" field MUST match EXACTLY the keyword given to you.
+- Do NOT wrap your response in any extra objects. Pay attention to the required JSON structure.
+- For most generic keywords, "mentioned" should be false. Be realistic about what AI models cite.
 `
 }

@@ -187,9 +187,44 @@ export function useReportGenerator() {
 
       // PHASE 2: Google Rankings Simulation
       updateStage('Phase 2', 'running')
-      const googleRankings = await callClaudeJSON<any>(buildGoogleRankingsPrompt(targetUrl, topKeywords, targetCountry, siteCrawl)).catch(() => ({
+      const rawGoogleRankings = await callClaudeJSON<any>(buildGoogleRankingsPrompt(targetUrl, topKeywords, targetCountry, siteCrawl)).catch(() => ({
           country: targetCountry.name, countryFlag: targetCountry.flag, keywords: [], rankingKeywords: 0, notRankingKeywords: 0, averagePosition: 0, topOpportunities: [], simulationDisclaimer: ''
       }))
+      
+      const normalizeRanking = (raw: any) => ({
+        keyword: raw?.keyword ?? '',
+        country: raw?.country ?? targetCountry.name,
+        countryFlag: raw?.countryFlag ?? targetCountry.flag,
+        estimatedPosition: 
+          raw?.estimatedPosition === null ||
+          raw?.estimatedPosition === 'null' ||
+          raw?.estimatedPosition === 'Not Ranking' ||
+          raw?.estimatedPosition === undefined ||
+          isNaN(Number(raw?.estimatedPosition))
+            ? null 
+            : Number(raw?.estimatedPosition),
+        estimatedPage:
+          raw?.estimatedPage === null ||
+          raw?.estimatedPage === 'null' ||
+          isNaN(Number(raw?.estimatedPage))
+            ? null
+            : Number(raw?.estimatedPage),
+        positionLabel: raw?.positionLabel ?? 'Unknown',
+        hasFeaturedSnippet: raw?.hasFeaturedSnippet === true || raw?.hasFeaturedSnippet === 'true',
+        hasPeopleAlsoAsk: raw?.hasPeopleAlsoAsk === true || raw?.hasPeopleAlsoAsk === 'true',
+        topCompetitors: raw?.topCompetitors ?? [],
+        opportunity: raw?.opportunity ?? 'medium',
+        simulationNote: raw?.simulationNote ?? 'Estimated based on SEO signals'
+      });
+
+      const rankingKeywordsArray = Array.isArray(rawGoogleRankings.keywords) ? rawGoogleRankings.keywords : [];
+      const normalizedKeywords = rankingKeywordsArray.map(normalizeRanking);
+      
+      const googleRankings = {
+          ...rawGoogleRankings,
+          keywords: normalizedKeywords
+      };
+
       updateStage('Phase 2', 'complete')
       setProgress(35)
 
@@ -329,40 +364,59 @@ export function useReportGenerator() {
       }
 
       const rawLlmVis = llmVisibilityResults;
-      const calcScore = (idx: number) => {
-        const results = rawLlmVis[idx]?.results || [];
-        if (results.length === 0) return 0;
-        return Math.round((results.filter((r:any) => r.mentioned).length / results.length) * 100);
-      };
       
-      const chatgptScore = calcScore(1);
-      const geminiScore = calcScore(0);
-      const perplexityScore = calcScore(2);
+      const normalizeResult = (raw: any) => ({
+        mentioned: raw?.mentioned === true || raw?.mentioned === 'true' || raw?.mentioned === 1,
+        confidence: raw?.confidence ?? 'low',
+        quote: raw?.quote ?? null,
+        context: raw?.context ?? null,
+        competitorsMentioned: raw?.competitorsMentioned ?? raw?.competitors_mentioned ?? [],
+        simulationNote: raw?.simulationNote ?? raw?.simulation_note ?? 'AI simulated estimate'
+      });
+      
+      const geminiResults = Array.isArray(rawLlmVis[0]) ? rawLlmVis[0] : rawLlmVis[0]?.results ?? [];
+      const chatgptResults = Array.isArray(rawLlmVis[1]) ? rawLlmVis[1] : rawLlmVis[1]?.results ?? [];
+      const perplexityResults = Array.isArray(rawLlmVis[2]) ? rawLlmVis[2] : rawLlmVis[2]?.results ?? [];
+      
+      console.log('Gemini LLM raw:', rawLlmVis[0]);
+      console.log('ChatGPT LLM raw:', rawLlmVis[1]);
+      console.log('Perplexity LLM raw:', rawLlmVis[2]);
+
+      const keywordResults = topKeywords.map((kw: string) => {
+          const kwLower = kw.toLowerCase().trim();
+          return {
+              keyword: kw,
+              gemini: normalizeResult(geminiResults.find((r:any) => r?.keyword?.toLowerCase().trim() === kwLower)),
+              chatgpt: normalizeResult(chatgptResults.find((r:any) => r?.keyword?.toLowerCase().trim() === kwLower)),
+              perplexity: normalizeResult(perplexityResults.find((r:any) => r?.keyword?.toLowerCase().trim() === kwLower))
+          }
+      });
+      
+      console.log('Keyword results:', keywordResults);
+      
+      const chatgptScore = keywordResults.length > 0 ? Math.round((keywordResults.filter((r:any) => r.chatgpt.mentioned).length / keywordResults.length) * 100) : 0;
+      const geminiScore = keywordResults.length > 0 ? Math.round((keywordResults.filter((r:any) => r.gemini.mentioned).length / keywordResults.length) * 100) : 0;
+      const perplexityScore = keywordResults.length > 0 ? Math.round((keywordResults.filter((r:any) => r.perplexity.mentioned).length / keywordResults.length) * 100) : 0;
       const combinedLlmScore = Math.round((chatgptScore + geminiScore + perplexityScore) / 3);
 
+      console.log('Scores:', { chatgptScore, geminiScore, perplexityScore });
+
       const mentionedKeywords = Array.from(new Set(
-        rawLlmVis.flatMap((llm: any) => llm.results?.filter((r:any) => r.mentioned).map((r:any) => r.keyword) || [])
+        keywordResults.filter((r:any) => r.gemini.mentioned || r.chatgpt.mentioned || r.perplexity.mentioned).map((r:any) => r.keyword)
       ));
       const notMentionedKeywords = topKeywords.filter((k: string) => !mentionedKeywords.includes(k));
 
-      const competitorMentions = rawLlmVis.flatMap((llm: any) => llm.results?.flatMap((r:any) => r.competitorsMentioned || []) || []);
+      const competitorMentions = [
+          ...keywordResults.flatMap((r:any) => r.gemini.competitorsMentioned || []),
+          ...keywordResults.flatMap((r:any) => r.chatgpt.competitorsMentioned || []),
+          ...keywordResults.flatMap((r:any) => r.perplexity.competitorsMentioned || [])
+      ].filter(Boolean);
+      
       const competitorCounts = competitorMentions.reduce((acc: Record<string, number>, curr: string) => {
           acc[curr] = (acc[curr] || 0) + 1;
           return acc;
       }, {});
-      const topCompetitorsInLLMs = Object.entries(competitorCounts).map(([domain, mentionCount]) => ({ domain, mentionCount })).sort((a: any, b: any) => b.mentionCount - a.mentionCount).slice(0, 5);
-
-      const keywordResults = topKeywords.map((kw: string) => {
-          const getRes = (llmIdx: number) => rawLlmVis[llmIdx]?.results?.find((r:any) => r.keyword === kw) || {
-              mentioned: false, confidence: 'low', quote: null, context: null, competitorsMentioned: [], simulationNote: ''
-          };
-          return {
-              keyword: kw,
-              gemini: getRes(0),
-              chatgpt: getRes(1),
-              perplexity: getRes(2)
-          }
-      });
+      const topCompetitorsInLLMs = Object.entries(competitorCounts).map(([domain, mentionCount]) => ({ domain, mentionCount })).sort((a: any, b: any) => (b.mentionCount as number) - (a.mentionCount as number)).slice(0, 5);
 
       const llmVisibilityReport = {
           overallScore: combinedLlmScore,
