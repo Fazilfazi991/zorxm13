@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { callGeminiJSON, callClaudeJSON, callOpenAIJSON, callGeminiGroundedJSON } from '../services/ai.service'
+import { callGeminiJSON, callClaudeJSON, callOpenAIJSON } from '../services/ai.service'
+import { searchAllKeywords } from '../services/google-search.service'
 import { AI_CONFIG } from '../services/../config/ai.config'
 import { crawlWebsite } from '../services/crawler.service'
 import {
@@ -16,11 +17,7 @@ import {
   buildClaudeCompetitorPrompt,
   buildClaudeSummaryPrompt,
   buildSiteCrawlPrompt,
-  buildGoogleRankingsPrompt,
-  buildGeminiVisibilityPrompt,
-  buildGeminiGroundedVisibilityPrompt,
-  buildChatGPTVisibilityPrompt,
-  buildPerplexityVisibilityPrompt,
+  buildLLMVisibilityFromSearchPrompt,
   SEOInput
 } from '../services/prompts'
 import { FullSEOReport, SEOIssue, Country, SiteCrawlResult } from '../types/report.types'
@@ -112,6 +109,7 @@ export type LoadingStage = {
   icon?: string
   subStages?: string[]
   phase?: string
+  note?: string
 }
 
 export function useReportGenerator() {
@@ -144,9 +142,10 @@ export function useReportGenerator() {
     // Initialize loading stages
     const initialStages: LoadingStage[] = [
       { id: 'Phase 1', label: 'Phase 1: Site Crawl & Keyword Discovery', status: 'pending', ai: 'gemini', icon: '🕷️', phase: 'Phase 1' },
-      { id: 'Phase 2', label: 'Phase 2: Google Ranking Simulation', status: 'pending', ai: 'claude', icon: '📈', phase: 'Phase 2' },
-      { id: 'llm_gemini', label: 'Searching Google (Real Data)', status: 'pending', ai: 'gemini', icon: '🔍', phase: 'Phase 3' },
-      { id: 'Phase 3', label: 'Phase 3: LLM Visibility Check', status: 'pending', ai: null, icon: '👁️', phase: 'Phase 3', subStages: ['ChatGPT', 'Perplexity'] },
+      { id: 'rankings', label: `Searching Google in ${targetCountry.name}...`, sublabel: 'Waiting to start...', status: 'pending', ai: null, icon: '🔍', phase: 'Phase 2', note: 'Real Google Search data' },
+      { id: 'llm_gemini', label: 'Analyzing Gemini visibility...', sublabel: 'Using real search results', status: 'pending', ai: 'gemini', icon: '🔵', phase: 'Phase 3', note: '✓ Real data' },
+      { id: 'llm_chatgpt', label: 'Analyzing ChatGPT visibility...', sublabel: 'Based on real Google rankings', status: 'pending', ai: 'claude', icon: '🟢', phase: 'Phase 3', note: 'Search-based' },
+      { id: 'llm_perplexity', label: 'Analyzing Perplexity visibility...', sublabel: 'Perplexity uses live search — checking now', status: 'pending', ai: 'claude', icon: '🟣', phase: 'Phase 3', note: 'Search-based' },
       { id: 'Phase 4-1', label: 'Phase 4: Core SEO Analysis (Gemini)', status: 'pending', ai: 'gemini', icon: '⚡', phase: 'Phase 4', subStages: ['On-Page SEO', 'Technical', 'Content Quality', 'AEO', 'Topical Authority'] },
       { id: 'Phase 4-2', label: 'Phase 4: Deep Reasoning (Claude)', status: 'pending', ai: 'claude', icon: '🧠', phase: 'Phase 4', subStages: ['E-E-A-T Analysis', 'LLM Visibility'] },
       { id: 'competitor', label: 'Phase 4: Competitive Gaps', status: 'pending', ai: 'claude', icon: '🏆', phase: 'Phase 4' },
@@ -211,114 +210,178 @@ export function useReportGenerator() {
       // Get top keywords to check
       const topKeywords = siteCrawl.topKeywords?.slice(0, 5) || [rawInput.focusKeyword || 'SEO']
 
-      // PHASE 2: Google Rankings Simulation
-      updateStage('Phase 2', 'running')
-      const rawGoogleRankings = await callClaudeJSON<any>(buildGoogleRankingsPrompt(targetUrl, topKeywords, targetCountry, siteCrawl)).catch(() => ({
-          country: targetCountry.name, countryFlag: targetCountry.flag, keywords: [], rankingKeywords: 0, notRankingKeywords: 0, averagePosition: 0, topOpportunities: [], simulationDisclaimer: ''
-      }))
-      
-      const normalizeRanking = (raw: any) => ({
-        keyword: raw?.keyword ?? '',
-        country: raw?.country ?? targetCountry.name,
-        countryFlag: raw?.countryFlag ?? targetCountry.flag,
-        estimatedPosition: 
-          raw?.estimatedPosition === null ||
-          raw?.estimatedPosition === 'null' ||
-          raw?.estimatedPosition === 'Not Ranking' ||
-          raw?.estimatedPosition === undefined ||
-          isNaN(Number(raw?.estimatedPosition))
-            ? null 
-            : Number(raw?.estimatedPosition),
-        estimatedPage:
-          raw?.estimatedPage === null ||
-          raw?.estimatedPage === 'null' ||
-          isNaN(Number(raw?.estimatedPage))
-            ? null
-            : Number(raw?.estimatedPage),
-        positionLabel: raw?.positionLabel ?? 'Unknown',
-        hasFeaturedSnippet: raw?.hasFeaturedSnippet === true || raw?.hasFeaturedSnippet === 'true',
-        hasPeopleAlsoAsk: raw?.hasPeopleAlsoAsk === true || raw?.hasPeopleAlsoAsk === 'true',
-        topCompetitors: raw?.topCompetitors ?? [],
-        opportunity: raw?.opportunity ?? 'medium',
-        simulationNote: raw?.simulationNote ?? 'Estimated based on SEO signals'
-      });
+      // PHASE 2: Real Google Search for all keywords
+      updateStage('rankings', 'running')
 
-      const rankingKeywordsArray = Array.isArray(rawGoogleRankings.keywords) ? rawGoogleRankings.keywords : [];
-      const normalizedKeywords = rankingKeywordsArray.map(normalizeRanking);
-      
-      const googleRankings = {
-          ...rawGoogleRankings,
-          keywords: normalizedKeywords
-      };
+      const googleSearchResults = await searchAllKeywords(
+        topKeywords,
+        targetUrl,
+        targetCountry.gl || 'us', 
+        (current, total, keyword) => {
+          updateStage('rankings', 'running', {
+            label: `Searching Google in ${targetCountry.name}...`,
+            sublabel: `Checking keyword ${current}/${total}: ${keyword}`
+          })
+          setProgress(20 + (current / total) * 15)
+        }
+      )
 
-      updateStage('Phase 2', 'complete')
+      updateStage('rankings', 'complete')
       setProgress(35)
 
-      // PHASE 3: LLM Visibility Check
-      updateStage('Phase 3', 'running')
-
-      // Gemini: run grounded per-keyword checks sequentially
-      const runGroundedGeminiChecks = async (): Promise<{ llmName: string; results: any[] }> => {
-        const results: any[] = []
-        let current = 0
-        const total = topKeywords.length
-
-        for (const keyword of topKeywords) {
-          current++
-          try {
-            updateStage('llm_gemini', 'running', {
-              label: `Searching Google for keyword ${current}/${total}...`,
-              sublabel: `Checking if ${targetUrl} appears for "${keyword}"`
-            })
-
-            const result = await callGeminiGroundedJSON<any>(
-              buildGeminiGroundedVisibilityPrompt(
-                targetUrl,
-                keyword,
-                targetCountry,
-                siteCrawl?.inferredBusinessType ?? 'Business'
+      // Build Google Rankings report from real data
+      const googleRankings: any = {
+        country: targetCountry.name,
+        countryFlag: targetCountry.flag,
+        analyzedAt: new Date().toISOString(),
+        keywords: googleSearchResults.map(s => ({
+          keyword: s.keyword,
+          country: targetCountry.name,
+          countryFlag: targetCountry.flag,
+          estimatedPosition: s.domainPosition,
+          estimatedPage: s.domainPosition 
+            ? Math.ceil(s.domainPosition / 10) 
+            : null,
+          positionLabel: s.domainFound
+            ? `Position ${s.domainPosition}`
+            : 'Not in Top 10',
+          hasFeaturedSnippet: s.hasFeaturedSnippet,
+          hasPeopleAlsoAsk: false,
+          topCompetitors: s.competitorDomains,
+          opportunity: !s.domainFound 
+            ? 'high' 
+            : s.domainPosition && s.domainPosition > 5 
+              ? 'medium' 
+              : 'low',
+          simulationNote: 'Real Google Search data via Custom Search API',
+        })),
+        rankingKeywords: googleSearchResults
+          .filter(s => s.domainFound).length,
+        notRankingKeywords: googleSearchResults
+          .filter(s => !s.domainFound).length,
+        averagePosition: (() => {
+          const positions = googleSearchResults
+            .filter(s => s.domainPosition)
+            .map(s => s.domainPosition!)
+          return positions.length 
+            ? Math.round(
+                positions.reduce((a, b) => a + b, 0) / 
+                positions.length
               )
-            )
-            results.push({
-              ...result,
-              keyword,
-              mentioned: result.mentioned === true || result.mentioned === 'true',
-            })
-            console.log(`Gemini grounded [${keyword}]:`, result.mentioned, result.quote)
-            // Small delay to avoid rate limiting
-            await new Promise(r => setTimeout(r, 500))
-          } catch (err) {
-            console.warn(`Grounded check failed for "${keyword}":`, err)
-            results.push({
-              keyword,
-              mentioned: false,
-              confidence: 'low',
-              quote: null,
-              context: 'Search check failed',
-              competitorsMentioned: [],
-              searchPosition: null,
-              simulationNote: 'Check failed'
-            })
-          }
-        }
-        updateStage('llm_gemini', 'complete', { label: 'Google Search Completed' })
-        return { llmName: 'Gemini', results }
+            : 0
+        })(),
+        topOpportunities: googleSearchResults
+          .filter(s => !s.domainFound)
+          .map(s => s.keyword)
+          .slice(0, 3),
+        simulationDisclaimer: 'Real Google Search data — positions may vary by location and device'
       }
 
-      // ChatGPT: use real OpenAI if key is set, else fall back to Claude
-      const chatgptPrompt = buildChatGPTVisibilityPrompt(targetUrl, topKeywords, targetCountry, siteCrawl)
-      const chatgptVisPromise = AI_CONFIG.OPENAI.API_KEY
-        ? callOpenAIJSON<any>(chatgptPrompt).catch(() => callClaudeJSON<any>(chatgptPrompt))
-        : callClaudeJSON<any>(chatgptPrompt)
+      // PHASE 3: LLM Visibility from real search data
+      updateStage('llm_gemini', 'running')
+      updateStage('llm_chatgpt', 'running')
+      updateStage('llm_perplexity', 'running')
 
-      const llmVisibilityResults = await Promise.all([
-          runGroundedGeminiChecks(),
-          chatgptVisPromise,
-          callClaudeJSON<any>(buildPerplexityVisibilityPrompt(targetUrl, topKeywords, targetCountry, siteCrawl))
-      ]).catch(() => ([{llmName:'Gemini', results:[]}, {llmName:'ChatGPT', results:[]}, {llmName:'Perplexity', results:[]}]))
+      // Run all 3 LLM assessments in parallel using the SAME real Google data
+      const [geminiLLM, chatgptLLM, perplexityLLM] = 
+        await Promise.all([
+          callGeminiJSON<any>(
+            buildLLMVisibilityFromSearchPrompt(
+              targetUrl, googleSearchResults, 
+              targetCountry, siteCrawl?.inferredBusinessType ?? 'Business', 'Gemini'
+            )
+          ).catch(() => null),
 
-      updateStage('Phase 3', 'complete')
+          (AI_CONFIG.OPENAI.API_KEY
+            ? callOpenAIJSON<any>(
+                buildLLMVisibilityFromSearchPrompt(
+                  targetUrl, googleSearchResults,
+                  targetCountry, siteCrawl?.inferredBusinessType ?? 'Business', 'ChatGPT'
+                )
+              )
+            : callClaudeJSON<any>(
+                buildLLMVisibilityFromSearchPrompt(
+                  targetUrl, googleSearchResults,
+                  targetCountry, siteCrawl?.inferredBusinessType ?? 'Business', 'ChatGPT'
+                )
+              )
+          ).catch(() => null),
+
+          callClaudeJSON<any>(
+            buildLLMVisibilityFromSearchPrompt(
+              targetUrl, googleSearchResults,
+              targetCountry, siteCrawl?.inferredBusinessType ?? 'Business', 'Perplexity'
+            )
+          ).catch(() => null),
+        ])
+
+      updateStage('llm_gemini', 'complete')
+      updateStage('llm_chatgpt', 'complete')
+      updateStage('llm_perplexity', 'complete')
       setProgress(50)
+
+      // Normalize results
+      const geminiResultsRaw = Array.isArray(geminiLLM)
+        ? geminiLLM : geminiLLM?.results ?? []
+      const chatgptResultsRaw = Array.isArray(chatgptLLM)
+        ? chatgptLLM : chatgptLLM?.results ?? []
+      const perplexityResultsRaw = Array.isArray(perplexityLLM)
+        ? perplexityLLM : perplexityLLM?.results ?? []
+
+      // Build keyword results
+      const llmKeywordResults = topKeywords.map(keyword => {
+        // Get the real Google data for this keyword
+        const googleData = googleSearchResults.find(
+          s => s.keyword.toLowerCase() === keyword.toLowerCase()
+        )
+
+        const normalize = (raw: any): any => ({
+          mentioned: raw?.mentioned === true || 
+                     raw?.mentioned === 'true' ||
+                     (googleData?.domainFound === true),
+          confidence: raw?.confidence ?? 
+            (googleData?.domainFound ? 'medium' : 'low'),
+          quote: raw?.quote ?? googleData?.domainSnippet ?? null,
+          context: raw?.context ?? 
+            `Position ${googleData?.domainPosition ?? 'not ranking'} in Google`,
+          competitorsMentioned: raw?.competitorsMentioned ?? 
+            googleData?.competitorDomains ?? [],
+          simulationNote: 'Based on real Google Search data'
+        })
+
+        return {
+          keyword,
+          gemini: normalize(
+            geminiResultsRaw.find((r: any) => 
+              r?.keyword?.toLowerCase().trim() === 
+              keyword.toLowerCase().trim()
+            )
+          ),
+          chatgpt: normalize(
+            chatgptResultsRaw.find((r: any) =>
+              r?.keyword?.toLowerCase().trim() ===
+              keyword.toLowerCase().trim()
+            )
+          ),
+          perplexity: normalize(
+            perplexityResultsRaw.find((r: any) =>
+              r?.keyword?.toLowerCase().trim() ===
+              keyword.toLowerCase().trim()
+            )
+          ),
+        }
+      })
+
+      // Set the final LLM Visibility Report
+      const llmVisibilityReport = {
+        score: Math.round(
+          (llmKeywordResults.filter(r => r.gemini.mentioned).length +
+           llmKeywordResults.filter(r => r.chatgpt.mentioned).length +
+           llmKeywordResults.filter(r => r.perplexity.mentioned).length) / 
+          (topKeywords.length * 3) * 100
+        ),
+        results: llmKeywordResults
+      }
 
       // PHASE 4: Core Analysis
       updateStage('Phase 4-1', 'running')

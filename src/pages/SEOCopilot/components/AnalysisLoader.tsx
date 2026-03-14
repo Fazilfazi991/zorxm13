@@ -18,17 +18,17 @@ export function AnalysisLoader({ stages, progress, url, country }: AnalysisLoade
   const phaseNumber = parseInt(currentPhaseId.replace('Phase ', '')) || 1
 
   const phaseDetails: Record<string, string> = {
-    'Phase 1': 'Keyword Discovery',
-    'Phase 2': 'Google Rankings',
-    'Phase 3': 'LLM Visibility',
-    'Phase 4': 'Full SEO Analysis'
+    'Phase 1': 'Site Crawl',
+    'Phase 2': 'Real Google Search',
+    'Phase 3': 'AI Engine Visibility',
+    'Phase 4': 'Deep Analysis'
   }
 
   const groupedPhases = [
-    { id: 'Phase 1', name: 'Keyword Discovery' },
-    { id: 'Phase 2', name: 'Google Rankings' },
-    { id: 'Phase 3', name: 'LLM Visibility' },
-    { id: 'Phase 4', name: 'Full SEO Analysis' }
+    { id: 'Phase 1', name: 'Site Crawl' },
+    { id: 'Phase 2', name: 'Real Google Search' },
+    { id: 'Phase 3', name: 'AI Engine Visibility' },
+    { id: 'Phase 4', name: 'Deep Analysis' }
   ]
 
   return (

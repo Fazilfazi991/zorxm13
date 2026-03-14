@@ -17,6 +17,11 @@ export const AI_CONFIG = {
     API_KEY: import.meta.env.VITE_OPENAI_API_KEY ?? '',
     MODEL: 'gpt-4o-mini',
     API_URL: 'https://api.openai.com/v1/chat/completions',
+  },
+  GOOGLE_SEARCH: {
+    API_KEY: import.meta.env.VITE_GEMINI_API_KEY ?? '',
+    SEARCH_ENGINE_ID: '440c04047b3414b89',
+    API_URL: 'https://www.googleapis.com/customsearch/v1',
   }
 }
 

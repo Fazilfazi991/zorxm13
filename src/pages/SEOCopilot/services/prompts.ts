@@ -1172,3 +1172,92 @@ CRITICAL FORMATTING RULES:
 - Do NOT wrap your response in any extra objects.
 `
 }
+
+export function buildLLMVisibilityFromSearchPrompt(
+  domain: string,
+  searchData: any[], // KeywordSearchData[]
+  country: Country,
+  businessType: string,
+  llmName: 'ChatGPT' | 'Gemini' | 'Perplexity'
+): string {
+
+  const llmBehavior = {
+    ChatGPT: `ChatGPT uses training data up to early 2024. 
+      It cites well-known brands, Wikipedia-listed entities,
+      and domains that appeared frequently in its training data.
+      It favors authoritative, well-established sources.`,
+    Gemini: `Gemini uses Google Search grounding and favors 
+      domains that rank well in Google. If a domain ranks 
+      in top 5 for a keyword, Gemini is likely to cite it.
+      It strongly favors Google-verified businesses.`,
+    Perplexity: `Perplexity does live web search and directly 
+      cites sources from current search results. If a domain 
+      appears in top 10 Google results, Perplexity will 
+      likely cite it. It favors recent, indexed content.`
+  }
+
+  const searchSummary = searchData.map(s => `
+Keyword: "${s.keyword}"
+- ${domain} found in Google results: ${s.domainFound ? `YES at position ${s.domainPosition}` : 'NO'}
+- Domain snippet: ${s.domainSnippet ?? 'Not found'}
+- Top competitors ranking: ${s.competitorDomains.slice(0, 3).join(', ')}
+  `).join('\n')
+
+  return `
+You are analyzing LLM visibility for "${domain}"
+(${businessType}) in ${country.name}.
+
+HOW ${llmName.toUpperCase()} WORKS:
+${llmBehavior[llmName]}
+
+REAL GOOGLE SEARCH RESULTS FOR EACH KEYWORD:
+${searchSummary}
+
+Based on these REAL search results, assess whether 
+${llmName} would mention ${domain} for each keyword.
+
+Key logic:
+- If domain IS in Google top 10 → high chance 
+  ${llmName} mentions it (especially Perplexity/Gemini)
+- If domain is NOT in Google results → low chance
+- Brand name keywords → mention if any web presence
+- ${llmName === 'ChatGPT' 
+    ? 'ChatGPT: slightly less dependent on current rankings, more on brand recognition'
+    : llmName === 'Perplexity'
+    ? 'Perplexity: MOST dependent on current Google rankings'
+    : 'Gemini: highly dependent on Google rankings'
+  }
+
+Respond with ONLY this JSON:
+{
+  "llmName": "${llmName}",
+  "results": [
+    ${searchData.map(s => `{
+      "keyword": "${s.keyword}",
+      "mentioned": ${s.domainFound 
+        ? 'true' 
+        : 'false'
+      },
+      "confidence": "${s.domainFound 
+        ? s.domainPosition && s.domainPosition <= 3 
+          ? 'high' 
+          : 'medium'
+        : 'high'
+      }",
+      "quote": ${s.domainFound && s.domainSnippet
+        ? `"${s.domainSnippet?.substring(0, 150).replace(/"/g, "'")}"`
+        : 'null'
+      },
+      "context": "Based on Google position ${s.domainPosition ?? 'not ranking'} for this keyword",
+      "searchPosition": ${s.domainPosition ?? 'null'},
+      "competitorsMentioned": ${JSON.stringify(s.competitorDomains.slice(0, 3))},
+      "simulationNote": "Based on real Google Search data"
+    }`).join(',\n    ')}
+  ]
+}
+
+OVERRIDE RULE: If the keyword contains the brand 
+name or domain name "${domain.split('.')[0]}", 
+set mentioned=true regardless of ranking.
+`
+}

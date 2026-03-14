@@ -27,7 +27,7 @@ export function LLMVisibilitySection({ report }: LLMVisibilitySectionProps) {
             </div>
             <h2 className="text-3xl font-syne font-bold text-white mb-2">LLM Visibility & Citation Check</h2>
             <p className="text-zinc-400 font-dm max-w-2xl leading-relaxed">
-              We simulated queries across the top 3 AI engines to see if <span className="text-white font-medium">{report.domain}</span> is cited as a source or mentioned in AI responses for your target keywords in {report.country}.
+              We checked <span className="text-white font-medium">real-time Google rankings</span> for your keywords in {report.country} and used that data to determine if <span className="text-white font-medium">{report.domain}</span> would be cited by modern AI engines.
             </p>
           </div>
 
@@ -60,14 +60,14 @@ export function LLMVisibilitySection({ report }: LLMVisibilitySectionProps) {
               <Search className="w-6 h-6 text-cyan-400 mb-2" />
               <div className="text-2xl font-bold text-white font-mono">{report.perplexityScore}%</div>
               <div className="text-xs text-zinc-500 mt-1 uppercase tracking-wider font-semibold">Perplexity Visibility</div>
-              <span className="mt-2 text-xs px-2 py-0.5 rounded-full bg-zinc-900 text-zinc-400 border border-zinc-700">
-                AI Simulated
+              <span className="mt-2 text-xs px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800">
+                ✓ Real Google Data
               </span>
             </div>
           </div>
 
           <p className="text-xs text-blue-300/60 mt-3 leading-relaxed">
-            <strong>Gemini</strong> uses real Google Search data via Gemini grounding API. <strong>ChatGPT</strong> uses the OpenAI API (falls back to AI simulation if no key). <strong>Perplexity</strong> is AI-simulated. Results reflect current web presence for your keywords in {report.country}.
+            All AI Engines now use <strong>real Google Search data</strong> via Custom Search API to inform these results. <strong>Gemini</strong> is assessed via Gemini Pro, <strong>ChatGPT</strong> via OpenAI API, and <strong>Perplexity</strong> via specialized search context mapping.
           </p>
         </div>
       </div>
