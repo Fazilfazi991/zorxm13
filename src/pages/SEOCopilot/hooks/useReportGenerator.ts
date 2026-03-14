@@ -374,9 +374,9 @@ export function useReportGenerator() {
         simulationNote: raw?.simulationNote ?? raw?.simulation_note ?? 'AI simulated estimate'
       });
       
-      const geminiResults = Array.isArray(rawLlmVis[0]) ? rawLlmVis[0] : rawLlmVis[0]?.results ?? [];
-      const chatgptResults = Array.isArray(rawLlmVis[1]) ? rawLlmVis[1] : rawLlmVis[1]?.results ?? [];
-      const perplexityResults = Array.isArray(rawLlmVis[2]) ? rawLlmVis[2] : rawLlmVis[2]?.results ?? [];
+      const geminiResultsNormalized = Array.isArray(rawLlmVis[0]) ? rawLlmVis[0] : rawLlmVis[0]?.results ?? [];
+      const chatgptResultsNormalized = Array.isArray(rawLlmVis[1]) ? rawLlmVis[1] : rawLlmVis[1]?.results ?? [];
+      const perplexityResultsNormalized = Array.isArray(rawLlmVis[2]) ? rawLlmVis[2] : rawLlmVis[2]?.results ?? [];
       
       console.log('Gemini LLM raw:', rawLlmVis[0]);
       console.log('ChatGPT LLM raw:', rawLlmVis[1]);
@@ -386,9 +386,9 @@ export function useReportGenerator() {
           const kwLower = kw.toLowerCase().trim();
           return {
               keyword: kw,
-              gemini: normalizeResult(geminiResults.find((r:any) => r?.keyword?.toLowerCase().trim() === kwLower)),
-              chatgpt: normalizeResult(chatgptResults.find((r:any) => r?.keyword?.toLowerCase().trim() === kwLower)),
-              perplexity: normalizeResult(perplexityResults.find((r:any) => r?.keyword?.toLowerCase().trim() === kwLower))
+              gemini: normalizeResult(geminiResultsNormalized.find((r:any) => r?.keyword?.toLowerCase().trim() === kwLower)),
+              chatgpt: normalizeResult(chatgptResultsNormalized.find((r:any) => r?.keyword?.toLowerCase().trim() === kwLower)),
+              perplexity: normalizeResult(perplexityResultsNormalized.find((r:any) => r?.keyword?.toLowerCase().trim() === kwLower))
           }
       });
       
