@@ -38,6 +38,9 @@ export function LLMVisibilitySection({ report }: LLMVisibilitySectionProps) {
               <Bot className="w-6 h-6 text-blue-400 mb-2" />
               <div className="text-2xl font-bold text-white font-mono">{report.geminiScore}%</div>
               <div className="text-xs text-zinc-500 mt-1 uppercase tracking-wider font-semibold">Gemini Visibility</div>
+              <span className="mt-2 text-xs px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800">
+                ✓ Real Google Search
+              </span>
             </div>
 
             {/* ChatGPT */}
@@ -46,6 +49,9 @@ export function LLMVisibilitySection({ report }: LLMVisibilitySectionProps) {
               <MessageSquare className="w-6 h-6 text-emerald-400 mb-2" />
               <div className="text-2xl font-bold text-white font-mono">{report.chatgptScore}%</div>
               <div className="text-xs text-zinc-500 mt-1 uppercase tracking-wider font-semibold">ChatGPT Visibility</div>
+              <span className="mt-2 text-xs px-2 py-0.5 rounded-full bg-zinc-900 text-zinc-400 border border-zinc-700">
+                OpenAI API
+              </span>
             </div>
 
             {/* Perplexity */}
@@ -54,8 +60,15 @@ export function LLMVisibilitySection({ report }: LLMVisibilitySectionProps) {
               <Search className="w-6 h-6 text-cyan-400 mb-2" />
               <div className="text-2xl font-bold text-white font-mono">{report.perplexityScore}%</div>
               <div className="text-xs text-zinc-500 mt-1 uppercase tracking-wider font-semibold">Perplexity Visibility</div>
+              <span className="mt-2 text-xs px-2 py-0.5 rounded-full bg-zinc-900 text-zinc-400 border border-zinc-700">
+                AI Simulated
+              </span>
             </div>
           </div>
+
+          <p className="text-xs text-blue-300/60 mt-3 leading-relaxed">
+            <strong>Gemini</strong> uses real Google Search data via Gemini grounding API. <strong>ChatGPT</strong> uses the OpenAI API (falls back to AI simulation if no key). <strong>Perplexity</strong> is AI-simulated. Results reflect current web presence for your keywords in {report.country}.
+          </p>
         </div>
       </div>
 

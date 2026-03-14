@@ -978,6 +978,44 @@ Respond with ONLY this JSON:
 `
 }
 
+export function buildGeminiGroundedVisibilityPrompt(
+  domain: string,
+  keyword: string,
+  country: Country,
+  businessType: string
+): string {
+  return `
+Search Google for the query: "${keyword}" in ${country.name}
+
+I need to know if the website "${domain}" 
+(a ${businessType} based in ${country.name}) 
+appears in the search results or would be 
+cited when answering this query.
+
+After searching, analyze:
+1. Does ${domain} appear in the top 10 Google results?
+2. Would an AI assistant cite ${domain} when answering "${keyword}"?
+3. Which other websites rank for this keyword?
+
+Respond with ONLY this JSON (no markdown, no backticks):
+{
+  "keyword": "${keyword}",
+  "mentioned": <true if ${domain} appears in search results or top rankings, false if not>,
+  "confidence": "high|medium|low",
+  "quote": "<if mentioned=true: the actual page title or meta description from ${domain} that appears. null if not found>",
+  "context": "<1-2 sentences about what appears in search results for this keyword>",
+  "competitorsMentioned": [
+    "<actual domain from search results>",
+    "<actual domain 2>",
+    "<actual domain 3>"
+  ],
+  "searchPosition": <estimated position 1-100 if found, null if not>,
+  "simulationNote": "Based on real Google Search via Gemini grounding"
+}
+`
+}
+
+// Legacy batch version kept as fallback
 export function buildGeminiVisibilityPrompt(
   domain: string,
   keywords: string[],
@@ -996,15 +1034,6 @@ COUNTRY CONTEXT: ${country.name}
 KEYWORDS:
 ${keywords.map((k, i) => `${i+1}. "${k}"`).join('\n')}
 
-For EACH keyword, simulate what Gemini would say and
-whether ${domain} would be mentioned.
-
-A domain gets mentioned if:
-- It's well-known in its niche
-- It has authoritative content on the topic
-- It's been referenced across multiple sources
-- It has strong brand signals
-
 Respond with ONLY this JSON:
 {
   "llmName": "Gemini",
@@ -1013,40 +1042,16 @@ Respond with ONLY this JSON:
       "keyword": "<exact keyword>",
       "mentioned": <true|false>,
       "confidence": "high|medium|low",
-      "quote": "<if mentioned: the exact simulated quote where ${domain} appears, null if not mentioned>",
-      "context": "<simulated response context — what Gemini would say about this keyword>",
-      "competitorsMentioned": [
-        "<domain that Gemini would more likely mention instead>",
-        "<competitor 2>"
-      ],
-      "simulationNote": "AI-simulated estimate — actual Gemini responses vary"
+      "quote": "<if mentioned: simulated quote where ${domain} appears, null if not>",
+      "context": "<what Gemini would say about this keyword>",
+      "competitorsMentioned": ["<competitor domain>"],
+      "simulationNote": "AI-simulated estimate"
     }
   ]
 }
 
-IMPORTANT RULES:
-- Be REALISTIC — most small/medium businesses are NOT 
-  mentioned in LLM responses unless they're notable
-- Only mark mentioned=true if the domain is genuinely
-  well-known enough for an LLM to reference it
-- The quote must be a realistic LLM-style response 
-  that naturally includes the domain
-- competitorsMentioned should be realistic big players
-  in that space (e.g. for web design: Toptal, Upwork,
-  Clutch, etc.)
-
-SCORING GUIDANCE for ${domain}:
-- For BRAND keywords (the person's name, domain/company name): mentioned=true if the site has any real web presence
-- For LOCATION-SPECIFIC keywords (e.g. 'business coach Dubai'): mentioned=true if the site is actively targeting that location
-- For NICHE/LONG-TAIL keywords that exactly match site content: mentioned=true if the domain clearly specializes in that topic
-- For GENERIC, broad keywords: mentioned=false unless the site is very well known
-- DO NOT return all false — that would mean zero web presence, which is unrealistic for a live site
-- Return AT LEAST 2-3 keywords as mentioned=true if the site has real content and a web presence
-
-CRITICAL FORMATTING RULES:
-- "mentioned" MUST be a strict JSON boolean (true or false), NEVER a string ("true" or "false").
-- The "keyword" field MUST match EXACTLY the keyword given to you.
-- Do NOT wrap your response in any extra objects.
+SCORING GUIDANCE: Return AT LEAST 2-3 keywords as mentioned=true for any live site.
+CRITICAL: "mentioned" must be a strict JSON boolean (true or false).
 `
 }
 

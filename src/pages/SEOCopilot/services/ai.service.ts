@@ -43,6 +43,56 @@ export async function callGeminiJSON<T>(prompt: string): Promise<T> {
   }
 }
 
+export async function callGeminiGrounded(prompt: string): Promise<string> {
+  try {
+    const response = await fetch(
+      `${AI_CONFIG.GEMINI.API_URL}?key=${AI_CONFIG.GEMINI.API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          tools: [{ google_search: {} }],
+          generationConfig: {
+            temperature: 0.1,
+            maxOutputTokens: 3000,
+          }
+        })
+      }
+    )
+
+    const data = await response.json()
+
+    // Check if grounding was actually used
+    const hasGrounding = (data.candidates?.[0]?.groundingMetadata?.groundingChunks?.length ?? 0) > 0
+    if (!hasGrounding) {
+      console.warn('Gemini grounding not available — falling back to regular Gemini')
+      return await callGemini(prompt + '\n\nRespond ONLY with valid JSON. No markdown, no backticks.')
+    }
+
+    // Log grounding sources for debugging
+    const sources = data.candidates?.[0]?.groundingMetadata?.groundingChunks?.map((c: any) => c.web?.uri)
+    if (sources?.length) console.log('Grounding sources:', sources)
+
+    return data.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+  } catch (err) {
+    console.warn('Grounded search failed, falling back:', err)
+    return await callGemini(prompt + '\n\nRespond ONLY with valid JSON. No markdown, no backticks.')
+  }
+}
+
+export async function callGeminiGroundedJSON<T>(prompt: string): Promise<T> {
+  const raw = await callGeminiGrounded(prompt)
+  const cleaned = raw.replace(/```json|```/g, '').trim()
+  try {
+    return JSON.parse(cleaned) as T
+  } catch {
+    const match = cleaned.match(/\{[\s\S]*\}/)
+    if (match) return JSON.parse(match[0]) as T
+    throw new Error('Gemini Grounded returned invalid JSON: ' + raw.substring(0, 200))
+  }
+}
+
 // ─── OPENAI ──────────────────────────────────────────
 
 export async function callOpenAI(prompt: string): Promise<string> {

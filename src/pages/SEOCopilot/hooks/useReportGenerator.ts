@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { callGeminiJSON, callClaudeJSON, callOpenAIJSON } from '../services/ai.service'
+import { callGeminiJSON, callClaudeJSON, callOpenAIJSON, callGeminiGroundedJSON } from '../services/ai.service'
 import { AI_CONFIG } from '../services/../config/ai.config'
 import { crawlWebsite } from '../services/crawler.service'
 import {
@@ -18,6 +18,7 @@ import {
   buildSiteCrawlPrompt,
   buildGoogleRankingsPrompt,
   buildGeminiVisibilityPrompt,
+  buildGeminiGroundedVisibilityPrompt,
   buildChatGPTVisibilityPrompt,
   buildPerplexityVisibilityPrompt,
   SEOInput
@@ -107,6 +108,7 @@ export type LoadingStage = {
   label: string
   status: 'pending' | 'running' | 'complete' | 'error'
   ai?: 'gemini' | 'claude' | null
+  sublabel?: string
   icon?: string
   subStages?: string[]
   phase?: string
@@ -119,9 +121,9 @@ export function useReportGenerator() {
   const [error, setError] = useState<string | null>(null)
   const [progress, setProgress] = useState(0)
 
-  function updateStage(id: string, status: LoadingStage['status']) {
+  function updateStage(id: string, status: LoadingStage['status'], updates?: Partial<LoadingStage>) {
     setStages(prev => prev.map(s => 
-      s.id === id ? { ...s, status } : s
+      s.id === id ? { ...s, status, ...updates } : s
     ))
   }
 
@@ -143,7 +145,8 @@ export function useReportGenerator() {
     const initialStages: LoadingStage[] = [
       { id: 'Phase 1', label: 'Phase 1: Site Crawl & Keyword Discovery', status: 'pending', ai: 'gemini', icon: '🕷️', phase: 'Phase 1' },
       { id: 'Phase 2', label: 'Phase 2: Google Ranking Simulation', status: 'pending', ai: 'claude', icon: '📈', phase: 'Phase 2' },
-      { id: 'Phase 3', label: 'Phase 3: LLM Visibility Check', status: 'pending', ai: null, icon: '👁️', phase: 'Phase 3', subStages: ['Gemini', 'ChatGPT', 'Perplexity'] },
+      { id: 'llm_gemini', label: 'Searching Google (Real Data)', status: 'pending', ai: 'gemini', icon: '🔍', phase: 'Phase 3' },
+      { id: 'Phase 3', label: 'Phase 3: LLM Visibility Check', status: 'pending', ai: null, icon: '👁️', phase: 'Phase 3', subStages: ['ChatGPT', 'Perplexity'] },
       { id: 'Phase 4-1', label: 'Phase 4: Core SEO Analysis (Gemini)', status: 'pending', ai: 'gemini', icon: '⚡', phase: 'Phase 4', subStages: ['On-Page SEO', 'Technical', 'Content Quality', 'AEO', 'Topical Authority'] },
       { id: 'Phase 4-2', label: 'Phase 4: Deep Reasoning (Claude)', status: 'pending', ai: 'claude', icon: '🧠', phase: 'Phase 4', subStages: ['E-E-A-T Analysis', 'LLM Visibility'] },
       { id: 'competitor', label: 'Phase 4: Competitive Gaps', status: 'pending', ai: 'claude', icon: '🏆', phase: 'Phase 4' },
@@ -251,23 +254,69 @@ export function useReportGenerator() {
       updateStage('Phase 2', 'complete')
       setProgress(35)
 
-      // PHASE 3: LLM Visibility Check (Parallel)
+      // PHASE 3: LLM Visibility Check
       updateStage('Phase 3', 'running')
+
+      // Gemini: run grounded per-keyword checks sequentially
+      const runGroundedGeminiChecks = async (): Promise<{ llmName: string; results: any[] }> => {
+        const results: any[] = []
+        let current = 0
+        const total = topKeywords.length
+
+        for (const keyword of topKeywords) {
+          current++
+          try {
+            updateStage('llm_gemini', 'running', {
+              label: `Searching Google for keyword ${current}/${total}...`,
+              sublabel: `Checking if ${targetUrl} appears for "${keyword}"`
+            })
+
+            const result = await callGeminiGroundedJSON<any>(
+              buildGeminiGroundedVisibilityPrompt(
+                targetUrl,
+                keyword,
+                targetCountry,
+                siteCrawl?.inferredBusinessType ?? 'Business'
+              )
+            )
+            results.push({
+              ...result,
+              keyword,
+              mentioned: result.mentioned === true || result.mentioned === 'true',
+            })
+            console.log(`Gemini grounded [${keyword}]:`, result.mentioned, result.quote)
+            // Small delay to avoid rate limiting
+            await new Promise(r => setTimeout(r, 500))
+          } catch (err) {
+            console.warn(`Grounded check failed for "${keyword}":`, err)
+            results.push({
+              keyword,
+              mentioned: false,
+              confidence: 'low',
+              quote: null,
+              context: 'Search check failed',
+              competitorsMentioned: [],
+              searchPosition: null,
+              simulationNote: 'Check failed'
+            })
+          }
+        }
+        updateStage('llm_gemini', 'complete', { label: 'Google Search Completed' })
+        return { llmName: 'Gemini', results }
+      }
 
       // ChatGPT: use real OpenAI if key is set, else fall back to Claude
       const chatgptPrompt = buildChatGPTVisibilityPrompt(targetUrl, topKeywords, targetCountry, siteCrawl)
       const chatgptVisPromise = AI_CONFIG.OPENAI.API_KEY
-        ? callOpenAIJSON<any>(chatgptPrompt).catch(() =>
-            callClaudeJSON<any>(chatgptPrompt)
-          )
+        ? callOpenAIJSON<any>(chatgptPrompt).catch(() => callClaudeJSON<any>(chatgptPrompt))
         : callClaudeJSON<any>(chatgptPrompt)
 
       const llmVisibilityResults = await Promise.all([
-          callGeminiJSON<any>(buildGeminiVisibilityPrompt(targetUrl, topKeywords, targetCountry, siteCrawl)),
+          runGroundedGeminiChecks(),
           chatgptVisPromise,
           callClaudeJSON<any>(buildPerplexityVisibilityPrompt(targetUrl, topKeywords, targetCountry, siteCrawl))
       ]).catch(() => ([{llmName:'Gemini', results:[]}, {llmName:'ChatGPT', results:[]}, {llmName:'Perplexity', results:[]}]))
-      
+
       updateStage('Phase 3', 'complete')
       setProgress(50)
 

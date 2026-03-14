@@ -86,7 +86,12 @@ export function AnalysisLoader({ stages, progress, url, country }: AnalysisLoade
                 <span className="text-xl mt-0.5">{s.icon || '🔄'}</span>
                 <div>
                   <div className="text-indigo-100 font-medium text-sm font-dm">{s.label}</div>
-                  <div className="text-zinc-500 text-xs mt-0.5">{s.sublabel || s.subStages?.[0] || 'Processing data...'}</div>
+                  <div className={cn(
+                    "text-xs mt-0.5",
+                    s.id === 'llm_gemini' ? "text-zinc-400 font-mono" : "text-zinc-500"
+                  )}>
+                    {s.sublabel || s.subStages?.[0] || 'Processing data...'}
+                  </div>
                 </div>
               </div>
             ))}
