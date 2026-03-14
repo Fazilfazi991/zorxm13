@@ -804,51 +804,78 @@ Return ONLY this JSON:
 
 export function buildSiteCrawlPrompt(
   url: string, 
-  country: Country
+  country: Country,
+  crawledData?: { homepage?: { title?: string; metaDescription?: string; metaKeywords?: string; h1Tags?: string[]; h2Tags?: string[]; ogTitle?: string; bodyText?: string } | null; additionalPages?: Array<{ url?: string; title?: string; metaDescription?: string; h1Tags?: string[]; h2Tags?: string[]; bodyText?: string }>; allHeadings?: string[] }
 ): string {
   const domain = extractDomain(url)
-  
+  const homepage = crawledData?.homepage
+  const additionalPages = crawledData?.additionalPages ?? []
+  const allHeadings = crawledData?.allHeadings ?? []
+  const hasCrawledData = !!homepage
+
   return `
-You are an SEO specialist analyzing a website to 
-discover its most important keywords.
+You are an SEO keyword research specialist.
+Extract the most valuable SEO keywords from this 
+website${hasCrawledData ? "'s ACTUAL content" : " based on domain analysis"}.
 
 WEBSITE TO ANALYZE: ${url}
 TARGET MARKET: ${country.name} (${country.code.toUpperCase()})
 DOMAIN: ${domain}
 
-Based on the domain name and URL structure, intelligently
-infer what this website is about and what services/products
-it likely offers. Then generate realistic keyword data.
+${hasCrawledData ? `REAL WEBSITE DATA EXTRACTED:
+
+HOMEPAGE:
+- Title: "${homepage?.title ?? 'Not found'}"
+- Meta Description: "${homepage?.metaDescription ?? 'Not found'}"
+- Meta Keywords: "${homepage?.metaKeywords ?? 'Not set'}"
+- H1 Tags: ${JSON.stringify(homepage?.h1Tags ?? [])}
+- H2 Tags: ${JSON.stringify((homepage?.h2Tags ?? []).slice(0, 10))}
+- OG Title: "${homepage?.ogTitle ?? ''}"
+- Body Text Preview: "${(homepage?.bodyText ?? '').substring(0, 800)}"
+
+ADDITIONAL PAGES FOUND:
+${additionalPages.map((page, i) => `
+Page ${i + 1}: ${page.url ?? ''}
+- Title: "${page.title ?? ''}"
+- Meta Description: "${page.metaDescription ?? ''}"
+- H1: ${JSON.stringify(page.h1Tags ?? [])}
+- H2s: ${JSON.stringify((page.h2Tags ?? []).slice(0, 5))}
+- Content: "${(page.bodyText ?? '').substring(0, 300)}"
+`).join('\n')}
+
+ALL HEADINGS FROM SITE:
+${JSON.stringify(allHeadings.slice(0, 30))}
+
+Based on this REAL content, extract 10 keywords that:
+1. Directly match the services/topics on the site
+2. Are relevant for ${country.name} market
+3. Include a mix of: brand keywords, service keywords, location keywords, and topic keywords
+4. Are realistic search terms people actually use
+
+IMPORTANT: Only use keywords that are directly supported by the actual page content above. Do NOT invent keywords not present in the content.` : `
+Based on the domain name and URL structure, intelligently infer what this website is about and generate realistic keyword data.
 
 For example:
-- "ayishamuneer.com" → likely a personal brand, 
-  freelancer, or consultant
+- "ayishamuneer.com" → likely a personal brand, freelancer, or consultant
 - "techagency.com" → digital agency, web development
-- "restaurant-dubai.com" → food, dining, restaurant
+- "restaurant-dubai.com" → food, dining, restaurant`}
 
-Analyze and respond with ONLY this JSON:
+Respond with ONLY this JSON:
 {
   "domain": "${domain}",
-  "inferredBusinessType": "<what this business likely does>",
+  "inferredBusinessType": "<what this business does${hasCrawledData ? ' based on real content' : ''}>",
   "inferredIndustry": "<industry category>",
   "pagesFound": [
     {
       "url": "${url}",
       "pageType": "homepage",
-      "title": "<inferred page title>",
-      "description": "<what this page likely covers>"
-    },
-    {
-      "url": "${url}/services",
-      "pageType": "service",
-      "title": "<inferred services page title>",
-      "description": "<inferred services>"
+      "title": "${hasCrawledData ? (homepage?.title ?? '') : '<inferred page title>'}",
+      "description": "<what this page covers>"
     }
-    // add 3-6 total pages based on domain inference
   ],
   "discoveredKeywords": [
     {
-      "keyword": "<most important keyword for this business>",
+      "keyword": "<${hasCrawledData ? 'real keyword from site content' : 'keyword for this business'}>",
       "intent": "commercial|transactional|informational|navigational",
       "sourcePageType": "homepage|service|product|blog",
       "sourcePage": "${url}",
@@ -856,11 +883,6 @@ Analyze and respond with ONLY this JSON:
       "difficulty": "low|medium|high",
       "priority": 1
     }
-    // Generate 10 keywords total, prioritized 1-10
-    // Make them SPECIFIC to the inferred business
-    // Include the country/city if relevant
-    // e.g. for Dubai business: "web design dubai", 
-    //      "digital agency uae", etc.
   ],
   "topKeywords": [
     "<keyword 1>",
@@ -876,8 +898,8 @@ Analyze and respond with ONLY this JSON:
   ],
   "primaryTopics": [
     "<main topic cluster 1>",
-    "<main topic cluster 2>",
-    "<main topic cluster 3>"
+    "<topic 2>",
+    "<topic 3>"
   ]
 }
 

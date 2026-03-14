@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { callGeminiJSON, callClaudeJSON } from '../services/ai.service'
+import { crawlWebsite } from '../services/crawler.service'
 import {
   buildCoreOnPagePrompt,
   buildTechnicalSEOPrompt,
@@ -174,9 +175,30 @@ export function useReportGenerator() {
       const targetCountry = rawInput.country || { code: 'us', name: 'United States', flag: '🇺🇸', gl: 'us', hl: 'en' }
       const targetUrl = rawInput.url || 'https://example.com'
 
-      // PHASE 1: Keyword Discovery
+      // PHASE 1: Crawl website + keyword discovery
       updateStage('Phase 1', 'running')
-      const siteCrawl = await callGeminiJSON<any>(buildSiteCrawlPrompt(targetUrl, targetCountry)).catch(() => ({
+
+      // Step 1a: Crawl the real website via CORS proxy
+      let crawledData: Awaited<ReturnType<typeof crawlWebsite>> | undefined = undefined
+      try {
+        crawledData = await crawlWebsite(targetUrl)
+        console.log('Crawled site data:', crawledData)
+      } catch {
+        console.warn('Website crawl failed — falling back to domain-only analysis')
+      }
+
+      // Step 1b: Hydrate rawInput with real metadata if found
+      if (crawledData?.homepage) {
+        if (!rawInput.title && crawledData.homepage.title) {
+          rawInput = { ...rawInput, title: crawledData.homepage.title }
+        }
+        if (!rawInput.metaDescription && crawledData.homepage.metaDescription) {
+          rawInput = { ...rawInput, metaDescription: crawledData.homepage.metaDescription }
+        }
+      }
+
+      // Step 1c: Send REAL or domain-inferred data to Gemini for keyword extraction
+      const siteCrawl = await callGeminiJSON<any>(buildSiteCrawlPrompt(targetUrl, targetCountry, crawledData)).catch(() => ({
           domain: targetUrl, inferredBusinessType: 'Unknown', inferredIndustry: 'Unknown', pagesFound: [], discoveredKeywords: [], topKeywords: [rawInput.focusKeyword || 'SEO'], primaryTopics: []
       }))
       updateStage('Phase 1', 'complete')
