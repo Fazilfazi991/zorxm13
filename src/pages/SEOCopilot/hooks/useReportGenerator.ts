@@ -283,7 +283,7 @@ export function useReportGenerator() {
       updateStage('llm_perplexity', 'running')
 
       // Run all 3 LLM assessments in parallel using the SAME real Google data
-      const [geminiLLM, chatgptLLM, perplexityLLM] = 
+      const llmVisibilityResults = 
         await Promise.all([
           callGeminiJSON<any>(
             buildLLMVisibilityFromSearchPrompt(
@@ -318,70 +318,8 @@ export function useReportGenerator() {
       updateStage('llm_gemini', 'complete')
       updateStage('llm_chatgpt', 'complete')
       updateStage('llm_perplexity', 'complete')
+
       setProgress(50)
-
-      // Normalize results
-      const geminiResultsRaw = Array.isArray(geminiLLM)
-        ? geminiLLM : geminiLLM?.results ?? []
-      const chatgptResultsRaw = Array.isArray(chatgptLLM)
-        ? chatgptLLM : chatgptLLM?.results ?? []
-      const perplexityResultsRaw = Array.isArray(perplexityLLM)
-        ? perplexityLLM : perplexityLLM?.results ?? []
-
-      // Build keyword results
-      const llmKeywordResults = topKeywords.map(keyword => {
-        // Get the real Google data for this keyword
-        const googleData = googleSearchResults.find(
-          s => s.keyword.toLowerCase() === keyword.toLowerCase()
-        )
-
-        const normalize = (raw: any): any => ({
-          mentioned: raw?.mentioned === true || 
-                     raw?.mentioned === 'true' ||
-                     (googleData?.domainFound === true),
-          confidence: raw?.confidence ?? 
-            (googleData?.domainFound ? 'medium' : 'low'),
-          quote: raw?.quote ?? googleData?.domainSnippet ?? null,
-          context: raw?.context ?? 
-            `Position ${googleData?.domainPosition ?? 'not ranking'} in Google`,
-          competitorsMentioned: raw?.competitorsMentioned ?? 
-            googleData?.competitorDomains ?? [],
-          simulationNote: 'Based on real Google Search data'
-        })
-
-        return {
-          keyword,
-          gemini: normalize(
-            geminiResultsRaw.find((r: any) => 
-              r?.keyword?.toLowerCase().trim() === 
-              keyword.toLowerCase().trim()
-            )
-          ),
-          chatgpt: normalize(
-            chatgptResultsRaw.find((r: any) =>
-              r?.keyword?.toLowerCase().trim() ===
-              keyword.toLowerCase().trim()
-            )
-          ),
-          perplexity: normalize(
-            perplexityResultsRaw.find((r: any) =>
-              r?.keyword?.toLowerCase().trim() ===
-              keyword.toLowerCase().trim()
-            )
-          ),
-        }
-      })
-
-      // Set the final LLM Visibility Report
-      const llmVisibilityReport = {
-        score: Math.round(
-          (llmKeywordResults.filter(r => r.gemini.mentioned).length +
-           llmKeywordResults.filter(r => r.chatgpt.mentioned).length +
-           llmKeywordResults.filter(r => r.perplexity.mentioned).length) / 
-          (topKeywords.length * 3) * 100
-        ),
-        results: llmKeywordResults
-      }
 
       // PHASE 4: Core Analysis
       updateStage('Phase 4-1', 'running')
