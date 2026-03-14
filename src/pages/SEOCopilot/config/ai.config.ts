@@ -1,13 +1,13 @@
 export const AI_CONFIG = {
   GEMINI: {
-    API_KEY: import.meta.env.VITE_GEMINI_API_KEY || "",
-    MODEL: "gemini-2.5-flash-preview-04-17",
-    API_URL: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-04-17:generateContent",
+    API_KEY: import.meta.env.VITE_GEMINI_API_KEY ?? '',
+    MODEL: "gemini-2.5-flash",
+    API_URL: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
     MAX_TOKENS: 8192,
     TEMPERATURE: 0.2,
   },
   CLAUDE: {
-    API_KEY: "YOUR_CLAUDE_API_KEY_HERE",
+    API_KEY: import.meta.env.VITE_CLAUDE_API_KEY ?? '',
     MODEL: "claude-3-5-sonnet-20241022",
     API_URL: "https://api.anthropic.com/v1/messages",
     MAX_TOKENS: 4096,
