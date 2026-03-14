@@ -67,9 +67,9 @@ function makeIssuesSpecific(
   return issues.map(issue => ({
     ...issue,
     // Fix generic timeToFix
-    timeToFix: issue.timeToFix?.toLowerCase().includes('ongoing') 
+    timeToFix: (issue.timeToFix?.toString() || '').toLowerCase().includes('ongoing') 
       ? '45 minutes' 
-      : issue.timeToFix,
+      : issue.timeToFix?.toString(),
     // Fix generic fix steps
     fixSteps: issue.fixSteps.map(step => {
       let fixedStep = step
@@ -89,10 +89,10 @@ function makeIssuesSpecific(
       return fixedStep
     }),
     // Fix generic explanations
-    explanation: issue.explanation.includes('your page') || 
-                 issue.explanation.includes(domain)
-      ? issue.explanation  
-      : issue.explanation.replace(
+    explanation: (issue.explanation?.toString() || '').includes('your page') || 
+                 (issue.explanation?.toString() || '').includes(domain)
+      ? issue.explanation?.toString() || ''
+      : (issue.explanation?.toString() || '').replace(
           /this page|the page|your content/gi, 
           `the ${issue.category} on ${domain}`
         )
