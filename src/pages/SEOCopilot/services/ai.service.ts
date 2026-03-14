@@ -43,6 +43,51 @@ export async function callGeminiJSON<T>(prompt: string): Promise<T> {
   }
 }
 
+// ─── OPENAI ──────────────────────────────────────────
+
+export async function callOpenAI(prompt: string): Promise<string> {
+  if (!AI_CONFIG.OPENAI.API_KEY) {
+    throw new Error('OpenAI API key not configured')
+  }
+  const response = await fetch(AI_CONFIG.OPENAI.API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${AI_CONFIG.OPENAI.API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: AI_CONFIG.OPENAI.MODEL,
+      messages: [
+        {
+          role: 'system',
+          content: `You are an AI visibility analyst. You assess whether a domain would be mentioned when ChatGPT responds to search queries. Always respond with valid JSON only. No markdown, no backticks, no explanation.`
+        },
+        { role: 'user', content: prompt }
+      ],
+      temperature: 0.3,
+      max_tokens: 2000,
+    })
+  })
+  if (!response.ok) {
+    const err = await response.json()
+    throw new Error(`OpenAI error: ${err.error?.message || response.status}`)
+  }
+  const data = await response.json()
+  return data.choices?.[0]?.message?.content ?? ''
+}
+
+export async function callOpenAIJSON<T>(prompt: string): Promise<T> {
+  const raw = await callOpenAI(prompt)
+  const cleaned = raw.replace(/```json|```/g, '').trim()
+  try {
+    return JSON.parse(cleaned) as T
+  } catch {
+    const match = cleaned.match(/\{[\s\S]*\}/)
+    if (match) return JSON.parse(match[0]) as T
+    throw new Error('OpenAI returned invalid JSON')
+  }
+}
+
 // ─── CLAUDE ──────────────────────────────────────────
 
 export async function callClaude(prompt: string): Promise<string> {

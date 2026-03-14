@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { callGeminiJSON, callClaudeJSON } from '../services/ai.service'
+import { callGeminiJSON, callClaudeJSON, callOpenAIJSON } from '../services/ai.service'
+import { AI_CONFIG } from '../services/../config/ai.config'
 import { crawlWebsite } from '../services/crawler.service'
 import {
   buildCoreOnPagePrompt,
@@ -252,9 +253,18 @@ export function useReportGenerator() {
 
       // PHASE 3: LLM Visibility Check (Parallel)
       updateStage('Phase 3', 'running')
+
+      // ChatGPT: use real OpenAI if key is set, else fall back to Claude
+      const chatgptPrompt = buildChatGPTVisibilityPrompt(targetUrl, topKeywords, targetCountry, siteCrawl)
+      const chatgptVisPromise = AI_CONFIG.OPENAI.API_KEY
+        ? callOpenAIJSON<any>(chatgptPrompt).catch(() =>
+            callClaudeJSON<any>(chatgptPrompt)
+          )
+        : callClaudeJSON<any>(chatgptPrompt)
+
       const llmVisibilityResults = await Promise.all([
           callGeminiJSON<any>(buildGeminiVisibilityPrompt(targetUrl, topKeywords, targetCountry, siteCrawl)),
-          callClaudeJSON<any>(buildChatGPTVisibilityPrompt(targetUrl, topKeywords, targetCountry, siteCrawl)),
+          chatgptVisPromise,
           callClaudeJSON<any>(buildPerplexityVisibilityPrompt(targetUrl, topKeywords, targetCountry, siteCrawl))
       ]).catch(() => ([{llmName:'Gemini', results:[]}, {llmName:'ChatGPT', results:[]}, {llmName:'Perplexity', results:[]}]))
       
@@ -415,13 +425,25 @@ export function useReportGenerator() {
       });
       
       console.log('Keyword results:', keywordResults);
-      
-      const chatgptScore = keywordResults.length > 0 ? Math.round((keywordResults.filter((r:any) => r.chatgpt.mentioned).length / keywordResults.length) * 100) : 0;
-      const geminiScore = keywordResults.length > 0 ? Math.round((keywordResults.filter((r:any) => r.gemini.mentioned).length / keywordResults.length) * 100) : 0;
-      const perplexityScore = keywordResults.length > 0 ? Math.round((keywordResults.filter((r:any) => r.perplexity.mentioned).length / keywordResults.length) * 100) : 0;
-      const combinedLlmScore = Math.round((chatgptScore + geminiScore + perplexityScore) / 3);
 
-      console.log('Scores:', { chatgptScore, geminiScore, perplexityScore });
+      // Bulletproof score calculation — handles boolean true AND string "true"
+      const countMentioned = (results: typeof keywordResults, llm: 'gemini' | 'chatgpt' | 'perplexity') =>
+        results.filter(r => {
+          const val = r[llm]?.mentioned
+          return val === true || val === 'true' || (val as any) === 1
+        }).length
+
+      const total = keywordResults.length || 1
+      const mentionedInGemini = countMentioned(keywordResults, 'gemini')
+      const mentionedInChatGPT = countMentioned(keywordResults, 'chatgpt')
+      const mentionedInPerplexity = countMentioned(keywordResults, 'perplexity')
+
+      const chatgptScore = Math.round((mentionedInChatGPT / total) * 100)
+      const geminiScore = Math.round((mentionedInGemini / total) * 100)
+      const perplexityScore = Math.round((mentionedInPerplexity / total) * 100)
+      const combinedLlmScore = Math.round((chatgptScore + geminiScore + perplexityScore) / 3)
+
+      console.log('LLM Scores:', { geminiScore, chatgptScore, perplexityScore, combinedLlmScore, total, mentionedInGemini, mentionedInChatGPT, mentionedInPerplexity })
 
       const mentionedKeywords = Array.from(new Set(
         keywordResults.filter((r:any) => r.gemini.mentioned || r.chatgpt.mentioned || r.perplexity.mentioned).map((r:any) => r.keyword)

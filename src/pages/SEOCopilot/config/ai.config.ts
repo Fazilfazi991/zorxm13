@@ -12,6 +12,11 @@ export const AI_CONFIG = {
     API_URL: "https://api.anthropic.com/v1/messages",
     MAX_TOKENS: 4096,
     TEMPERATURE: 0.3,
+  },
+  OPENAI: {
+    API_KEY: import.meta.env.VITE_OPENAI_API_KEY ?? '',
+    MODEL: 'gpt-4o-mini',
+    API_URL: 'https://api.openai.com/v1/chat/completions',
   }
 }
 
