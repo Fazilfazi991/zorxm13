@@ -1,60 +1,463 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ZORX Digital Marketing | Dubai's Leading Digital Growth Agency</title>
-    <meta name="description" content="ZORX is a Dubai-based digital marketing agency specializing in SEO, PPC, social media marketing, and conversion optimization. Drive measurable growth for your UAE business." />
-    <meta name="author" content="ZORX Digital Marketing" />
-    <meta name="keywords" content="digital marketing Dubai, SEO agency UAE, PPC management Dubai, social media marketing, web design Dubai, content marketing" />
-    <link rel="canonical" href="https://zorx.ae" />
-    <link rel="icon" type="image/png" href="/logo.png" />
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zorx Media — AI-Powered Creative Agency Dubai</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#00C2FF;--blue-dim:rgba(0,194,255,0.15);--blue-glow:0 0 30px rgba(0,194,255,0.5);--black:#060608;--dark:#0c0c0f;--white:#f0f0f0;--gray:rgba(240,240,240,0.5)}
+html{overflow-x:hidden}
+body{font-family:'Syne',sans-serif;background:var(--black);color:var(--white);overflow-x:hidden;cursor:none}
+#grain{position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:9000;opacity:.5;mix-blend-mode:overlay}
+#cursor{position:fixed;width:14px;height:14px;background:var(--blue);border-radius:50%;pointer-events:none;z-index:9999;top:0;left:0;box-shadow:0 0 20px var(--blue);transition:width .2s,height .2s;mix-blend-mode:screen}
+#cursor.big{width:44px;height:44px;background:rgba(0,194,255,.25);border:1.5px solid var(--blue)}
+#preloader{position:fixed;inset:0;background:var(--black);z-index:9998;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1.2rem;transition:opacity .7s ease}
+#preloader.gone{opacity:0;pointer-events:none}
+.pre-word{font-family:'Bebas Neue',sans-serif;font-size:clamp(4rem,12vw,9rem);letter-spacing:.2em;display:flex}
+.pre-l{display:inline-block;opacity:0;transform:translateY(60px);transition:opacity .5s ease,transform .5s cubic-bezier(.34,1.56,.64,1)}
+.pre-l.z{color:var(--blue);text-shadow:0 0 40px var(--blue)}
+.pre-line{width:0;height:1px;background:var(--blue);box-shadow:var(--blue-glow);transition:width .8s ease .5s}
+.pre-sub{font-size:.7rem;letter-spacing:.4em;color:var(--gray);opacity:0;text-transform:uppercase;transition:opacity .5s ease .9s}
+nav{position:fixed;top:0;left:0;width:100%;z-index:500;padding:1.4rem 3rem;display:flex;align-items:center;justify-content:space-between;transition:background .4s,backdrop-filter .4s}
+nav.solid{background:rgba(6,6,8,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--blue-dim)}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.15em}
+.nav-logo em{color:var(--blue);font-style:normal;text-shadow:var(--blue-glow)}
+.nav-links{display:flex;gap:2.5rem;list-style:none}
+.nav-links a{color:var(--gray);text-decoration:none;font-size:.8rem;letter-spacing:.15em;text-transform:uppercase;transition:color .3s}
+.nav-links a:hover{color:var(--blue)}
+.nav-cta{padding:.6rem 1.5rem;border:1px solid var(--blue);background:transparent;color:var(--blue);font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:.1em;cursor:none;transition:all .3s}
+.nav-cta:hover{background:var(--blue);color:var(--black);box-shadow:var(--blue-glow)}
+#hero{position:relative;height:150vh}
+#hero-sticky{position:sticky;top:0;height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center}
+#three-canvas{position:absolute;inset:0;z-index:0;display:block;pointer-events:none}
+.hero-inner{position:relative;z-index:2;text-align:center;max-width:1000px;padding:0 2rem}
+.hero-tag{display:inline-block;font-size:.7rem;letter-spacing:.35em;color:var(--blue);text-transform:uppercase;border:1px solid var(--blue-dim);padding:.4rem 1rem;margin-bottom:2rem;opacity:0;transform:translateY(16px);transition:opacity .8s ease .2s,transform .8s ease .2s}
+.hero-h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(3.5rem,11vw,9rem);line-height:.95;letter-spacing:.02em;margin-bottom:1.5rem}
+.hero-h1 .ln{display:block;overflow:hidden}
+.hero-h1 .ln-in{display:block;transform:translateY(110%);transition:transform .9s cubic-bezier(.16,1,.3,1)}
+.hero-h1 .blue{color:var(--blue);text-shadow:0 0 60px rgba(0,194,255,.4)}
+.hero-sub{font-size:clamp(.9rem,1.5vw,1.05rem);color:var(--gray);letter-spacing:.05em;margin-bottom:2.5rem;opacity:0;transform:translateY(16px);transition:opacity .8s ease .7s,transform .8s ease .7s;max-width:520px;margin-left:auto;margin-right:auto;line-height:1.7}
+.hero-btns{display:flex;gap:1rem;justify-content:center;opacity:0;transform:translateY(16px);transition:opacity .8s ease .95s,transform .8s ease .95s}
+.btn-p{padding:1rem 2.4rem;background:var(--blue);color:var(--black);font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.12em;border:none;cursor:none;transition:box-shadow .3s,transform .3s}
+.btn-p:hover{box-shadow:0 0 50px rgba(0,194,255,.6);transform:translateY(-2px)}
+.btn-g{padding:1rem 2.4rem;background:transparent;color:var(--white);font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.12em;border:1px solid rgba(240,240,240,.3);cursor:none;transition:border-color .3s,color .3s,transform .3s}
+.btn-g:hover{border-color:var(--blue);color:var(--blue);transform:translateY(-2px)}
+.scroll-hint{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem;color:var(--gray);font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;opacity:0;transition:opacity 1s ease 1.4s;z-index:2}
+.scroll-bar{width:1px;height:46px;background:linear-gradient(to bottom,var(--blue),transparent);animation:sA 1.8s ease-in-out infinite}
+@keyframes sA{0%{transform:scaleY(0);transform-origin:top;opacity:1}45%{transform:scaleY(1);transform-origin:top;opacity:1}55%{transform:scaleY(1);transform-origin:bottom;opacity:1}100%{transform:scaleY(0);transform-origin:bottom;opacity:0}}
+.marquee-wrap{position:relative;z-index:10;background:var(--dark);border-top:1px solid var(--blue-dim);border-bottom:1px solid var(--blue-dim);overflow:hidden;padding:1.3rem 0}
+.marquee-track{display:flex;width:max-content;animation:mR 28s linear infinite}
+.m-item{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.12em;color:var(--blue);text-shadow:0 0 20px rgba(0,194,255,.4);padding:0 2rem;white-space:nowrap}
+.m-dot{color:rgba(0,194,255,.3);padding:0 .4rem}
+@keyframes mR{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 
-    <meta property="og:title" content="ZORX Digital Marketing | Dubai's Leading Digital Growth Agency" />
-    <meta property="og:description" content="Drive measurable growth with Dubai's premier digital marketing agency. SEO, PPC, Social Media & more." />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://zorx.ae" />
-    <meta property="og:image" content="https://zorx.ae/og-image.png" />
-    <meta property="og:locale" content="en_AE" />
+/* ===== SERVICES — CLEAN GRID ===== */
+#services{position:relative;z-index:10;background:var(--black);padding:7rem 4rem}
+#sv-sticky{display:none}
+.svc-head{margin-bottom:4rem}
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;max-width:1300px}
+.svc-card{
+  position:relative;overflow:hidden;cursor:none;
+  border-radius:8px;padding:2.5rem;
+  display:flex;flex-direction:column;gap:.8rem;
+  opacity:0;transform:translateY(40px);
+  transition:opacity .6s ease,transform .6s ease,border-color .35s,box-shadow .35s;
+  border:1px solid rgba(255,255,255,.06);
+}
+.svc-card.in{opacity:1;transform:translateY(0)}
+/* unique gradient per card */
+.c1{background:linear-gradient(135deg,#08080f 0%,#001829 100%)}
+.c2{background:linear-gradient(135deg,#08080f 0%,#1a1500 100%)}
+.c3{background:linear-gradient(135deg,#08080f 0%,#1a0008 100%)}
+.c4{background:linear-gradient(135deg,#08080f 0%,#001a0e 100%)}
+.c5{background:linear-gradient(135deg,#08080f 0%,#1a0d00 100%)}
+.c6{background:linear-gradient(135deg,#08080f 0%,#0d001a 100%)}
+/* hover border glow */
+.c1:hover{border-color:rgba(0,194,255,.4);box-shadow:0 0 30px rgba(0,194,255,.08)}
+.c2:hover{border-color:rgba(255,215,0,.4);box-shadow:0 0 30px rgba(255,215,0,.08)}
+.c3:hover{border-color:rgba(255,51,102,.4);box-shadow:0 0 30px rgba(255,51,102,.08)}
+.c4:hover{border-color:rgba(0,255,136,.4);box-shadow:0 0 30px rgba(0,255,136,.08)}
+.c5:hover{border-color:rgba(255,107,53,.4);box-shadow:0 0 30px rgba(255,107,53,.08)}
+.c6:hover{border-color:rgba(170,68,255,.4);box-shadow:0 0 30px rgba(170,68,255,.08)}
+/* corner radial glow */
+.svc-card::after{content:'';position:absolute;bottom:-40px;right:-40px;width:220px;height:220px;border-radius:50%;opacity:.12;pointer-events:none;transition:opacity .4s}
+.svc-card:hover::after{opacity:.22}
+.c1::after{background:radial-gradient(circle,#00C2FF,transparent)}
+.c2::after{background:radial-gradient(circle,#FFD700,transparent)}
+.c3::after{background:radial-gradient(circle,#FF3366,transparent)}
+.c4::after{background:radial-gradient(circle,#00FF88,transparent)}
+.c5::after{background:radial-gradient(circle,#FF6B35,transparent)}
+.c6::after{background:radial-gradient(circle,#AA44FF,transparent)}
+/* watermark number */
+.svc-card::before{
+  content:attr(data-num);
+  position:absolute;bottom:-15px;right:10px;
+  font-family:'Bebas Neue',sans-serif;font-size:130px;
+  color:#fff;opacity:.04;line-height:1;pointer-events:none;
+  transition:opacity .4s;
+}
+.svc-card:hover::before{opacity:.07}
+.svc-num{font-family:'Bebas Neue',sans-serif;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;position:relative;z-index:1}
+.c1 .svc-num{color:#00C2FF}.c2 .svc-num{color:#FFD700}.c3 .svc-num{color:#FF3366}
+.c4 .svc-num{color:#00FF88}.c5 .svc-num{color:#FF6B35}.c6 .svc-num{color:#AA44FF}
+.svc-icon{font-size:2.2rem;line-height:1;position:relative;z-index:1}
+.svc-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.04em;color:#fff;position:relative;z-index:1}
+.svc-desc{font-size:.88rem;color:rgba(240,240,240,.55);line-height:1.75;flex:1;position:relative;z-index:1}
+.svc-cta{display:inline-block;padding:.6rem 1.4rem;border:1px solid;background:transparent;font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;cursor:none;border-radius:3px;transition:all .3s;margin-top:.5rem;align-self:flex-start;position:relative;z-index:1}
+.c1 .svc-cta{border-color:#00C2FF;color:#00C2FF}.c1 .svc-cta:hover{background:#00C2FF;color:#060608}
+.c2 .svc-cta{border-color:#FFD700;color:#FFD700}.c2 .svc-cta:hover{background:#FFD700;color:#060608}
+.c3 .svc-cta{border-color:#FF3366;color:#FF3366}.c3 .svc-cta:hover{background:#FF3366;color:#060608}
+.c4 .svc-cta{border-color:#00FF88;color:#00FF88}.c4 .svc-cta:hover{background:#00FF88;color:#060608}
+.c5 .svc-cta{border-color:#FF6B35;color:#FF6B35}.c5 .svc-cta:hover{background:#FF6B35;color:#060608}
+.c6 .svc-cta{border-color:#AA44FF;color:#AA44FF}.c6 .svc-cta:hover{background:#AA44FF;color:#060608}
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@zorxdigital" />
-    <meta name="twitter:title" content="ZORX Digital Marketing | Dubai's Leading Digital Growth Agency" />
-    <meta name="twitter:description" content="Drive measurable growth with Dubai's premier digital marketing agency." />
-    <meta name="twitter:image" content="https://zorx.ae/og-image.png" />
+/* ===== WORK ===== */
+#work{position:relative;z-index:10;padding:6rem 4rem;background:var(--dark);border-top:1px solid var(--blue-dim)}
+.work-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:4rem}
+.sec-label{font-size:.72rem;letter-spacing:.35em;color:var(--blue);text-transform:uppercase;margin-bottom:.7rem}
+.sec-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,5vw,4rem);letter-spacing:.05em;line-height:1}
+.work-link{color:var(--blue);text-decoration:none;font-size:.9rem;letter-spacing:.1em;transition:opacity .3s}
+.work-link:hover{opacity:.7}
+.work-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2rem}
+.work-item{position:relative;overflow:hidden;border-radius:8px;aspect-ratio:16/10;opacity:0;transform:translateY(35px);transition:opacity .6s,transform .6s}
+.work-item.in{opacity:1;transform:translateY(0)}
+.work-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s}
+.work-item:hover img{transform:scale(1.05)}
+.work-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,0,0,.6),rgba(0,194,255,.1));display:flex;flex-direction:column;justify-content:flex-end;padding:2rem;opacity:0;transition:opacity .4s}
+.work-item:hover .work-overlay{opacity:1}
+.work-tag{font-size:.7rem;letter-spacing:.2em;color:var(--blue);text-transform:uppercase;margin-bottom:.5rem}
+.work-name{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.05em;color:var(--white)}
 
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "MarketingAgency",
-      "name": "ZORX Digital Marketing",
-      "description": "Dubai-based digital marketing agency specializing in SEO, PPC, social media marketing, and conversion optimization.",
-      "url": "https://zorx.ae",
-      "logo": "https://zorx.ae/logo.png",
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "Dubai",
-        "addressCountry": "AE"
-      },
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "telephone": "+971-XXX-XXX-XXX",
-        "contactType": "sales",
-        "email": "hello@zorx.ae"
-      },
-      "sameAs": [
-        "https://www.linkedin.com/company/zorx",
-        "https://www.instagram.com/zorxdigital",
-        "https://twitter.com/zorxdigital"
-      ],
-      "areaServed": ["Dubai", "UAE", "GCC"],
-      "serviceType": ["SEO", "PPC", "Social Media Marketing", "Web Design", "Content Marketing"]
+/* ===== STATS ===== */
+#stats{position:relative;z-index:10;padding:6rem 4rem;background:var(--black);border-top:1px solid var(--blue-dim)}
+.stats-inner{max-width:1200px;margin:0 auto}
+.stats-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4rem;gap:3rem}
+.stats-desc{font-size:.95rem;color:var(--gray);line-height:1.8;max-width:450px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem}
+.stat-box{text-align:center;padding:2.5rem 1rem;border:1px solid rgba(255,255,255,.06);position:relative;overflow:hidden;opacity:0;transform:translateY(35px);transition:opacity .7s,transform .7s}
+.stat-box.in{opacity:1;transform:translateY(0)}
+.stat-box::after{content:'';position:absolute;bottom:0;left:0;width:0;height:2px;background:var(--blue);box-shadow:var(--blue-glow);transition:width 1s}
+.stat-box.in::after{width:100%}
+.stat-n{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,5vw,5rem);color:var(--blue);text-shadow:0 0 40px rgba(0,194,255,.4);line-height:1;margin-bottom:.5rem}
+.stat-l{font-size:.78rem;letter-spacing:.25em;color:var(--gray);text-transform:uppercase}
+
+/* ===== PROCESS ===== */
+#process{position:relative;z-index:10;padding:6rem 4rem;background:var(--dark);border-top:1px solid var(--blue-dim)}
+.process-head{text-align:center;margin-bottom:5rem}
+.process-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative}
+.process-grid::before{content:'';position:absolute;top:50px;left:12.5%;width:75%;height:1px;background:linear-gradient(to right,transparent,var(--blue),transparent);box-shadow:var(--blue-glow)}
+.p-step{padding:2rem 1.5rem;text-align:center;opacity:0;transform:translateY(28px);transition:opacity .6s,transform .6s}
+.p-step.in{opacity:1;transform:translateY(0)}
+.p-dot{width:14px;height:14px;background:var(--blue);border-radius:50%;margin:0 auto 2rem;box-shadow:0 0 20px var(--blue);position:relative;z-index:1}
+.p-num{font-family:'Bebas Neue',sans-serif;font-size:3rem;color:rgba(0,194,255,.15);line-height:1;margin-bottom:.5rem}
+.p-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.08em;margin-bottom:.8rem}
+.p-desc{font-size:.88rem;color:var(--gray);line-height:1.7}
+
+/* ===== TESTIMONIALS ===== */
+#testimonials{position:relative;z-index:10;padding:6rem 4rem;background:var(--black);border-top:1px solid var(--blue-dim)}
+.testi-head{text-align:center;margin-bottom:4rem}
+.testi-wrap{overflow:hidden;max-width:800px;margin:0 auto}
+.testi-track{display:flex;gap:2rem;transition:transform .5s cubic-bezier(.2,.9,.3,1)}
+.testi-card{flex-shrink:0;width:100%;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);padding:3rem;border-radius:8px;opacity:0;transform:translateY(28px);transition:opacity .6s,transform .6s}
+.testi-card.in{opacity:1;transform:translateY(0)}
+.testi-quote{font-size:3rem;color:var(--blue);opacity:.3;line-height:1;margin-bottom:1rem}
+.testi-text{font-size:1.05rem;color:var(--white);line-height:1.8;margin-bottom:2rem}
+.testi-author{display:flex;gap:1rem;align-items:center}
+.testi-av{width:48px;height:48px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--black)}
+.testi-name{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.05em}
+.testi-role{font-size:.8rem;color:var(--gray)}
+
+/* ===== CTA ===== */
+#cta{position:relative;z-index:10;padding:8rem 4rem;text-align:center;background:var(--dark);overflow:hidden;border-top:1px solid var(--blue-dim)}
+.cta-blob{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(0,194,255,.08),transparent 70%);border-radius:50%;animation:bP 5s ease-in-out infinite}
+@keyframes bP{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.7}50%{transform:translate(-50%,-50%) scale(1.15);opacity:1}}
+.cta-in{position:relative;z-index:1}
+.cta-h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,9vw,7rem);letter-spacing:.02em;line-height:.95;margin-bottom:1rem}
+.cta-h2 span{color:var(--blue)}
+.cta-sub{font-size:1rem;color:var(--gray);margin-bottom:3rem;letter-spacing:.05em}
+.cta-btn{display:inline-block;padding:1.2rem 4rem;background:var(--blue);color:var(--black);font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.15em;border:none;cursor:none;animation:cP 2.5s ease-in-out infinite;transition:transform .3s}
+@keyframes cP{0%,100%{box-shadow:0 0 40px rgba(0,194,255,.4)}50%{box-shadow:0 0 80px rgba(0,194,255,.7)}}
+.cta-btn:hover{transform:scale(1.04)}
+
+/* ===== FOOTER ===== */
+footer{position:relative;z-index:10;padding:3rem 4rem;background:var(--black);border-top:1px solid rgba(255,255,255,.06)}
+.ft-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:2.5rem;padding-bottom:2.5rem;border-bottom:1px solid rgba(255,255,255,.06)}
+.ft-logo{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.15em}
+.ft-logo em{color:var(--blue);font-style:normal}
+.ft-links{display:flex;gap:2rem;list-style:none}
+.ft-links a{color:var(--gray);text-decoration:none;font-size:.85rem;transition:color .3s}
+.ft-links a:hover{color:var(--blue)}
+.ft-soc{display:flex;gap:1rem}
+.soc-a{width:36px;height:36px;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--gray);text-decoration:none;border-radius:4px;transition:all .3s}
+.soc-a:hover{border-color:var(--blue);color:var(--blue);box-shadow:0 0 10px var(--blue)}
+.ft-bottom{color:rgba(255,255,255,.25);font-size:.78rem;letter-spacing:.1em}
+
+/* ===== MOBILE ===== */
+@media(max-width:768px){
+  nav{padding:1.2rem 1.5rem}.nav-links,.nav-cta{display:none}
+  #services{padding:5rem 1.5rem}
+  .svc-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .process-grid{grid-template-columns:1fr 1fr}.process-grid::before{display:none}
+  #work,#stats,#process,#testimonials,#cta{padding:5rem 1.5rem}
+  .work-grid{grid-template-columns:1fr}
+  .stats-top{flex-direction:column}
+  footer{padding:2rem 1.5rem}.ft-top{flex-direction:column;gap:1.5rem;text-align:center}
+}
+</style>
+</head>
+<body>
+<div id="grain"></div>
+<div id="cursor"></div>
+
+<div id="preloader">
+  <div class="pre-word"><span class="pre-l z">Z</span><span class="pre-l">O</span><span class="pre-l">R</span><span class="pre-l">X</span></div>
+  <div class="pre-line" id="preLine"></div>
+  <div class="pre-sub" id="preSub">AI-Powered Creative Agency · Dubai</div>
+</div>
+
+<nav id="nav">
+  <div class="nav-logo"><em>Z</em>ORX MEDIA</div>
+  <ul class="nav-links"><li><a href="#services">Services</a></li><li><a href="#work">Work</a></li><li><a href="#process">Process</a></li><li><a href="#cta">Contact</a></li></ul>
+  <button class="nav-cta">Get Started →</button>
+</nav>
+
+<section id="hero">
+  <div id="hero-sticky">
+    <canvas id="three-canvas"></canvas>
+    <div class="hero-inner" id="heroInner">
+      <div class="hero-tag" id="heroTag">Dubai's AI-First Creative Studio</div>
+      <h1 class="hero-h1">
+        <span class="ln"><span class="ln-in" id="ln1">We Build</span></span>
+        <span class="ln"><span class="ln-in blue" id="ln2">Iconic</span></span>
+        <span class="ln"><span class="ln-in" id="ln3">Brands.</span></span>
+      </h1>
+      <p class="hero-sub" id="heroSub">AI-powered marketing, SaaS development, and creative production — built for ambitious companies across UAE and beyond.</p>
+      <div class="hero-btns" id="heroBtns"><button class="btn-p">Let's Build →</button><button class="btn-g">View Our Work</button></div>
+    </div>
+    <div class="scroll-hint" id="scrollHint"><div class="scroll-bar"></div><span>Scroll</span></div>
+  </div>
+</section>
+
+<div class="marquee-wrap"><div class="marquee-track">
+  <span class="m-item">AI Marketing</span><span class="m-dot">●</span><span class="m-item">SaaS Development</span><span class="m-dot">●</span><span class="m-item">Creative Production</span><span class="m-dot">●</span><span class="m-item">Brand Strategy</span><span class="m-dot">●</span><span class="m-item">Social Automation</span><span class="m-dot">●</span><span class="m-item">Web Development</span><span class="m-dot">●</span><span class="m-item">AI Marketing</span><span class="m-dot">●</span><span class="m-item">SaaS Development</span><span class="m-dot">●</span><span class="m-item">Creative Production</span><span class="m-dot">●</span><span class="m-item">Brand Strategy</span><span class="m-dot">●</span><span class="m-item">Social Automation</span><span class="m-dot">●</span><span class="m-item">Web Development</span><span class="m-dot">●</span>
+</div></div>
+
+<section id="services">
+  <div class="svc-head">
+    <div class="sec-label">What We Do</div>
+    <h2 class="sec-title">Our Services</h2>
+  </div>
+  <div class="svc-grid">
+    <div class="svc-card c1" data-num="1"><div class="svc-num">01</div><div class="svc-icon">🤖</div><div class="svc-title">AI Marketing</div><div class="svc-desc">Intelligent automation and AI-driven ad strategies that amplify reach and dramatically improve conversion across every channel.</div><button class="svc-cta">Learn More →</button></div>
+    <div class="svc-card c2" data-num="2"><div class="svc-num">02</div><div class="svc-icon">📱</div><div class="svc-title">Social Automation</div><div class="svc-desc">AI-powered content scheduling, audience engagement tools, and automated social presence management built for scale.</div><button class="svc-cta">Learn More →</button></div>
+    <div class="svc-card c3" data-num="3"><div class="svc-num">03</div><div class="svc-icon">🎬</div><div class="svc-title">Creative Production</div><div class="svc-desc">Cinematic video content, AI-generated visuals, and storytelling that stops the scroll and drives real results.</div><button class="svc-cta">Learn More →</button></div>
+    <div class="svc-card c4" data-num="4"><div class="svc-num">04</div><div class="svc-icon">💻</div><div class="svc-title">SaaS Development</div><div class="svc-desc">Custom software and SaaS platforms built for performance, scale, and exceptional user experiences from launch.</div><button class="svc-cta">Learn More →</button></div>
+    <div class="svc-card c5" data-num="5"><div class="svc-num">05</div><div class="svc-icon">🌐</div><div class="svc-title">Web Development</div><div class="svc-desc">Stunning, fast, responsive websites that blend premium aesthetics with conversion-first design and SEO best practices.</div><button class="svc-cta">Learn More →</button></div>
+    <div class="svc-card c6" data-num="6"><div class="svc-num">06</div><div class="svc-icon">✦</div><div class="svc-title">Brand Strategy</div><div class="svc-desc">Strategic identity, positioning, and brand architecture that makes you unmistakable in competitive global markets.</div><button class="svc-cta">Learn More →</button></div>
+  </div>
+</section>
+
+<section id="work">
+  <div class="work-head"><div><div class="sec-label">Selected Work</div><h2 class="sec-title">Our Portfolio</h2></div><a href="#" class="work-link">View All →</a></div>
+  <div class="work-grid">
+    <div class="work-item"><img src="https://picsum.photos/700/440?random=81" alt=""><div class="work-overlay"><div class="work-tag">SaaS · AI · UAE</div><div class="work-name">BrandPilot — Social Media Automation</div></div></div>
+    <div class="work-item"><img src="https://picsum.photos/700/440?random=82" alt=""><div class="work-overlay"><div class="work-tag">AI Marketing</div><div class="work-name">ZapMart AI Campaign</div></div></div>
+    <div class="work-item"><img src="https://picsum.photos/700/440?random=83" alt=""><div class="work-overlay"><div class="work-tag">Brand Identity · Dubai</div><div class="work-name">F&B Brand Overhaul</div></div></div>
+    <div class="work-item"><img src="https://picsum.photos/700/440?random=84" alt=""><div class="work-overlay"><div class="work-tag">Web Development</div><div class="work-name">Real Estate Lead Platform</div></div></div>
+    <div class="work-item"><img src="https://picsum.photos/700/440?random=85" alt=""><div class="work-overlay"><div class="work-tag">Creative Production</div><div class="work-name">AI Video Ad Series</div></div></div>
+  </div>
+</section>
+
+<section id="stats">
+  <div class="stats-inner">
+    <div class="stats-top"><div><div class="sec-label">By The Numbers</div><h2 class="sec-title">Why Zorx?</h2></div><p class="stats-desc">A lean, AI-first team that punches above its weight — combining creative excellence with cutting-edge tech to deliver real business results.</p></div>
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-n" data-val="6" data-sfx="+">0</div><div class="stat-l">Years Experience</div></div>
+      <div class="stat-box" style="transition-delay:.1s"><div class="stat-n" data-val="50" data-sfx="+">0</div><div class="stat-l">Projects Delivered</div></div>
+      <div class="stat-box" style="transition-delay:.2s"><div class="stat-n" data-val="6" data-sfx="">6</div><div class="stat-l">Team Members</div></div>
+      <div class="stat-box" style="transition-delay:.3s"><div class="stat-n">100%</div><div class="stat-l">AI-First Approach</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="process">
+  <div class="process-head"><div class="sec-label" style="text-align:center">How We Work</div><h2 class="sec-title">The Process</h2></div>
+  <div class="process-grid">
+    <div class="p-step"><div class="p-dot"></div><div class="p-num">01</div><div class="p-title">Discover</div><div class="p-desc">Deep-dive into your vision, market, and goals. We map the territory before building anything.</div></div>
+    <div class="p-step" style="transition-delay:.12s"><div class="p-dot"></div><div class="p-num">02</div><div class="p-title">Design</div><div class="p-desc">Creative concepts and strategy that push limits — never templates, always bespoke.</div></div>
+    <div class="p-step" style="transition-delay:.24s"><div class="p-dot"></div><div class="p-num">03</div><div class="p-title">Develop</div><div class="p-desc">Robust, scalable builds using the latest AI tools, frameworks, and engineering practices.</div></div>
+    <div class="p-step" style="transition-delay:.36s"><div class="p-dot"></div><div class="p-num">04</div><div class="p-title">Deploy</div><div class="p-desc">Launch with precision. Optimize relentlessly. Scale your success exponentially.</div></div>
+  </div>
+</section>
+
+<section id="testimonials">
+  <div class="testi-head"><div class="sec-label" style="text-align:center">Client Voices</div><h2 class="sec-title">What They Say</h2></div>
+  <div class="testi-wrap"><div class="testi-track" id="testiTrack">
+    <div class="testi-card"><div class="testi-quote">"</div><p class="testi-text">Zorx Media transformed our social presence. The AI-driven content strategy tripled our engagement within 60 days. Genuinely game-changing.</p><div class="testi-author"><div class="testi-av">A</div><div><div class="testi-name">Ahmed Al-Rashidi</div><div class="testi-role">CEO · F&B Group, Dubai</div></div></div></div>
+    <div class="testi-card"><div class="testi-quote">"</div><p class="testi-text">The BrandPilot platform they built is incredible. Posting across Instagram, Facebook, and WhatsApp automatically — saves hours every week.</p><div class="testi-author"><div class="testi-av">S</div><div><div class="testi-name">Sara Khalid</div><div class="testi-role">Marketing Manager · Retail Brand</div></div></div></div>
+    <div class="testi-card"><div class="testi-quote">"</div><p class="testi-text">From brand identity to launch campaign in weeks, not months. Quality and speed unmatched anywhere in the UAE market.</p><div class="testi-author"><div class="testi-av">M</div><div><div class="testi-name">Mohammed Hassan</div><div class="testi-role">Founder · Tech Startup, Abu Dhabi</div></div></div></div>
+  </div></div>
+</section>
+
+<section id="cta">
+  <div class="cta-blob"></div>
+  <div class="cta-in">
+    <h2 class="cta-h2">Let's Build<br><span>Something Insane.</span></h2>
+    <p class="cta-sub">Drop us a message. We respond fast.</p>
+    <button class="cta-btn">Start Your Project →</button>
+  </div>
+</section>
+
+<footer>
+  <div class="ft-top">
+    <div class="ft-logo"><em>Z</em>ORX Media</div>
+    <ul class="ft-links"><li><a href="#services">Services</a></li><li><a href="#work">Work</a></li><li><a href="#process">Process</a></li><li><a href="#cta">Contact</a></li></ul>
+    <div class="ft-soc"><a class="soc-a" href="#">IG</a><a class="soc-a" href="#">LI</a><a class="soc-a" href="#">TW</a><a class="soc-a" href="#">FB</a></div>
+  </div>
+  <div class="ft-bottom">© 2026 Zorx Media. All rights reserved. Crafted with AI in Dubai 🇦🇪</div>
+</footer>
+
+<script>
+/* PRELOADER */
+(function(){
+  const ls=document.querySelectorAll('.pre-l'),line=document.getElementById('preLine'),sub=document.getElementById('preSub'),pre=document.getElementById('preloader');
+  ls.forEach((l,i)=>setTimeout(()=>{l.style.opacity=1;l.style.transform='translateY(0)'},100+i*110));
+  setTimeout(()=>{line.style.width='180px';sub.style.opacity=1},550);
+  setTimeout(()=>{
+    pre.classList.add('gone');
+    setTimeout(()=>{
+      pre.style.display='none';
+      ['ln1','ln2','ln3'].forEach((id,i)=>setTimeout(()=>{document.getElementById(id).style.transform='translateY(0)'},i*130));
+      ['heroTag','heroSub','heroBtns'].forEach(id=>{const el=document.getElementById(id);el.style.opacity=1;el.style.transform='translateY(0)'});
+      document.getElementById('scrollHint').style.opacity=1;
+    },750);
+  },2100);
+})();
+
+/* CURSOR */
+const cur=document.getElementById('cursor');
+document.addEventListener('mousemove',e=>{cur.style.transform=`translate(${e.clientX-7}px,${e.clientY-7}px)`});
+document.querySelectorAll('button,a,.svc-card,.work-item').forEach(el=>{
+  el.addEventListener('mouseenter',()=>cur.classList.add('big'));
+  el.addEventListener('mouseleave',()=>cur.classList.remove('big'));
+});
+
+/* NAV handled inside services onScroll */
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('solid',window.scrollY>60),{passive:true});
+
+/* THREE.JS */
+(function(){
+  const canvas=document.getElementById('three-canvas');
+  const W=()=>window.innerWidth,H=()=>window.innerHeight;
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(W(),H());renderer.setClearColor(0x060608,1);
+  const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(65,W()/H(),.1,1000);
+  camera.position.z=55;
+  const N=1400,geo=new THREE.BufferGeometry(),pos=new Float32Array(N*3);
+  for(let i=0;i<N*3;i+=3){pos[i]=(Math.random()-.5)*180;pos[i+1]=(Math.random()-.5)*180;pos[i+2]=(Math.random()-.5)*180}
+  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  const mat=new THREE.PointsMaterial({color:0x00C2FF,size:.5,transparent:true,opacity:.65,sizeAttenuation:true});
+  const pts=new THREE.Points(geo,mat);scene.add(pts);
+  const sph=new THREE.Mesh(new THREE.IcosahedronGeometry(18,2),new THREE.MeshBasicMaterial({color:0x00C2FF,wireframe:true,transparent:true,opacity:.04}));
+  scene.add(sph);
+  let mx=0,my=0;
+  document.addEventListener('mousemove',e=>{mx=(e.clientX/W()-.5)*2;my=(e.clientY/H()-.5)*2});
+  window.addEventListener('resize',()=>{camera.aspect=W()/H();camera.updateProjectionMatrix();renderer.setSize(W(),H())});
+  function tick(){
+    requestAnimationFrame(tick);
+    const sp=Math.min(1,window.scrollY/(document.getElementById('hero').offsetHeight*.45));
+    pts.rotation.x+=.00012+my*.00004;pts.rotation.y+=.00016+mx*.00004;
+    sph.rotation.x=performance.now()*.0002;sph.rotation.y=performance.now()*.0003;
+    camera.position.z=55+sp*22;mat.opacity=Math.max(0,.65-sp*.55);
+    renderer.render(scene,camera);
+  }
+  tick();
+})();
+
+/* HERO PARALLAX */
+(function(){
+  const inner=document.getElementById('heroInner');
+  function u(){const p=Math.min(1,window.scrollY/(document.getElementById('hero').offsetHeight*.28));inner.style.transform=`translateY(${p*-35}px)`;inner.style.opacity=Math.max(0,1-p*1.3)}
+  window.addEventListener('scroll',u,{passive:true});
+})();
+
+/* SERVICES — stagger reveal with alternating directions */
+(function(){
+  const cards = document.querySelectorAll('.svc-card');
+  /* Set initial off-screen position per card */
+  const dirs = [
+    {x:-60,y:40}, {x:0,y:60},  {x:60,y:40},
+    {x:-60,y:40}, {x:0,y:60},  {x:60,y:40}
+  ];
+  cards.forEach((c,i) => {
+    c.style.transform = `translate(${dirs[i].x}px,${dirs[i].y}px)`;
+  });
+
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        e.target.style.transform = '';
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  cards.forEach((c,i) => {
+    c.style.transitionDelay = (i * 0.1) + 's';
+    obs.observe(c);
+  });
+
+  /* 3D tilt */
+  cards.forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width  - .5;
+      const y = (e.clientY - r.top)  / r.height - .5;
+      card.style.transition = 'transform .08s ease,border-color .35s,box-shadow .35s';
+      card.style.transform  = `perspective(900px) rotateY(${x*10}deg) rotateX(${-y*10}deg) scale(1.02)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transition = 'transform .5s ease,border-color .35s,box-shadow .35s,opacity .6s';
+      card.style.transform  = 'perspective(900px) rotateY(0) rotateX(0) scale(1)';
+    });
+  });
+})();
+
+/* INTERSECTION OBSERVERS */
+const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.15});
+document.querySelectorAll('.work-item,.testi-card,.p-step').forEach(el=>io.observe(el));
+const sio=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting&&!e.target.dataset.done){
+      e.target.dataset.done=1;e.target.classList.add('in');
+      const num=e.target.querySelector('.stat-n[data-val]');
+      if(!num)return;
+      const target=+num.dataset.val,sfx=num.dataset.sfx||'',dur=1800,t0=performance.now();
+      const step=now=>{const p=Math.min(1,(now-t0)/dur),ease=1-Math.pow(1-p,3);num.textContent=Math.round(ease*target)+sfx;if(p<1)requestAnimationFrame(step)};
+      requestAnimationFrame(step);
     }
-    </script>
-  </head>
+  });
+},{threshold:.25});
+document.querySelectorAll('.stat-box').forEach(el=>sio.observe(el));
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+/* MAGNETIC BUTTONS */
+document.querySelectorAll('.btn-p,.btn-g,.cta-btn,.nav-cta,.svc-cta').forEach(btn=>{
+  btn.addEventListener('mousemove',e=>{const r=btn.getBoundingClientRect();const x=(e.clientX-r.left-r.width/2)*.28,y=(e.clientY-r.top-r.height/2)*.28;btn.style.transition='transform .08s ease';btn.style.transform=`translate(${x}px,${y}px)`});
+  btn.addEventListener('mouseleave',()=>{btn.style.transition='transform .5s cubic-bezier(.34,1.56,.64,1)';btn.style.transform=''});
+});
+
+/* TESTIMONIALS */
+(function(){
+  const track=document.getElementById('testiTrack');
+  const cards=document.querySelectorAll('.testi-card');
+  let idx=0;
+  setInterval(()=>{idx=(idx+1)%cards.length;track.style.transform=`translateX(${-idx*100}%)`},6000);
+})();
+</script>
+</body>
 </html>
