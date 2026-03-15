@@ -10,10 +10,8 @@
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{--blue:#00C2FF;--blue-dim:rgba(0,194,255,0.15);--blue-glow:0 0 30px rgba(0,194,255,0.5);--black:#060608;--dark:#0c0c0f;--white:#f0f0f0;--gray:rgba(240,240,240,0.5)}
 html{overflow-x:hidden}
-body{font-family:'Syne',sans-serif;background:var(--black);color:var(--white);overflow-x:hidden;cursor:none}
+body{font-family:'Syne',sans-serif;background:var(--black);color:var(--white);overflow-x:hidden}
 #grain{position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:9000;opacity:.5;mix-blend-mode:overlay}
-#cursor{position:fixed;width:14px;height:14px;background:var(--blue);border-radius:50%;pointer-events:none;z-index:9999;top:0;left:0;box-shadow:0 0 20px var(--blue);transition:width .2s,height .2s;mix-blend-mode:screen}
-#cursor.big{width:44px;height:44px;background:rgba(0,194,255,.25);border:1.5px solid var(--blue)}
 #preloader{position:fixed;inset:0;background:var(--black);z-index:9998;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1.2rem;transition:opacity .7s ease}
 #preloader.gone{opacity:0;pointer-events:none}
 .pre-word{font-family:'Bebas Neue',sans-serif;font-size:clamp(4rem,12vw,9rem);letter-spacing:.2em;display:flex}
@@ -21,14 +19,14 @@ body{font-family:'Syne',sans-serif;background:var(--black);color:var(--white);ov
 .pre-l.z{color:var(--blue);text-shadow:0 0 40px var(--blue)}
 .pre-line{width:0;height:1px;background:var(--blue);box-shadow:var(--blue-glow);transition:width .8s ease .5s}
 .pre-sub{font-size:.7rem;letter-spacing:.4em;color:var(--gray);opacity:0;text-transform:uppercase;transition:opacity .5s ease .9s}
-nav{position:fixed;top:0;left:0;width:100%;z-index:500;padding:1.4rem 3rem;display:flex;align-items:center;justify-content:space-between;transition:background .4s,backdrop-filter .4s}
+nav{position:fixed;top:0;left:0;width:100%;z-index:10000;padding:1.4rem 3rem;display:flex;align-items:center;justify-content:space-between;transition:background .4s,backdrop-filter .4s}
 nav.solid{background:rgba(6,6,8,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--blue-dim)}
 .nav-logo{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.15em}
 .nav-logo em{color:var(--blue);font-style:normal;text-shadow:var(--blue-glow)}
 .nav-links{display:flex;gap:2.5rem;list-style:none}
 .nav-links a{color:var(--gray);text-decoration:none;font-size:.8rem;letter-spacing:.15em;text-transform:uppercase;transition:color .3s}
 .nav-links a:hover{color:var(--blue)}
-.nav-cta{padding:.6rem 1.5rem;border:1px solid var(--blue);background:transparent;color:var(--blue);font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:.1em;cursor:none;transition:all .3s}
+.nav-cta{padding:.6rem 1.5rem;border:1px solid var(--blue);background:transparent;color:var(--blue);font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:.1em;cursor:pointer;transition:all .3s}
 .nav-cta:hover{background:var(--blue);color:var(--black);box-shadow:var(--blue-glow)}
 #hero{position:relative;height:150vh}
 #hero-sticky{position:sticky;top:0;height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center}
@@ -41,9 +39,9 @@ nav.solid{background:rgba(6,6,8,.9);backdrop-filter:blur(20px);border-bottom:1px
 .hero-h1 .blue{color:var(--blue);text-shadow:0 0 60px rgba(0,194,255,.4)}
 .hero-sub{font-size:clamp(.9rem,1.5vw,1.05rem);color:var(--gray);letter-spacing:.05em;margin-bottom:2.5rem;opacity:0;transform:translateY(16px);transition:opacity .8s ease .7s,transform .8s ease .7s;max-width:520px;margin-left:auto;margin-right:auto;line-height:1.7}
 .hero-btns{display:flex;gap:1rem;justify-content:center;opacity:0;transform:translateY(16px);transition:opacity .8s ease .95s,transform .8s ease .95s}
-.btn-p{padding:1rem 2.4rem;background:var(--blue);color:var(--black);font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.12em;border:none;cursor:none;transition:box-shadow .3s,transform .3s}
+.btn-p{padding:1rem 2.4rem;background:var(--blue);color:var(--black);font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.12em;border:none;cursor:pointer;transition:box-shadow .3s,transform .3s}
 .btn-p:hover{box-shadow:0 0 50px rgba(0,194,255,.6);transform:translateY(-2px)}
-.btn-g{padding:1rem 2.4rem;background:transparent;color:var(--white);font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.12em;border:1px solid rgba(240,240,240,.3);cursor:none;transition:border-color .3s,color .3s,transform .3s}
+.btn-g{padding:1rem 2.4rem;background:transparent;color:var(--white);font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.12em;border:1px solid rgba(240,240,240,.3);cursor:pointer;transition:border-color .3s,color .3s,transform .3s}
 .btn-g:hover{border-color:var(--blue);color:var(--blue);transform:translateY(-2px)}
 .scroll-hint{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem;color:var(--gray);font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;opacity:0;transition:opacity 1s ease 1.4s;z-index:2}
 .scroll-bar{width:1px;height:46px;background:linear-gradient(to bottom,var(--blue),transparent);animation:sA 1.8s ease-in-out infinite}
@@ -60,7 +58,7 @@ nav.solid{background:rgba(6,6,8,.9);backdrop-filter:blur(20px);border-bottom:1px
 .svc-head{margin-bottom:4rem}
 .svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;max-width:1300px}
 .svc-card{
-  position:relative;overflow:hidden;cursor:none;
+  position:relative;overflow:hidden;cursor:pointer;
   border-radius:8px;padding:2.5rem;
   display:flex;flex-direction:column;gap:.8rem;
   opacity:0;transform:translateY(40px);
@@ -106,7 +104,7 @@ nav.solid{background:rgba(6,6,8,.9);backdrop-filter:blur(20px);border-bottom:1px
 .svc-icon{font-size:2.2rem;line-height:1;position:relative;z-index:1}
 .svc-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.04em;color:#fff;position:relative;z-index:1}
 .svc-desc{font-size:.88rem;color:rgba(240,240,240,.55);line-height:1.75;flex:1;position:relative;z-index:1}
-.svc-cta{display:inline-block;padding:.6rem 1.4rem;border:1px solid;background:transparent;font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;cursor:none;border-radius:3px;transition:all .3s;margin-top:.5rem;align-self:flex-start;position:relative;z-index:1}
+.svc-cta{display:inline-block;padding:.6rem 1.4rem;border:1px solid;background:transparent;font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:3px;transition:all .3s;margin-top:.5rem;align-self:flex-start;position:relative;z-index:1}
 .c1 .svc-cta{border-color:#00C2FF;color:#00C2FF}.c1 .svc-cta:hover{background:#00C2FF;color:#060608}
 .c2 .svc-cta{border-color:#FFD700;color:#FFD700}.c2 .svc-cta:hover{background:#FFD700;color:#060608}
 .c3 .svc-cta{border-color:#FF3366;color:#FF3366}.c3 .svc-cta:hover{background:#FF3366;color:#060608}
@@ -178,7 +176,7 @@ nav.solid{background:rgba(6,6,8,.9);backdrop-filter:blur(20px);border-bottom:1px
 .cta-h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,9vw,7rem);letter-spacing:.02em;line-height:.95;margin-bottom:1rem}
 .cta-h2 span{color:var(--blue)}
 .cta-sub{font-size:1rem;color:var(--gray);margin-bottom:3rem;letter-spacing:.05em}
-.cta-btn{display:inline-block;padding:1.2rem 4rem;background:var(--blue);color:var(--black);font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.15em;border:none;cursor:none;animation:cP 2.5s ease-in-out infinite;transition:transform .3s}
+.cta-btn{display:inline-block;padding:1.2rem 4rem;background:var(--blue);color:var(--black);font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.15em;border:none;cursor:pointer;animation:cP 2.5s ease-in-out infinite;transition:transform .3s}
 @keyframes cP{0%,100%{box-shadow:0 0 40px rgba(0,194,255,.4)}50%{box-shadow:0 0 80px rgba(0,194,255,.7)}}
 .cta-btn:hover{transform:scale(1.04)}
 
@@ -211,7 +209,6 @@ footer{position:relative;z-index:10;padding:3rem 4rem;background:var(--black);bo
 </head>
 <body>
 <div id="grain"></div>
-<div id="cursor"></div>
 
 <div id="preloader">
   <div class="pre-word"><span class="pre-l z">Z</span><span class="pre-l">O</span><span class="pre-l">R</span><span class="pre-l">X</span></div>
@@ -338,13 +335,6 @@ footer{position:relative;z-index:10;padding:3rem 4rem;background:var(--black);bo
   },2100);
 })();
 
-/* CURSOR */
-const cur=document.getElementById('cursor');
-document.addEventListener('mousemove',e=>{cur.style.transform=`translate(${e.clientX-7}px,${e.clientY-7}px)`});
-document.querySelectorAll('button,a,.svc-card,.work-item').forEach(el=>{
-  el.addEventListener('mouseenter',()=>cur.classList.add('big'));
-  el.addEventListener('mouseleave',()=>cur.classList.remove('big'));
-});
 
 /* NAV handled inside services onScroll */
 window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('solid',window.scrollY>60),{passive:true});
