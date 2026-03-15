@@ -10,6 +10,14 @@ import Services from "./pages/Services";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import SEOCopilotTools from "./pages/SEOCopilot";
+import AIAgents from "./pages/services/AI-Agents";
+import SocialMedia from "./pages/services/SocialMedia";
+import AIVideo from "./pages/services/AIVideo";
+import SaaS from "./pages/services/SaaS";
+import WebDesign from "./pages/services/WebDesign";
+import BrandIdentity from "./pages/services/BrandIdentity";
+import FreeTools from "./pages/FreeTools";
+import Blogs from "./pages/Blogs";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +32,14 @@ const App = () => (
           <Route path="/about" element={<AboutUs />} />
           <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/services" element={<Services />} />
+          <Route path="/services/ai-agents" element={<AIAgents />} />
+          <Route path="/services/social-media" element={<SocialMedia />} />
+          <Route path="/services/ai-video" element={<AIVideo />} />
+          <Route path="/services/saas-software" element={<SaaS />} />
+          <Route path="/services/web-design" element={<WebDesign />} />
+          <Route path="/services/brand-identity" element={<BrandIdentity />} />
+          <Route path="/free-tools" element={<FreeTools />} />
+          <Route path="/blogs" element={<Blogs />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/seo-tools" element={<SEOCopilotTools />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

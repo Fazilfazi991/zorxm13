@@ -51,8 +51,9 @@ const ServicesSection = () => {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service, index) => (
-            <div
+            <Link
               key={service.title}
+              to={service.href}
               className="group relative p-8 bg-card rounded-2xl border border-border/50 shadow-card hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 overflow-hidden"
             >
               {/* Hover gradient overlay */}
@@ -71,12 +72,12 @@ const ServicesSection = () => {
                   {service.description}
                 </p>
 
-                <div className="flex items-center text-primary font-medium group/link cursor-pointer">
+                <div className="flex items-center text-primary font-medium group/link">
                   Learn more
                   <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover/link:translate-x-1" />
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

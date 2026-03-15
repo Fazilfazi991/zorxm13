@@ -6,10 +6,10 @@ import { Link, useLocation } from "react-router-dom";
 const navLinks = [
   { label: "Home", href: "/", isRoute: true },
   { label: "About Us", href: "/about", isRoute: true },
-  { label: "Portfolio", href: "/portfolio", isRoute: true },
   { label: "Services", href: "/services", isRoute: true },
-  { label: "SEO Tools", href: "/seo-tools", isRoute: true },
-  { label: "Contact", href: "/contact", isRoute: true },
+  { label: "Free Tools", href: "/free-tools", isRoute: true },
+  { label: "Blogs", href: "/blogs", isRoute: true },
+  { label: "Contact Us", href: "/contact", isRoute: true },
 ];
 
 const Navbar = () => {
