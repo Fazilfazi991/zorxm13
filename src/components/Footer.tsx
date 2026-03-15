@@ -39,18 +39,18 @@ const Footer = () => {
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-background/70">
                 <MapPin className="w-5 h-5 text-primary-light" />
-                <span>Dubai, UAE</span>
+                <span>Dubai Silicon Oasis, Dubai, UAE</span>
               </div>
               <div className="flex items-center gap-3 text-background/70">
                 <Mail className="w-5 h-5 text-primary-light" />
-                <a href="mailto:hello@zorx.ae" className="hover:text-primary-light transition-colors">
-                  hello@zorx.ae
+                <a href="mailto:info@zorxmedia.com" className="hover:text-primary-light transition-colors">
+                  info@zorxmedia.com
                 </a>
               </div>
               <div className="flex items-center gap-3 text-background/70">
                 <Phone className="w-5 h-5 text-primary-light" />
-                <a href="tel:+971500000000" className="hover:text-primary-light transition-colors">
-                  +971 XXX XXX XXX
+                <a href="https://wa.me/971542763828" className="hover:text-primary-light transition-colors">
+                  +971 54 276 3828
                 </a>
               </div>
             </div>
@@ -102,7 +102,7 @@ const Footer = () => {
         {/* Bottom bar */}
         <div className="pt-8 border-t border-background/10 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-background/50 text-sm">
-            © {new Date().getFullYear()} ZORX Digital Marketing. All Rights Reserved.
+            © {new Date().getFullYear()} Zorx Media. All Rights Reserved.
           </p>
 
           {/* Social links */}

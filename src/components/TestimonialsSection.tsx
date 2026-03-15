@@ -2,21 +2,21 @@ import { Star, Quote } from "lucide-react";
 
 const testimonials = [
   {
-    content: "ZORX helped us triple our leads within 3 months. Their data-driven approach and deep understanding of the Dubai market made all the difference. Highly recommended for any business looking to scale digitally.",
-    author: "Ahmed Al-Rashid",
-    position: "CEO, TechStart Dubai",
+    content: "Zorx Media transformed our lead generation. Their custom AI agents handle 70% of our initial inquiries, and the engagement quality has been game-changing. Truly a partner, not just a vendor.",
+    author: "Ahmed Al-Rashidi",
+    position: "Founder, Desert Oasis Real Estate",
     rating: 5,
   },
   {
-    content: "Working with ZORX transformed our online presence completely. Their SEO strategies got us ranking on the first page for all our key terms. The ROI has been incredible.",
-    author: "Sarah Mitchell",
-    position: "Marketing Director, Luxe Properties",
+    content: "The BrandPilot platform they deployed for our social automation has been incredible. We're now posting daily across all platforms with zero manual work, and our reach is up 200%.",
+    author: "Sarah Jenkins",
+    position: "Marketing Director, Elite Hospitality",
     rating: 5,
   },
   {
-    content: "The team at ZORX doesn't just run campaigns—they become true partners in your growth. Their transparent reporting and strategic insights have been invaluable to our e-commerce business.",
-    author: "Mohammed Hassan",
-    position: "Founder, Emirates Fashion Co.",
+    content: "From identity design to a full-scale SaaS launch in weeks. The speed and technical depth of the Zorx team is unmatched in the UAE market. They understand ambitious growth.",
+    author: "Marcus Wong",
+    position: "CTO, NexaFlow Systems",
     rating: 5,
   },
 ];
@@ -29,11 +29,11 @@ const TestimonialsSection = () => {
           <div className="inline-block px-4 py-1.5 bg-accent rounded-full text-sm font-medium text-accent-foreground mb-4">
             Testimonials
           </div>
-          <h2 className="heading-section text-foreground mb-4">
-            What Our Clients Say
+          <h2 className="heading-section text-foreground mb-4 tracking-tight">
+            Client Results & Feedback
           </h2>
-          <p className="text-lg text-muted-foreground">
-            Don't just take our word for it—hear from the brands we've helped grow.
+          <p className="text-lg text-muted-foreground font-medium">
+            We let the work speak for itself. Here is what leading UAE brands have to say.
           </p>
         </div>
 

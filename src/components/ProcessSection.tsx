@@ -4,26 +4,26 @@ const steps = [
   {
     number: "01",
     icon: Lightbulb,
-    title: "Discover",
-    description: "We dive deep into understanding your business, goals, target audience, and competitive landscape.",
+    title: "Intelligence Gathering",
+    description: "We audit your entire ecosystem, competitor gaps, and high-intent market opportunities.",
   },
   {
     number: "02",
     icon: Target,
-    title: "Strategize",
-    description: "We build a custom growth plan tailored to your unique needs and market opportunities.",
+    title: "The Growth Blueprint",
+    description: "Architecting a precise, data-backed strategy built for ROI and immediate market impact.",
   },
   {
     number: "03",
     icon: Rocket,
-    title: "Execute",
-    description: "We launch and optimize campaigns with precision, ensuring every element works towards your goals.",
+    title: "Precision Execution",
+    description: "We deploy and monitor with obsessive detail, ensuring every element is optimized for conversion.",
   },
   {
     number: "04",
     icon: TrendingUp,
-    title: "Scale",
-    description: "We track, analyze, and continuously improve to maximize your ROI and drive sustainable growth.",
+    title: "Ruthless Optimization",
+    description: "Constant iteration and scaling. We don't just maintain; we push for continuous, compound growth.",
   },
 ];
 
@@ -35,11 +35,11 @@ const ProcessSection = () => {
           <div className="inline-block px-4 py-1.5 bg-accent rounded-full text-sm font-medium text-accent-foreground mb-4">
             Our Process
           </div>
-          <h2 className="heading-section text-foreground mb-4">
-            Our Proven Process
+          <h2 className="heading-section text-foreground mb-4 tracking-tight">
+            How We Drive Results
           </h2>
-          <p className="text-lg text-muted-foreground">
-            A systematic approach to digital success that has helped dozens of UAE businesses achieve their goals.
+          <p className="text-lg text-muted-foreground font-medium">
+            A battle-tested methodology designed for speed, scale, and measurable ROI.
           </p>
         </div>
 

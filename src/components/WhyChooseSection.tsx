@@ -67,12 +67,12 @@ const WhyChooseSection = () => {
               Why ZORX
             </div>
 
-            <h2 className="heading-section text-foreground">
-              Why Brands Choose ZORX
+            <h2 className="heading-section text-foreground tracking-tight">
+              Why High-Growth Brands Partner With Us
             </h2>
 
-            <p className="text-lg text-muted-foreground">
-              We're not just another digital marketing agency. We're your growth partners, committed to delivering measurable results that impact your bottom line.
+            <p className="text-lg text-muted-foreground font-medium">
+              We aren't just another agency fulfilling a contract. We're an extension of your team, obsessed with performance and absolute transparency.
             </p>
 
             <div className="space-y-4">

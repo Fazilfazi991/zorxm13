@@ -18,16 +18,16 @@ const AboutSection = () => {
               About Us
             </div>
 
-            <h2 className="heading-section text-foreground">
-              Who We Are
+            <h2 className="heading-section text-foreground tracking-tight">
+              Dubai's Most Direct Digital Partner
             </h2>
 
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              ZORX is a Dubai-based digital marketing agency specializing in performance-focused marketing solutions. We combine creativity, analytics, and technology to deliver measurable results for brands across the UAE.
+            <p className="text-lg text-muted-foreground leading-relaxed font-medium">
+              Zorx isn't another generic agency. Based in Dubai, we are an AI-first team dedicated to pure performance. We bridge the gap between complex tech and real business growth.
             </p>
 
             <p className="text-muted-foreground leading-relaxed">
-              With deep expertise in the Gulf market and a passion for digital innovation, we craft strategies that don't just look good—they drive real business growth. From startups to enterprises, we've helped businesses across every industry achieve their digital ambitions.
+              We don't do fluff. Whether it's deploying custom AI agents or scaling SMM campaigns, our focus is on one thing: ROI. If it doesn't move the needle, we don't build it.
             </p>
           </div>
 

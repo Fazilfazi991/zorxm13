@@ -20,21 +20,21 @@ const HeroSection = () => {
               Trusted by UAE Businesses
             </div>
 
-            <h1 className="heading-display text-foreground animate-fade-up delay-100 opacity-0" style={{ animationFillMode: 'forwards' }}>
+            <h1 className="heading-display text-foreground animate-fade-up delay-100 opacity-0 tracking-tight leading-[1.1]" style={{ animationFillMode: 'forwards' }}>
               Driving Digital Growth for{" "}
-              <span className="text-primary">Ambitious Brands</span> in Dubai
+              <span className="text-primary italic">Ambitious Brands</span> in Dubai
             </h1>
 
-            <p className="text-lg md:text-xl text-muted-foreground max-w-xl animate-fade-up delay-200 opacity-0" style={{ animationFillMode: 'forwards' }}>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-xl animate-fade-up delay-300 opacity-0 leading-relaxed font-medium" style={{ animationFillMode: 'forwards' }}>
               We help businesses scale with data-driven digital marketing, performance ads, SEO, and creative strategies that convert.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 animate-fade-up delay-300 opacity-0" style={{ animationFillMode: 'forwards' }}>
-              <Button variant="hero" size="lg" className="group">
+            <div className="flex flex-col sm:flex-row gap-4 animate-fade-up delay-500 opacity-0" style={{ animationFillMode: 'forwards' }}>
+              <Button variant="hero" size="lg" className="group shadow-lg">
                 Get a Free Strategy Call
                 <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
               </Button>
-              <Button variant="heroOutline" size="lg" className="group">
+              <Button variant="heroOutline" size="lg" className="group border-[#065f46]/20">
                 <Play className="w-5 h-5" />
                 View Our Services
               </Button>
@@ -57,7 +57,7 @@ const HeroSection = () => {
           </div>
 
           {/* Right Visual */}
-          <div className="relative lg:h-[600px] animate-fade-up delay-200 opacity-0" style={{ animationFillMode: 'forwards' }}>
+          <div className="relative lg:h-[600px] animate-fade-up delay-400 opacity-0" style={{ animationFillMode: 'forwards' }}>
             <div className="relative h-full flex items-center justify-center">
               <div className="relative w-full max-w-lg aspect-square rounded-3xl overflow-hidden shadow-2xl border-8 border-white/10 backdrop-blur-sm">
                 <img

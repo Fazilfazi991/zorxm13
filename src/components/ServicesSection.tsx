@@ -3,33 +3,39 @@ import { Search, MousePointerClick, Share2, Layout, FileText, Mail, ArrowRight }
 const services = [
   {
     icon: Search,
-    title: "Search Engine Optimization (SEO)",
-    description: "Improve rankings, visibility, and organic traffic with data-driven SEO strategies tailored for the UAE market.",
+    title: "AI Agents & Automation",
+    description: "Deploy custom-built AI agents that handle lead gen, customer support, and internal workflows while you sleep.",
+    href: "/services/ai-agents",
   },
   {
     icon: MousePointerClick,
-    title: "Google Ads & PPC",
-    description: "High-converting paid campaigns with measurable ROI. We optimize every dirham of your ad spend.",
+    title: "Social Media Management",
+    description: "Results-first social strategy. We stop the scroll and turn followers into loyal, paying customers.",
+    href: "/services/social-media",
   },
   {
     icon: Share2,
-    title: "Social Media Marketing",
-    description: "Grow your brand on Instagram, Facebook, LinkedIn & TikTok with engaging content and targeted campaigns.",
+    title: "AI Video & Media Production",
+    description: "Cinematic, AI-powered video content designed to dominate attention and drive high-intent traffic.",
+    href: "/services/ai-video",
   },
   {
     icon: Layout,
-    title: "Website Design & CRO",
-    description: "Conversion-optimized websites that drive leads and sales. Beautiful, fast, and built for results.",
+    title: "SaaS & Software Development",
+    description: "We build scalable software products and internal tools designed for speed, security, and exponential growth.",
+    href: "/services/saas-software",
   },
   {
     icon: FileText,
-    title: "Content Marketing",
-    description: "Strategic content that builds authority and trust. From blogs to videos, we tell your brand story.",
+    title: "Web Design & Development",
+    description: "Stunning, high-conversion websites that blend premium aesthetics with ruthless technical performance.",
+    href: "/services/web-design",
   },
   {
     icon: Mail,
-    title: "Email & Automation",
-    description: "Nurture leads and increase customer lifetime value with smart email sequences and automation.",
+    title: "Brand Identity & Strategy",
+    description: "Making your brand unmistakable. We build deep strategy and visual identities for market leaders.",
+    href: "/services/brand-identity",
   },
 ];
 
@@ -41,11 +47,11 @@ const ServicesSection = () => {
           <div className="inline-block px-4 py-1.5 bg-accent rounded-full text-sm font-medium text-accent-foreground mb-4">
             Our Services
           </div>
-          <h2 className="heading-section text-foreground mb-4">
-            Our Digital Marketing Services
+          <h2 className="heading-section text-foreground mb-4 tracking-tight">
+            Our Core Specializations
           </h2>
-          <p className="text-lg text-muted-foreground">
-            Comprehensive digital solutions designed to grow your business and maximize your online presence.
+          <p className="text-lg text-muted-foreground font-medium">
+            We don't do everything. We only do what drives unfair growth for your brand.
           </p>
         </div>
 
@@ -54,7 +60,8 @@ const ServicesSection = () => {
             <Link
               key={service.title}
               to={service.href}
-              className="group relative p-8 bg-card rounded-2xl border border-border/50 shadow-card hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+              className={`group relative p-8 bg-card rounded-2xl border border-border/50 shadow-card hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 overflow-hidden animate-fade-up delay-${(index + 1) * 100} opacity-0`}
+              style={{ animationFillMode: 'forwards' }}
             >
               {/* Hover gradient overlay */}
               <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-5 transition-opacity duration-300" />

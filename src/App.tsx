@@ -18,6 +18,7 @@ import WebDesign from "./pages/services/WebDesign";
 import BrandIdentity from "./pages/services/BrandIdentity";
 import FreeTools from "./pages/FreeTools";
 import Blogs from "./pages/Blogs";
+import WhatsAppButton from "./components/WhatsAppButton";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <WhatsAppButton />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
