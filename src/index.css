@@ -15,26 +15,26 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 15% 15%;
 
-    --primary: 152 100% 46%;
+    --primary: 151 100% 50%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 152 100% 60%;
-    --primary-glow: 152 100% 46%;
+    --primary-light: 151 100% 65%;
+    --primary-glow: 151 100% 50%;
 
-    --secondary: 152 20% 96%;
-    --secondary-foreground: 152 100% 46%;
+    --secondary: 151 20% 96%;
+    --secondary-foreground: 151 100% 50%;
 
-    --muted: 152 10% 96%;
+    --muted: 151 10% 96%;
     --muted-foreground: 220 10% 45%;
 
-    --accent: 152 50% 94%;
-    --accent-foreground: 152 100% 46%;
+    --accent: 151 50% 94%;
+    --accent-foreground: 151 100% 50%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 152 15% 90%;
-    --input: 152 15% 90%;
-    --ring: 152 100% 46%;
+    --border: 151 15% 90%;
+    --input: 151 15% 90%;
+    --ring: 151 100% 50%;
 
     --radius: 0.75rem;
 
@@ -42,12 +42,12 @@
     --accent-warm: 35 100% 50%; /* Goldish accent */
     --accent-soft: 0 0% 96%;
     
-    --gradient-primary: linear-gradient(135deg, hsl(152, 100%, 46%) 0%, hsl(152, 100%, 35%) 100%);
-    --gradient-hero: linear-gradient(180deg, hsl(152, 30%, 98%) 0%, hsl(0, 0%, 100%) 100%);
-    --gradient-stats: linear-gradient(135deg, hsl(152, 100%, 46%) 0%, hsl(152, 100%, 22%) 100%);
-    --shadow-card: 0 4px 20px -4px hsl(152 20% 20% / 0.08);
-    --shadow-card-hover: 0 12px 32px -8px hsl(152 20% 20% / 0.15);
-    --shadow-glow: 0 0 40px hsl(152 100% 46% / 0.2);
+    --gradient-primary: linear-gradient(135deg, hsl(151, 100%, 50%) 0%, hsl(151, 100%, 35%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(151, 30%, 98%) 0%, hsl(0, 0%, 100%) 100%);
+    --gradient-stats: linear-gradient(135deg, hsl(151, 100%, 50%) 0%, hsl(151, 100%, 22%) 100%);
+    --shadow-card: 0 4px 20px -4px hsl(151 20% 20% / 0.08);
+    --shadow-card-hover: 0 12px 32px -8px hsl(151 20% 20% / 0.15);
+    --shadow-glow: 0 0 40px hsl(151 100% 50% / 0.2);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -69,7 +69,7 @@
     --popover: 220 20% 12%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 152 100% 46%;
+    --primary: 151 100% 50%;
     --primary-foreground: 220 20% 8%;
 
     --secondary: 220 15% 18%;
@@ -78,15 +78,15 @@
     --muted: 220 15% 18%;
     --muted-foreground: 220 10% 60%;
 
-    --accent: 152 30% 20%;
-    --accent-foreground: 152 100% 46%;
+    --accent: 151 30% 20%;
+    --accent-foreground: 151 100% 50%;
 
     --destructive: 0 62% 30%;
     --destructive-foreground: 0 0% 98%;
 
     --border: 220 15% 20%;
     --input: 220 15% 20%;
-    --ring: 152 100% 46%;
+    --ring: 151 100% 50%;
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
