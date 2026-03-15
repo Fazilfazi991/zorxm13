@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found | Zorx Media</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #F2F2F2;
+            --text: #0A0A0A;
+            --green: #00CC6A;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2rem; overflow: hidden; }
+
+        .container { max-width: 600px; }
+        .error-code { font-family: 'Bebas Neue', sans-serif; font-size: clamp(8rem, 20vw, 15rem); line-height: 0.8; color: var(--green); margin-bottom: 2rem; position: relative; }
+        .error-code::after { content: '404'; position: absolute; inset: 0; filter: blur(50px); opacity: 0.2; z-index: -1; }
+        
+        h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; letter-spacing: 0.05em; margin-bottom: 1rem; }
+        p { font-size: 1.1rem; color: #666; margin-bottom: 3rem; }
+
+        .btn-home { display: inline-block; padding: 1.2rem 3rem; background: var(--text); color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; letter-spacing: 0.15em; text-decoration: none; border-radius: 4px; transition: 0.3s; }
+        .btn-home:hover { background: var(--green); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,204,106,0.3); }
+
+        .links { margin-top: 4rem; display: flex; justify-content: center; gap: 2rem; list-style: none; }
+        .links a { color: #999; text-decoration: none; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; transition: 0.3s; }
+        .links a:hover { color: var(--green); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="error-code">404</div>
+        <h1>Lost in Automation?</h1>
+        <p>The page you are looking for has been moved, deleted, or never existed in the first place.</p>
+        <a href="index.html" class="btn-home">Back to Safety →</a>
+        <ul class="links">
+            <li><a href="index.html#services">Services</a></li>
+            <li><a href="portfolio.html">Portfolio</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </div>
+</body>
+</html>
