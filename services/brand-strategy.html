@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Brand Strategy — Zorx Media Dubai</title>
+<title>Brand Strategy — Zorx Media</title>
 <meta name="description" content="Iconic identities, strategic positioning, and brand storytelling that commands authority in the global market.">
 <link rel="icon" href="../logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -93,13 +93,25 @@ footer{position:relative;z-index:10;padding:3rem 4rem;background:var(--black);bo
   .grid-6{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:768px){
-  nav{padding:1.2rem 1.5rem}.nav-links,.nav-cta{display:none}
-  .section{padding:5rem 1.5rem}
-  .overview{grid-template-columns:1fr;gap:2rem}
-  .grid-6{grid-template-columns:1fr}
-  .process-grid{grid-template-columns:1fr 1fr}.process-grid::before{display:none}
   .stats{grid-template-columns:repeat(2,1fr)}
   footer{padding:2rem 1.5rem}.ft-top{flex-direction:column;gap:1.5rem;text-align:center}
+  
+  /* Hamburger and Mobile menu overrides */
+  nav{padding:1.2rem 1.5rem}.nav-links,.nav-cta{display:none}
+  .hamburger { display: flex; flex-direction: column; gap: 6px; cursor: pointer; z-index: 10001; }
+  .hamburger span { width: 28px; height: 2px; background: #00FF85; transition: 0.4s; }
+  .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 6px); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(6px, -7px); }
+  
+  .mobile-menu { position: fixed; inset: 0; background: rgba(6,6,8,0.98); backdrop-filter: blur(20px); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; clip-path: circle(0% at top right); transition: clip-path 0.6s cubic-bezier(0.19, 1, 0.22, 1); }
+  .mobile-menu.open { clip-path: circle(150% at top right); }
+  .mobile-links { list-style: none; text-align: center; margin-bottom: 2rem; }
+  .mobile-links li { margin: 1.5rem 0; }
+  .mobile-links a { color: #f0f0f0; text-decoration: none; font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 0.1em; transition: color 0.3s; }
+  .mobile-links a:hover { color: #00FF85; }
+  .mobile-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 0.5rem 2rem; width: 80%; }
+  .mobile-cta { padding: 1rem 3rem; background: #00FF85; color: #060608; font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.15em; text-decoration: none; border-radius: 2px; }
 }
 </style>
 </head>
@@ -111,9 +123,36 @@ footer{position:relative;z-index:10;padding:3rem 4rem;background:var(--black);bo
   <div class="nav-logo">
     <a href="../index.html"><img src="../logo.png" alt="ZORX MEDIA"></a>
   </div>
-  <ul class="nav-links"><li><a href="../index.html#services">Services</a></li><li><a href="../index.html#work">Work</a></li><li><a href="../index.html#process">Process</a></li><li><a href="../index.html#cta">Contact</a></li></ul>
+  <ul class="nav-links">
+    <li><a href="../index.html#services">Services</a></li>
+    <li class="nav-dropdown">
+        <a href="#" class="nav-drop-trigger">AI Tools ▾</a>
+        <ul class="dropdown-menu">
+            <li><a href="../tools/ai-tools.html">AI Marketing Tools</a></li>
+            <li><a href="../tools/seo-tools.html">SEO Tools</a></li>
+        </ul>
+    </li>
+    <li><a href="../portfolio.html">Portfolio</a></li>
+    <li><a href="../index.html#process">Process</a></li>
+    <li><a href="../index.html#cta">Contact</a></li>
+  </ul>
   <a href="../index.html#cta" class="nav-cta">Get Started →</a>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
 </nav>
+
+<!-- MOBILE MENU OVERLAY -->
+<div class="mobile-menu" id="mobileMenu">
+    <ul class="mobile-links">
+        <li><a href="../index.html#services">Services</a></li>
+        <li><a href="../portfolio.html">Portfolio</a></li>
+        <li><a href="../index.html#process">Process</a></li>
+        <li><a href="../index.html#cta">Contact</a></li>
+        <li class="mobile-divider"></li>
+        <li><a href="../tools/ai-tools.html">AI Marketing Tools</a></li>
+        <li><a href="../tools/seo-tools.html">SEO Tools</a></li>
+    </ul>
+    <a href="../index.html#cta" class="mobile-cta">Get Started →</a>
+</div>
 
 <header class="hero">
   <div class="breadcrumb"><a href="../index.html">Home</a> → <a href="../index.html#services">Services</a> → Brand Strategy</div>
@@ -121,7 +160,7 @@ footer{position:relative;z-index:10;padding:3rem 4rem;background:var(--black);bo
   <p class="hero-tagline">Beyond logos. We build legacies. Strategic positioning and identity design that commands authority in the global market.</p>
   <div class="hero-btns">
     <a href="../index.html#cta" class="btn-p">Start a Project →</a>
-    <a href="../index.html#work" class="btn-g">View Our Work</a>
+    <a href="../portfolio.html" class="btn-g">View Our Work</a>
   </div>
 </header>
 
@@ -195,6 +234,10 @@ window.addEventListener('scroll',()=>document.getElementById('nav').classList.to
 (function(){
   const c=document.getElementById('cursor');
   document.addEventListener('mousemove',e=>{c.style.left=e.clientX+'px';c.style.top=e.clientY+'px'});
+  
+  const h=document.getElementById('hamburger'),m=document.getElementById('mobileMenu');
+  h.addEventListener('click',()=>{h.classList.toggle('open');m.classList.toggle('open');document.body.style.overflow=m.classList.contains('open')?'hidden':''});
+  m.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{h.classList.remove('open');m.classList.remove('open');document.body.style.overflow=''}));
 })();
 </script>
 </body>

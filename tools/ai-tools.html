@@ -68,7 +68,22 @@
         .ft-bottom{color:rgba(255,255,255,.25);font-size:.78rem;letter-spacing:.1em;text-align:center}
 
         @media(max-width:768px){
-            nav{padding:1.2rem 1.5rem} .nav-links{display:none}
+            nav{padding:1.2rem 1.5rem} .nav-links, .nav-cta{display:none}
+            .hamburger { display: flex; flex-direction: column; gap: 6px; cursor: pointer; z-index: 10001; }
+            .hamburger span { width: 28px; height: 2px; background: #00FF85; transition: 0.4s; }
+            .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 6px); }
+            .hamburger.open span:nth-child(2) { opacity: 0; }
+            .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(6px, -7px); }
+            
+            .mobile-menu { position: fixed; inset: 0; background: rgba(6,6,8,0.98); backdrop-filter: blur(20px); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; clip-path: circle(0% at top right); transition: clip-path 0.6s cubic-bezier(0.19, 1, 0.22, 1); }
+            .mobile-menu.open { clip-path: circle(150% at top right); }
+            .mobile-links { list-style: none; text-align: center; margin-bottom: 2rem; }
+            .mobile-links li { margin: 1.5rem 0; }
+            .mobile-links a { color: #f0f0f0; text-decoration: none; font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 0.1em; transition: color 0.3s; }
+            .mobile-links a:hover { color: #00FF85; }
+            .mobile-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 0.5rem 2rem; width: 80%; }
+            .mobile-cta { padding: 1rem 3rem; background: #00FF85; color: #060608; font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.15em; text-decoration: none; border-radius: 2px; }
+            
             footer{padding:2rem 1.5rem} .ft-top{flex-direction:column;gap:1.5rem}
         }
     </style>
@@ -91,7 +106,22 @@
             <li><a href="../index.html#cta">Contact</a></li>
         </ul>
         <button class="nav-cta" onclick="location.href='../index.html#cta'" style="padding:.6rem 1.5rem;border:1px solid var(--green);background:transparent;color:var(--green);font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:.1em;cursor:pointer;transition:all .3s">Get Started →</button>
+        <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
     </nav>
+
+    <!-- MOBILE MENU OVERLAY -->
+    <div class="mobile-menu" id="mobileMenu">
+        <ul class="mobile-links">
+            <li><a href="../index.html#services">Services</a></li>
+            <li><a href="../portfolio.html">Portfolio</a></li>
+            <li><a href="../index.html#process">Process</a></li>
+            <li><a href="../index.html#cta">Contact</a></li>
+            <li class="mobile-divider"></li>
+            <li><a href="ai-tools.html" style="color:var(--green)">AI Marketing Tools</a></li>
+            <li><a href="seo-tools.html">SEO Tools</a></li>
+        </ul>
+        <a href="../index.html#cta" class="mobile-cta">Get Started →</a>
+    </div>
 
     <main>
         <div class="soon-box">
@@ -113,5 +143,12 @@
         </div>
         <div class="ft-bottom">© 2026 Zorx Media. Dubai, UAE.</div>
     </footer>
+    <script>
+    (function(){
+      const h=document.getElementById('hamburger'),m=document.getElementById('mobileMenu');
+      h.addEventListener('click',()=>{h.classList.toggle('open');m.classList.toggle('open');document.body.style.overflow=m.classList.contains('open')?'hidden':''});
+      m.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{h.classList.remove('open');m.classList.remove('open');document.body.style.overflow=''}));
+    })();
+    </script>
 </body>
 </html>
