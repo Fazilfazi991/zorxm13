@@ -53,10 +53,49 @@ nav.solid{background:rgba(6,6,8,.9);backdrop-filter:blur(20px);border-bottom:1px
 .scroll-hint{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem;color:var(--gray);font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;opacity:0;transition:opacity 1s ease 1.4s;z-index:2}
 .scroll-bar{width:1px;height:46px;background:linear-gradient(to bottom,var(--green),transparent);animation:sA 1.8s ease-in-out infinite}
 @keyframes sA{0%{transform:scaleY(0);transform-origin:top;opacity:1}45%{transform:scaleY(1);transform-origin:top;opacity:1}55%{transform:scaleY(1);transform-origin:bottom;opacity:1}100%{transform:scaleY(0);transform-origin:bottom;opacity:0}}
-.marquee-wrap{position:relative;z-index:10;background:var(--dark);border-top:1px solid var(--blue-dim);border-bottom:1px solid var(--blue-dim);overflow:hidden;padding:1.3rem 0}
-.marquee-track{display:flex;width:max-content;animation:mR 28s linear infinite}
-.m-item{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.12em;color:#00FF85;text-shadow:0 0 25px rgba(0,255,133,0.5);padding:0 2rem;white-space:nowrap}
-.m-dot{color:rgba(0,255,133,.3);padding:0 .4rem}
+.marquee-wrap {
+    position: relative;
+    z-index: 10;
+    overflow: hidden;
+    padding: 0;
+    margin: -20px 0;
+    transform: skewY(-3deg);
+    background: transparent;
+    border: none;
+}
+.marquee-inner {
+    background: #00FF85;
+    padding: 1rem 0;
+    border-top: none;
+    border-bottom: none;
+    overflow: hidden;
+}
+.marquee-track {
+    display: flex;
+    width: max-content;
+    animation: mR 28s linear infinite;
+}
+.marquee-track-reverse {
+    display: flex;
+    width: max-content;
+    animation: mR 28s linear infinite reverse;
+    margin-top: 0.3rem;
+    opacity: 0.35;
+}
+.m-item {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.2em;
+    color: #060608;
+    padding: 0 2rem;
+    white-space: nowrap;
+    text-shadow: none;
+    font-weight: 900;
+}
+.m-dot {
+    color: rgba(6,6,8,0.4);
+    padding: 0 0.3rem;
+}
 @keyframes mR{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 
 /* ===== SERVICES — CLEAN GRID ===== */
@@ -261,9 +300,16 @@ footer{position:relative;z-index:10;padding:3rem 4rem;background:var(--black);bo
   </div>
 </section>
 
-<div class="marquee-wrap"><div class="marquee-track">
-  <span class="m-item">AI Marketing</span><span class="m-dot">●</span><span class="m-item">SaaS Development</span><span class="m-dot">●</span><span class="m-item">Creative Production</span><span class="m-dot">●</span><span class="m-item">Brand Strategy</span><span class="m-dot">●</span><span class="m-item">Social Automation</span><span class="m-dot">●</span><span class="m-item">Web Development</span><span class="m-dot">●</span><span class="m-item">AI Marketing</span><span class="m-dot">●</span><span class="m-item">SaaS Development</span><span class="m-dot">●</span><span class="m-item">Creative Production</span><span class="m-dot">●</span><span class="m-item">Brand Strategy</span><span class="m-dot">●</span><span class="m-item">Social Automation</span><span class="m-dot">●</span><span class="m-item">Web Development</span><span class="m-dot">●</span>
-</div></div>
+<div class="marquee-wrap">
+  <div class="marquee-inner">
+    <div class="marquee-track">
+      <span class="m-item">AI Marketing</span><span class="m-dot">●</span><span class="m-item">SaaS Development</span><span class="m-dot">●</span><span class="m-item">Creative Production</span><span class="m-dot">●</span><span class="m-item">Brand Strategy</span><span class="m-dot">●</span><span class="m-item">Social Automation</span><span class="m-dot">●</span><span class="m-item">Web Development</span><span class="m-dot">●</span><span class="m-item">AI Marketing</span><span class="m-dot">●</span><span class="m-item">SaaS Development</span><span class="m-dot">●</span><span class="m-item">Creative Production</span><span class="m-dot">●</span><span class="m-item">Brand Strategy</span><span class="m-dot">●</span><span class="m-item">Social Automation</span><span class="m-dot">●</span><span class="m-item">Web Development</span><span class="m-dot">●</span>
+    </div>
+    <div class="marquee-track-reverse">
+      <span class="m-item">AI Marketing</span><span class="m-dot">●</span><span class="m-item">SaaS Development</span><span class="m-dot">●</span><span class="m-item">Creative Production</span><span class="m-dot">●</span><span class="m-item">Brand Strategy</span><span class="m-dot">●</span><span class="m-item">Social Automation</span><span class="m-dot">●</span><span class="m-item">Web Development</span><span class="m-dot">●</span><span class="m-item">AI Marketing</span><span class="m-dot">●</span><span class="m-item">SaaS Development</span><span class="m-dot">●</span><span class="m-item">Creative Production</span><span class="m-dot">●</span><span class="m-item">Brand Strategy</span><span class="m-dot">●</span><span class="m-item">Social Automation</span><span class="m-dot">●</span><span class="m-item">Web Development</span><span class="m-dot">●</span>
+    </div>
+  </div>
+</div>
 
 <section id="services">
   <div class="svc-head">
@@ -271,12 +317,12 @@ footer{position:relative;z-index:10;padding:3rem 4rem;background:var(--black);bo
     <h2 class="sec-title">Our Services</h2>
   </div>
   <div class="svc-grid">
-    <div class="svc-card c1" data-num="1"><div class="svc-num">01</div><div class="svc-icon">🤖</div><div class="svc-title">AI Marketing</div><div class="svc-desc">Intelligent automation and AI-driven ad strategies that amplify reach and dramatically improve conversion across every channel.</div><button class="svc-cta">Learn More →</button></div>
-    <div class="svc-card c2" data-num="2"><div class="svc-num">02</div><div class="svc-icon">📱</div><div class="svc-title">Social Automation</div><div class="svc-desc">AI-powered content scheduling, audience engagement tools, and automated social presence management built for scale.</div><button class="svc-cta">Learn More →</button></div>
-    <div class="svc-card c3" data-num="3"><div class="svc-num">03</div><div class="svc-icon">🎬</div><div class="svc-title">Creative Production</div><div class="svc-desc">Cinematic video content, AI-generated visuals, and storytelling that stops the scroll and drives real results.</div><button class="svc-cta">Learn More →</button></div>
-    <div class="svc-card c4" data-num="4"><div class="svc-num">04</div><div class="svc-icon">💻</div><div class="svc-title">SaaS Development</div><div class="svc-desc">Custom software and SaaS platforms built for performance, scale, and exceptional user experiences from launch.</div><button class="svc-cta">Learn More →</button></div>
-    <div class="svc-card c5" data-num="5"><div class="svc-num">05</div><div class="svc-icon">🌐</div><div class="svc-title">Web Development</div><div class="svc-desc">Stunning, fast, responsive websites that blend premium aesthetics with conversion-first design and SEO best practices.</div><button class="svc-cta">Learn More →</button></div>
-    <div class="svc-card c6" data-num="6"><div class="svc-num">06</div><div class="svc-icon">✦</div><div class="svc-title">Brand Strategy</div><div class="svc-desc">Strategic identity, positioning, and brand architecture that makes you unmistakable in competitive global markets.</div><button class="svc-cta">Learn More →</button></div>
+    <div class="svc-card c1" data-num="1"><div class="svc-num">01</div><div class="svc-icon">🤖</div><div class="svc-title">AI Marketing</div><div class="svc-desc">Intelligent automation and AI-driven ad strategies that amplify reach and dramatically improve conversion across every channel.</div><a href="services/ai-marketing.html" class="svc-cta">Learn More →</a></div>
+    <div class="svc-card c2" data-num="2"><div class="svc-num">02</div><div class="svc-icon">📱</div><div class="svc-title">Social Automation</div><div class="svc-desc">AI-powered content scheduling, audience engagement tools, and automated social presence management built for scale.</div><a href="services/social-automation.html" class="svc-cta">Learn More →</a></div>
+    <div class="svc-card c3" data-num="3"><div class="svc-num">03</div><div class="svc-icon">🎬</div><div class="svc-title">Creative Production</div><div class="svc-desc">Cinematic video content, AI-generated visuals, and storytelling that stops the scroll and drives real results.</div><a href="services/creative-production.html" class="svc-cta">Learn More →</a></div>
+    <div class="svc-card c4" data-num="4"><div class="svc-num">04</div><div class="svc-icon">💻</div><div class="svc-title">SaaS Development</div><div class="svc-desc">Custom software and SaaS platforms built for performance, scale, and exceptional user experiences from launch.</div><a href="services/saas-development.html" class="svc-cta">Learn More →</a></div>
+    <div class="svc-card c5" data-num="5"><div class="svc-num">05</div><div class="svc-icon">🌐</div><div class="svc-title">Web Development</div><div class="svc-desc">Stunning, fast, responsive websites that blend premium aesthetics with conversion-first design and SEO best practices.</div><a href="services/web-development.html" class="svc-cta">Learn More →</a></div>
+    <div class="svc-card c6" data-num="6"><div class="svc-num">06</div><div class="svc-icon">✦</div><div class="svc-title">Brand Strategy</div><div class="svc-desc">Strategic identity, positioning, and brand architecture that makes you unmistakable in competitive global markets.</div><a href="services/brand-strategy.html" class="svc-cta">Learn More →</a></div>
   </div>
 </section>
 
