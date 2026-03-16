@@ -9,16 +9,38 @@ import { Sparkles, ArrowRight, Wand2 } from "lucide-react";
 const PageGenerator = () => {
   const [json, setJson] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [loadingStep, setLoadingStep] = React.useState(0);
   const [error, setError] = React.useState<string | null>(null);
   const [lastInput, setLastInput] = React.useState<any>(null);
+
+  const loadingMessages = [
+    "Analysing your business...",
+    "Crafting your sections...",
+    "Writing your copy...",
+    "Building your layout...",
+    "Finalising your page..."
+  ];
+
+  React.useEffect(() => {
+    let interval: any;
+    if (isLoading) {
+      interval = setInterval(() => {
+        setLoadingStep((prev) => (prev + 1) % loadingMessages.length);
+      }, 2000);
+    } else {
+      setLoadingStep(0);
+    }
+    return () => clearInterval(interval);
+  }, [isLoading]);
 
   const generatePage = async (data: any) => {
     setIsLoading(true);
     setError(null);
+    setJson(null);
     setLastInput(data);
     
     try {
-      const response = await fetch('/api/generate-page', {
+      const response = await fetch('/api/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -26,13 +48,10 @@ const PageGenerator = () => {
         body: JSON.stringify(data),
       });
 
-      if (!response.ok) {
-        throw new Error('Could not connect to generator. Please try again.');
-      }
-
       const result = await response.json();
-      if (result.error) {
-        throw new Error(result.error);
+      
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Generation failed. Please try again.');
       }
 
       setJson(result.json);
@@ -60,13 +79,13 @@ const PageGenerator = () => {
           <div className="max-w-3xl mx-auto text-center mb-16 space-y-4">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/5 rounded-full text-xs font-bold text-primary uppercase tracking-widest border border-primary/10 animate-fade-up">
               <Sparkles className="w-3.5 h-3.5" />
-              Free AI Tool
+              AI Assistant
             </div>
             <h1 className="heading-display text-foreground animate-fade-up delay-100">
-              AI Elementor <span className="text-transparent bg-clip-text bg-gradient-primary">Generator</span>
+              WordPress <span className="text-transparent bg-clip-text bg-gradient-primary">Template Craft</span>
             </h1>
             <p className="text-lg text-muted-foreground animate-fade-up delay-200">
-              Generate a professional, fully responsive WordPress Elementor template in seconds.
+              Generate elite Elementor templates with elite AI logic. Claude + Gemini fallback.
             </p>
           </div>
 
@@ -80,8 +99,8 @@ const PageGenerator = () => {
                     <Wand2 className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-syne font-bold text-foreground">Configure Template</h2>
-                    <p className="text-xs text-muted-foreground">Customize your AI generation</p>
+                    <h2 className="text-xl font-syne font-bold text-foreground">Configure Page</h2>
+                    <p className="text-xs text-muted-foreground">Customize your template details</p>
                   </div>
                 </div>
                 
@@ -96,6 +115,7 @@ const PageGenerator = () => {
                 businessName={lastInput?.businessName || 'Business'}
                 pageType={lastInput?.pageType || 'page'}
                 isLoading={isLoading} 
+                loadingMessage={loadingMessages[loadingStep]}
                 error={error} 
                 onRetry={() => generatePage(lastInput)} 
               />
