@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Layout, User, Briefcase, Zap, Heart, Flame, Laptop } from "lucide-react";
+import { Layout, User, Briefcase, Zap, Heart, Flame, Laptop, ChevronDown, Check, Sparkles } from "lucide-react";
+import { PromptBuilder } from './PromptBuilder';
 
 export type PageType = 'landing' | 'about' | 'portfolio';
 export type Tone = 'professional' | 'friendly' | 'bold' | 'minimal';
@@ -15,6 +16,45 @@ interface GeneratorFormProps {
   isLoading: boolean;
 }
 
+const EXAMPLES = [
+  {
+    id: 'seo',
+    title: 'SEO Agency Service Page',
+    data: {
+      pageType: 'landing' as const,
+      businessName: 'RankRight SEO Agency',
+      description: "We help small and medium businesses rank on Google through technical SEO, content strategy, and link building. We've helped 200+ clients grow organic traffic by 300% in 6 months.",
+      tone: 'professional' as const,
+      ctaText: 'Book a Free Strategy Call',
+      primaryColor: '#166534'
+    }
+  },
+  {
+    id: 'photo',
+    title: 'Freelance Photographer Portfolio',
+    data: {
+      pageType: 'portfolio' as const,
+      businessName: 'Lena Visuals',
+      description: "Dubai-based freelance photographer specialising in brand photography, corporate headshots, and product shoots for e-commerce brands and startups.",
+      tone: 'minimal' as const,
+      ctaText: 'View My Work',
+      primaryColor: '#1A1A2E'
+    }
+  },
+  {
+    id: 'agency',
+    title: 'Digital Marketing Agency About Page',
+    data: {
+      pageType: 'about' as const,
+      businessName: 'Zorx Digital',
+      description: "A Dubai-based digital marketing agency helping brands grow through AI-powered marketing, Meta Ads, SEO, and content creation. We work with startups and established businesses across the UAE.",
+      tone: 'bold' as const,
+      ctaText: 'Work With Us',
+      primaryColor: '#166534'
+    }
+  }
+];
+
 const GeneratorForm: React.FC<GeneratorFormProps> = ({ onSubmit, isLoading }) => {
   const [pageType, setPageType] = React.useState<PageType>('landing');
   const [businessName, setBusinessName] = React.useState('');
@@ -22,6 +62,39 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onSubmit, isLoading }) =>
   const [tone, setTone] = React.useState<Tone>('professional');
   const [primaryColor, setPrimaryColor] = React.useState('#6C63FF');
   const [ctaText, setCtaText] = React.useState('Get Started');
+  const [showExamples, setShowExamples] = React.useState(false);
+  const [toast, setToast] = React.useState<string | null>(null);
+  const [isPromptBuilderOpen, setIsPromptBuilderOpen] = React.useState(false);
+
+  const submitButtonRef = React.useRef<HTMLButtonElement>(null);
+
+  const showToast = (message: string) => {
+    setToast(message);
+    setTimeout(() => setToast(null), 2500);
+  };
+
+  const loadExample = (example: typeof EXAMPLES[0]) => {
+    setPageType(example.data.pageType);
+    setBusinessName(example.data.businessName);
+    setDescription(example.data.description);
+    setTone(example.data.tone);
+    setPrimaryColor(example.data.primaryColor);
+    setCtaText(example.data.ctaText);
+    setShowExamples(false);
+    showToast("Example loaded — feel free to customise it");
+  };
+
+  const handleUsePrompt = (prompt: string, cta?: string) => {
+    setDescription(prompt);
+    if (cta) setCtaText(cta);
+    setIsPromptBuilderOpen(false);
+    showToast("Prompt added — ready to generate!");
+    
+    // Smooth scroll to generate button
+    setTimeout(() => {
+      submitButtonRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +145,39 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onSubmit, isLoading }) =>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="description" className="text-[14px] font-semibold text-[var(--color-text-primary)]">Description</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="description" className="text-[14px] font-semibold text-[var(--color-text-primary)]">Description</Label>
+            <div className="relative">
+              <button 
+                type="button"
+                onClick={() => setShowExamples(!showExamples)}
+                className="text-[12px] text-[var(--color-green-700)] font-medium hover:opacity-80 transition-opacity flex items-center gap-1"
+              >
+                Need inspiration? <span className="flex items-center">Try an example <ChevronDown className={`w-3 h-3 ml-0.5 transition-transform ${showExamples ? 'rotate-180' : ''}`} /></span>
+              </button>
+
+              {showExamples && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-20" 
+                    onClick={() => setShowExamples(false)}
+                  />
+                  <Card className="absolute right-0 top-full mt-2 w-[280px] z-30 shadow-xl border-[var(--color-border)] p-1 animate-in fade-in zoom-in-95 duration-200">
+                    {EXAMPLES.map((ex) => (
+                      <button
+                        key={ex.id}
+                        type="button"
+                        onClick={() => loadExample(ex)}
+                        className="w-full text-left px-4 py-3 text-[13px] font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-green-700)]/[0.04] hover:text-[var(--color-green-700)] rounded-lg transition-colors flex items-center justify-between"
+                      >
+                        {ex.title}
+                      </button>
+                    ))}
+                  </Card>
+                </>
+              )}
+            </div>
+          </div>
           <Textarea
             id="description"
             placeholder="What does your business do? Who is your audience?"
@@ -81,6 +186,15 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onSubmit, isLoading }) =>
             required
             className={`min-h-[100px] py-3 resize-none ${inputStyles}`}
           />
+          
+          <button
+            type="button"
+            onClick={() => setIsPromptBuilderOpen(true)}
+            className="w-full flex items-center justify-center gap-2 h-10 rounded-[10px] border border-[var(--color-green-700)] text-[var(--color-green-700)] bg-[var(--color-green-700)]/[0.04] text-[13px] font-medium hover:bg-[var(--color-green-700)]/[0.08] transition-all"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            Build my prompt for me
+          </button>
         </div>
       </div>
 
@@ -142,6 +256,7 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onSubmit, isLoading }) =>
 
       <Button
         type="submit"
+        ref={submitButtonRef}
         disabled={isLoading}
         className="w-full h-[48px] text-[15px] font-bold bg-[var(--color-green-700)] hover:bg-[var(--color-green-600)] active:scale-[0.98] text-white rounded-[12px] transition-all duration-200 mt-2 shadow-sm"
       >
@@ -154,6 +269,22 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onSubmit, isLoading }) =>
           'Generate My Page'
         )}
       </Button>
+
+      {/* Local Toast System */}
+      {toast && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="bg-[#1A1A1A] text-white px-6 py-3 rounded-full text-[14px] font-medium shadow-2xl flex items-center gap-3 border border-white/10">
+            <Check className="w-4 h-4 text-[var(--color-green-500)]" />
+            {toast}
+          </div>
+        </div>
+      )}
+      {/* Prompt Builder Modal */}
+      <PromptBuilder 
+        isOpen={isPromptBuilderOpen}
+        onClose={() => setIsPromptBuilderOpen(false)}
+        onUsePrompt={handleUsePrompt}
+      />
     </form>
   );
 };
