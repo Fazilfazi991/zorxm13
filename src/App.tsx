@@ -45,7 +45,7 @@ const App = () => (
           <Route path="/blogs" element={<Blogs />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/seo-tools" element={<SEOCopilotTools />} />
-          <Route path="/tools/page-generator" element={<PageGenerator />} />
+          <Route path="/ai-generator" element={<PageGenerator />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
