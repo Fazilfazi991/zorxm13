@@ -7,7 +7,7 @@ import PreviewPanel from "./components/PreviewPanel";
 import { Sparkles, ArrowRight, Wand2 } from "lucide-react";
 
 const PageGenerator = () => {
-  const [html, setHtml] = React.useState<string | null>(null);
+  const [json, setJson] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [lastInput, setLastInput] = React.useState<any>(null);
@@ -35,7 +35,7 @@ const PageGenerator = () => {
         throw new Error(result.error);
       }
 
-      setHtml(result.html);
+      setJson(result.json);
       
       // Smooth scroll to preview on mobile
       if (window.innerWidth < 1024) {
@@ -63,10 +63,10 @@ const PageGenerator = () => {
               Free AI Tool
             </div>
             <h1 className="heading-display text-foreground animate-fade-up delay-100">
-              AI Website <span className="text-transparent bg-clip-text bg-gradient-primary">Generator</span>
+              AI Elementor <span className="text-transparent bg-clip-text bg-gradient-primary">Generator</span>
             </h1>
             <p className="text-lg text-muted-foreground animate-fade-up delay-200">
-              Generate a professional, fully responsive WordPress-ready HTML page in seconds. No coding required.
+              Generate a professional, fully responsive WordPress Elementor template in seconds.
             </p>
           </div>
 
@@ -80,7 +80,7 @@ const PageGenerator = () => {
                     <Wand2 className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-syne font-bold text-foreground">Configure Page</h2>
+                    <h2 className="text-xl font-syne font-bold text-foreground">Configure Template</h2>
                     <p className="text-xs text-muted-foreground">Customize your AI generation</p>
                   </div>
                 </div>
@@ -92,7 +92,9 @@ const PageGenerator = () => {
             {/* Preview Section */}
             <div id="preview-section" className="lg:col-span-8 xl:col-span-7 h-[calc(100vh-160px)] min-h-[600px]">
               <PreviewPanel 
-                html={html} 
+                json={json} 
+                businessName={lastInput?.businessName || 'Business'}
+                pageType={lastInput?.pageType || 'page'}
                 isLoading={isLoading} 
                 error={error} 
                 onRetry={() => generatePage(lastInput)} 
@@ -109,13 +111,13 @@ const PageGenerator = () => {
             </div>
             <div className="space-y-4">
               <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center font-bold text-primary">2</div>
-              <h3 className="text-lg font-bold text-foreground">Live Generation</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">Our AI creates a high-conversion layout with professional copy based on real industry best practices.</p>
+              <h3 className="text-lg font-bold text-foreground">JSON Generation</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">Our AI creates a high-conversion Elementor JSON template with professional widgets and copy.</p>
             </div>
             <div className="space-y-4">
               <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center font-bold text-primary">3</div>
-              <h3 className="text-lg font-bold text-foreground">Deploy Anywhere</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">Copy the generated code and paste it into your WordPress site or any HTML-compatible hosting.</p>
+              <h3 className="text-lg font-bold text-foreground">Import to WordPress</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">Download the JSON file and import it directly into your Elementor template library.</p>
             </div>
           </div>
         </div>
