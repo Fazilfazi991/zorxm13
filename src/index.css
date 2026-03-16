@@ -38,6 +38,23 @@
 
     --radius: 0.75rem;
 
+    /* REDESIGN TOKENS */
+    --color-green-900: #0D3D20;
+    --color-green-800: #145229;
+    --color-green-700: #166534;
+    --color-green-600: #1A7A3E;
+    --color-green-500: #22C55E;
+    --color-offwhite: #F8F6F1;
+    --color-offwhite-dark: #EDE9E0;
+    --color-surface: #FFFFFF;
+    --color-text-primary: #1A1A1A;
+    --color-text-secondary: #4B5563;
+    --color-text-muted: #9CA3AF;
+    --color-border: #E5E1D8;
+    --color-dark-bg: #0A1F12;
+    --color-dark-surface: #111F16;
+    --color-dark-border: #1E3528;
+
     /* Custom tokens */
     --accent-warm: 35 100% 50%; /* Goldish accent */
     --accent-soft: 0 0% 96%;
@@ -109,7 +126,8 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased tracking-tight;
+    @apply bg-background text-foreground antialiased tracking-tight;
+    font-family: 'Inter', sans-serif;
     line-height: 1.6;
   }
 }
