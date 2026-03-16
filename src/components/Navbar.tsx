@@ -8,6 +8,7 @@ const navLinks = [
   { label: "About Us", href: "/about", isRoute: true },
   { label: "Services", href: "/services", isRoute: true },
   { label: "Free Tools", href: "/free-tools", isRoute: true },
+  { label: "AI Page Generator", href: "/tools/page-generator", isRoute: true },
   { label: "Blogs", href: "/blogs", isRoute: true },
   { label: "Contact Us", href: "/contact", isRoute: true },
 ];

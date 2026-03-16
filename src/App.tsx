@@ -17,6 +17,7 @@ import SaaS from "./pages/services/SaaS";
 import WebDesign from "./pages/services/WebDesign";
 import BrandIdentity from "./pages/services/BrandIdentity";
 import FreeTools from "./pages/FreeTools";
+import PageGenerator from "./pages/tools/PageGenerator";
 import Blogs from "./pages/Blogs";
 import WhatsAppButton from "./components/WhatsAppButton";
 
@@ -44,6 +45,7 @@ const App = () => (
           <Route path="/blogs" element={<Blogs />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/seo-tools" element={<SEOCopilotTools />} />
+          <Route path="/tools/page-generator" element={<PageGenerator />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
