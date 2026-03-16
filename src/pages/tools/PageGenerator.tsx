@@ -33,6 +33,8 @@ const PageGenerator = () => {
   }, [isLoading]);
 
   const generatePage = async (data: any) => {
+    if (!data) return;
+    
     setIsLoading(true);
     setError(null);
     setJson(null);
@@ -47,23 +49,37 @@ const PageGenerator = () => {
         body: JSON.stringify(data),
       });
 
+      // Handle non-JSON responses (e.g. server crashes, 504 Gateway Timeout)
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Non-JSON response received:", text);
+        throw new Error(`Server returned unexpected response type: ${response.status} ${response.statusText}`);
+      }
+
       const result = await response.json();
       
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Generation failed. Please try again.');
+      if (!response.ok || !result || result.success === false) {
+        throw new Error(result?.error || result?.message || 'Generation failed. Our AI models are currently busy. Please try again in a moment.');
+      }
+
+      if (!result.json) {
+        throw new Error('Generation succeeded but no content was returned. Please try again.');
       }
 
       setJson(result.json);
       
       // Smooth scroll to preview on mobile
-      if (window.innerWidth < 1024) {
+      if (typeof window !== 'undefined' && window.innerWidth < 1024) {
         const previewElement = document.getElementById('generator-section');
         if (previewElement) {
           previewElement.scrollIntoView({ behavior: 'smooth' });
         }
       }
     } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred');
+      console.error("Generation Error:", err);
+      setError(err instanceof Error ? err.message : 'Something went wrong during generation. Please check your connection and try again.');
+      setJson(null);
     } finally {
       setIsLoading(false);
     }

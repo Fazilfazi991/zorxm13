@@ -20,6 +20,7 @@ import FreeTools from "./pages/FreeTools";
 import PageGenerator from "./pages/tools/PageGenerator";
 import Blogs from "./pages/Blogs";
 import WhatsAppButton from "./components/WhatsAppButton";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -45,7 +46,14 @@ const App = () => (
           <Route path="/blogs" element={<Blogs />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/seo-tools" element={<SEOCopilotTools />} />
-          <Route path="/ai-generator" element={<PageGenerator />} />
+          <Route 
+            path="/ai-generator" 
+            element={
+              <ErrorBoundary>
+                <PageGenerator />
+              </ErrorBoundary>
+            } 
+          />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
