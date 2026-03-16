@@ -360,6 +360,7 @@ footer{position:relative;z-index:10;padding:3rem 4rem;background:var(--black);bo
 </style>
 </head>
 <body>
+  <div id="root">
 <div id="grain"></div>
 <div id="cursor"></div>
 
@@ -686,5 +687,7 @@ document.querySelectorAll('.btn-p,.btn-g,.cta-btn,.nav-cta,.svc-cta').forEach(bt
   document.addEventListener('mousemove',e=>{c.style.left=e.clientX+'px';c.style.top=e.clientY+'px'});
 })();
 </script>
+</div>
+<script type="module" src="/src/main.tsx"></script>
 </body>
 </html>
