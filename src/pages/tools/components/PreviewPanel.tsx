@@ -3,7 +3,7 @@ import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { List, Code, Copy, Download, Check, AlertCircle, RotateCcw, Info, Layout, FileJson } from "lucide-react";
+import { List, Code, Copy, Download, Check, AlertCircle, RotateCcw, Info, Layout, FileJson, Sparkles } from "lucide-react";
 
 interface PreviewPanelProps {
   json: string | null;
