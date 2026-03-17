@@ -66,6 +66,35 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onSubmit, isLoading }) =>
   const [toast, setToast] = React.useState<string | null>(null);
   const [isPromptBuilderOpen, setIsPromptBuilderOpen] = React.useState(false);
 
+  // Rotating placeholder logic
+  const placeholders = [
+    "Make me a landing page for our web development agency in Dubai...",
+    "Create an about us page with founder story and team section...",
+    "Build a portfolio page for a freelance photographer specialising in brands...",
+    "Generate a landing page for our SEO service targeting UAE businesses...",
+    "Design an about page for a digital marketing agency with values section...",
+    "Make a portfolio page for a creative studio with project showcases...",
+    "Create a landing page for a restaurant with online booking CTA...",
+    "Build a service page for a law firm focusing on corporate clients..."
+  ];
+
+  const [placeholderIndex, setPlaceholderIndex] = React.useState(0);
+  const [placeholderVisible, setPlaceholderVisible] = React.useState(true);
+  const [isFocused, setIsFocused] = React.useState(false);
+  const [promptAddedFlash, setPromptAddedFlash] = React.useState(false);
+
+  React.useEffect(() => {
+    if (isFocused || description) return;
+    const interval = setInterval(() => {
+      setPlaceholderVisible(false);
+      setTimeout(() => {
+        setPlaceholderIndex(i => (i + 1) % placeholders.length);
+        setPlaceholderVisible(true);
+      }, 300);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [isFocused, description, placeholders.length]);
+
   const submitButtonRef = React.useRef<HTMLButtonElement>(null);
 
   const showToast = (message: string) => {
@@ -88,7 +117,11 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onSubmit, isLoading }) =>
     setDescription(prompt);
     if (cta) setCtaText(cta);
     setIsPromptBuilderOpen(false);
-    showToast("Prompt added — ready to generate!");
+    showToast("Prompt added ✓");
+    
+    // Pulse animation
+    setPromptAddedFlash(true);
+    setTimeout(() => setPromptAddedFlash(false), 800);
     
     // Smooth scroll to generate button
     setTimeout(() => {
@@ -178,23 +211,87 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onSubmit, isLoading }) =>
               )}
             </div>
           </div>
-          <Textarea
-            id="description"
-            placeholder="What does your business do? Who is your audience?"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-            className={`min-h-[100px] py-3 resize-none ${inputStyles}`}
-          />
-          
-          <button
-            type="button"
-            onClick={() => setIsPromptBuilderOpen(true)}
-            className="w-full flex items-center justify-center gap-2 h-10 rounded-[10px] border border-[var(--color-green-700)] text-[var(--color-green-700)] bg-[var(--color-green-700)]/[0.04] text-[13px] font-medium hover:bg-[var(--color-green-700)]/[0.08] transition-all"
+          <div 
+            className="flex flex-col"
+            style={{
+              background: 'var(--color-background-primary)',
+              border: '1px solid var(--color-border)',
+              borderRadius: '16px',
+              padding: '16px',
+              transition: 'all 0.2s',
+              ...(isFocused ? {
+                borderColor: '#166534',
+                boxShadow: '0 0 0 3px rgba(22,101,52,0.08)'
+              } : {}),
+              ...(promptAddedFlash ? {
+                borderColor: '#166534',
+                boxShadow: '0 0 0 4px rgba(22,101,52,0.2)'
+              } : {})
+            }}
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            Build my prompt for me
-          </button>
+            <textarea
+              id="description"
+              placeholder={placeholders[placeholderIndex]}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              required
+              style={{
+                border: 'none',
+                outline: 'none',
+                background: 'transparent',
+                width: '100%',
+                minHeight: '80px',
+                maxHeight: '200px',
+                resize: 'none',
+                fontSize: '14px',
+                color: 'var(--color-text-primary)',
+                lineHeight: '1.6',
+                fontFamily: 'inherit',
+                opacity: placeholderVisible || description ? 1 : 0,
+                transform: placeholderVisible || description ? 'translateY(0)' : 'translateY(-4px)',
+                transition: 'opacity 0.3s, transform 0.3s'
+              }}
+              className="custom-scrollbar"
+            />
+            
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              paddingTop: '10px',
+              borderTop: '0.5px solid var(--color-border-tertiary)',
+              marginTop: '8px'
+            }}>
+              <button
+                type="button"
+                onClick={() => setIsPromptBuilderOpen(true)}
+                style={{
+                  fontSize: '12px',
+                  color: '#166534',
+                  background: 'rgba(22,101,52,0.06)',
+                  border: '0.5px solid rgba(22,101,52,0.2)',
+                  borderRadius: '20px',
+                  padding: '4px 12px',
+                  cursor: 'pointer',
+                  fontWeight: 500,
+                  transition: 'background 0.2s'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.background = 'rgba(22,101,52,0.12)'}
+                onMouseOut={(e) => e.currentTarget.style.background = 'rgba(22,101,52,0.06)'}
+              >
+                ✦ Build my prompt
+              </button>
+              
+              <span style={{
+                fontSize: '11px',
+                color: 'var(--color-text-muted)'
+              }}>
+                {description.length} / 500
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 

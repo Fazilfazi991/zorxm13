@@ -1,6 +1,5 @@
-
-import React from 'react';
-import { X, ArrowLeft, ArrowRight, Sparkles, Check, Edit2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { X, ArrowLeft, Check, Edit2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -21,8 +20,8 @@ const STEPS = [
 ];
 
 export const PromptBuilder: React.FC<PromptBuilderProps> = ({ isOpen, onClose, onUsePrompt }) => {
-  const [currentStep, setCurrentStep] = React.useState(1);
-  const [answers, setAnswers] = React.useState({
+  const [currentStep, setCurrentStep] = useState(1);
+  const [answers, setAnswers] = useState({
     whatYouDo: '',
     customers: [] as string[],
     goal: '',
@@ -30,13 +29,30 @@ export const PromptBuilder: React.FC<PromptBuilderProps> = ({ isOpen, onClose, o
     highlights: '',
     feeling: ''
   });
-  const [customCustomer, setCustomCustomer] = React.useState('');
-  const [showCustomCustomerInput, setShowCustomCustomerInput] = React.useState(false);
-  const [customCta, setCustomCta] = React.useState('');
-  const [showCustomCtaInput, setShowCustomCtaInput] = React.useState(false);
-  const [isGenerated, setIsGenerated] = React.useState(false);
-  const [generatedPrompt, setGeneratedPrompt] = React.useState('');
-  const [isEditingPrompt, setIsEditingPrompt] = React.useState(false);
+  const [customCustomer, setCustomCustomer] = useState('');
+  const [showCustomCustomerInput, setShowCustomCustomerInput] = useState(false);
+  const [customCta, setCustomCta] = useState('');
+  const [showCustomCtaInput, setShowCustomCtaInput] = useState(false);
+  const [isGenerated, setIsGenerated] = useState(false);
+  const [generatedPrompt, setGeneratedPrompt] = useState('');
+  const [isEditingPrompt, setIsEditingPrompt] = useState(false);
+  
+  // Need delayed render for CSS slide up transition
+  const [shouldRender, setShouldRender] = useState(false);
+  
+  useEffect(() => {
+    if (isOpen) {
+      setShouldRender(true);
+      // Reset state on open if it was closed
+      if (isGenerated) {
+        setIsGenerated(false);
+        setCurrentStep(1);
+      }
+    } else {
+      const timer = setTimeout(() => setShouldRender(false), 350);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
 
   const handleNext = () => {
     if (currentStep < 6) {
@@ -90,240 +106,238 @@ export const PromptBuilder: React.FC<PromptBuilderProps> = ({ isOpen, onClose, o
     }
   };
 
-  if (!isOpen) return null;
+  if (!shouldRender) return null;
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
+    <>
+      {/* Backdrop */}
       <div 
-        className="bg-white w-[90%] max-w-[520px] rounded-[24px] shadow-2xl relative flex flex-col max-h-[85vh] overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-8 duration-500"
+        className="fixed inset-0 z-40 bg-black/30 transition-opacity duration-200"
+        style={{ opacity: isOpen ? 1 : 0 }}
+        onClick={onClose} 
+      />
+      
+      {/* Bottom Sheet Panel */}
+      <div 
+        className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-background-primary)] rounded-t-[24px] border-t border-[var(--color-border)] w-full flex flex-col md:max-h-[85vh] max-h-[92vh]"
+        style={{
+          transform: isOpen ? 'translateY(0)' : 'translateY(100%)',
+          transition: 'transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)'
+        }}
         onKeyDown={handleKeyDown}
       >
-        {/* Progress Bar */}
+        {/* Progress Bar (Sticky Top) */}
         {!isGenerated && (
-          <div className="absolute top-0 left-0 w-full h-[3px] bg-[var(--color-offwhite)]">
+          <div className="sticky top-0 w-full h-[3px] bg-[var(--color-border-tertiary)] z-20">
             <div 
-              className="h-full bg-[var(--color-green-700)] transition-all duration-500 ease-out" 
+              className="h-full bg-[#166534] transition-all duration-300 ease-out" 
               style={{ width: `${(currentStep / 6) * 100}%` }}
             />
           </div>
         )}
 
-        <button 
-          onClick={onClose}
-          className="absolute top-6 right-6 p-2 rounded-full hover:bg-[var(--color-offwhite)] text-[var(--color-text-muted)] transition-colors z-10"
-        >
-          <X className="w-5 h-5" />
-        </button>
+        {/* Panel Header */}
+        <div className="pt-4 px-6 pb-4 shrink-0 relative bg-[var(--color-background-primary)] z-10 rounded-t-[24px]">
+          <div className="w-10 h-1 bg-[var(--color-border-secondary)] rounded-full mx-auto mb-4" />
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-[18px] font-semibold text-[var(--color-text-primary)]">Build your prompt</h2>
+              <p className="text-[13px] text-[var(--color-text-muted)]">Answer a few questions</p>
+            </div>
+            <button 
+              onClick={onClose} 
+              className="p-2 hover:bg-[var(--color-offwhite)] rounded-full text-[var(--color-text-muted)] transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
 
-        <div className="p-8 pt-10 overflow-y-auto custom-scrollbar flex-grow">
+        {/* Scrollable Content */}
+        <div className="px-6 overflow-y-auto custom-scrollbar flex-grow pb-[120px]">
           {!isGenerated ? (
-            <div className="space-y-8">
-              {/* Header */}
-              <div className="space-y-1">
-                <h2 className="text-[22px] font-semibold text-[var(--color-text-primary)] tracking-tight">Let's build your prompt</h2>
-                <p className="text-[14px] text-[var(--color-text-muted)]">Answer a few quick questions (Step {currentStep}/6)</p>
-              </div>
+            <div className="animate-in slide-in-from-right-8 duration-300 pt-2">
+              {currentStep === 1 && (
+                <div className="space-y-4">
+                  <p className="text-[16px] font-medium text-[var(--color-text-primary)]">{STEPS[0]}</p>
+                  <Textarea 
+                    autoFocus
+                    placeholder="e.g. We run an SEO agency helping small businesses rank on Google..."
+                    className="min-h-[120px] py-4 bg-[var(--color-offwhite)] border-[var(--color-border)] rounded-[16px] text-[15px] focus:ring-4 focus:ring-[var(--color-green-700)]/10 focus:border-[var(--color-green-700)] transition-all leading-relaxed"
+                    value={answers.whatYouDo}
+                    onChange={(e) => setAnswers({...answers, whatYouDo: e.target.value})}
+                  />
+                </div>
+              )}
 
-              {/* Step Content */}
-              <div className="animate-in slide-in-from-right-8 duration-300">
-                {currentStep === 1 && (
-                  <div className="space-y-4">
-                    <p className="text-[16px] font-medium text-[var(--color-text-primary)]">{STEPS[0]}</p>
-                    <Textarea 
-                      autoFocus
-                      placeholder="e.g. We run an SEO agency helping small businesses rank on Google..."
-                      className="min-h-[120px] py-4 bg-[var(--color-offwhite)] border-[var(--color-border)] rounded-[16px] text-[15px] focus:ring-4 focus:ring-[var(--color-green-700)]/10 focus:border-[var(--color-green-700)] transition-all leading-relaxed"
-                      value={answers.whatYouDo}
-                      onChange={(e) => setAnswers({...answers, whatYouDo: e.target.value})}
-                    />
+              {currentStep === 2 && (
+                <div className="space-y-4">
+                  <p className="text-[16px] font-medium text-[var(--color-text-primary)]">{STEPS[1]}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {["Small businesses", "Freelancers", "Startups", "Enterprises", "Local customers", "E-commerce brands"].map(chip => (
+                      <button
+                        key={chip}
+                        onClick={() => toggleCustomer(chip)}
+                        className={`px-4 py-2 rounded-full text-[13px] font-medium border transition-all ${
+                          answers.customers.includes(chip)
+                            ? 'bg-[var(--color-green-700)] text-white border-[var(--color-green-700)] shadow-md'
+                            : 'bg-[var(--color-offwhite)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-[var(--color-green-700)]/50'
+                        }`}
+                      >
+                        {chip}
+                      </button>
+                    ))}
+                    {!showCustomCustomerInput ? (
+                      <button
+                        onClick={() => setShowCustomCustomerInput(true)}
+                        className="px-4 py-2 rounded-full text-[13px] font-medium border border-dashed border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-green-700)] transition-all"
+                      >
+                        + Add your own
+                      </button>
+                    ) : (
+                      <div className="flex gap-2 w-[100%] md:w-auto">
+                        <Input 
+                          autoFocus
+                          placeholder="Type customer type..."
+                          className="h-10 bg-[var(--color-offwhite)] rounded-full text-[13px] flex-grow"
+                          value={customCustomer}
+                          onChange={(e) => setCustomCustomer(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && addCustomCustomer()}
+                        />
+                        <Button onClick={addCustomCustomer} size="sm" className="rounded-full bg-[var(--color-green-700)] shrink-0">Add</Button>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
+              )}
 
-                {currentStep === 2 && (
-                  <div className="space-y-4">
-                    <p className="text-[16px] font-medium text-[var(--color-text-primary)]">{STEPS[1]}</p>
-                    <div className="flex flex-wrap gap-2">
-                      {["Small businesses", "Freelancers", "Startups", "Enterprises", "Local customers", "E-commerce brands"].map(chip => (
-                        <button
-                          key={chip}
-                          onClick={() => toggleCustomer(chip)}
-                          className={`px-4 py-2 rounded-full text-[13px] font-medium border transition-all ${
-                            answers.customers.includes(chip)
-                              ? 'bg-[var(--color-green-700)] text-white border-[var(--color-green-700)] shadow-md'
-                              : 'bg-[var(--color-offwhite)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-[var(--color-green-700)]/50'
-                          }`}
-                        >
-                          {chip}
-                        </button>
-                      ))}
-                      {!showCustomCustomerInput ? (
-                        <button
-                          onClick={() => setShowCustomCustomerInput(true)}
-                          className="px-4 py-2 rounded-full text-[13px] font-medium border border-dashed border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-green-700)] transition-all"
-                        >
-                          + Add your own
-                        </button>
-                      ) : (
-                        <div className="flex gap-2 w-full">
-                          <Input 
-                            autoFocus
-                            placeholder="Type customer type..."
-                            className="h-10 bg-[var(--color-offwhite)] rounded-full text-[13px]"
-                            value={customCustomer}
-                            onChange={(e) => setCustomCustomer(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && addCustomCustomer()}
-                          />
-                          <Button onClick={addCustomCustomer} size="sm" className="rounded-full bg-[var(--color-green-700)]">Add</Button>
-                        </div>
-                      )}
-                    </div>
+              {currentStep === 3 && (
+                <div className="space-y-4">
+                  <p className="text-[16px] font-medium text-[var(--color-text-primary)]">{STEPS[2]}</p>
+                  <div className="flex flex-col gap-2">
+                    {["Get leads", "Book consultations", "Sell a product or service", "Build brand trust", "Show my work"].map(chip => (
+                      <button
+                        key={chip}
+                        onClick={() => setAnswers({...answers, goal: chip})}
+                        className={`px-5 py-3 rounded-xl text-left text-[14px] font-medium border transition-all flex items-center justify-between ${
+                          answers.goal === chip
+                            ? 'bg-[var(--color-green-700)] text-white border-[var(--color-green-700)] shadow-lg'
+                            : 'bg-[var(--color-offwhite)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-[var(--color-green-700)]/50'
+                        }`}
+                      >
+                        {chip}
+                        {answers.goal === chip && <Check className="w-4 h-4 ml-2" />}
+                      </button>
+                    ))}
                   </div>
-                )}
+                </div>
+              )}
 
-                {currentStep === 3 && (
-                  <div className="space-y-4">
-                    <p className="text-[16px] font-medium text-[var(--color-text-primary)]">{STEPS[2]}</p>
-                    <div className="flex flex-col gap-2">
-                      {["Get leads", "Book consultations", "Sell a product or service", "Build brand trust", "Show my work"].map(chip => (
-                        <button
-                          key={chip}
-                          onClick={() => setAnswers({...answers, goal: chip})}
-                          className={`px-5 py-3 rounded-xl text-left text-[14px] font-medium border transition-all flex items-center justify-between ${
-                            answers.goal === chip
-                              ? 'bg-[var(--color-green-700)] text-white border-[var(--color-green-700)] shadow-lg'
-                              : 'bg-[var(--color-offwhite)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-[var(--color-green-700)]/50'
-                          }`}
-                        >
-                          {chip}
-                          {answers.goal === chip && <Check className="w-4 h-4 ml-2" />}
-                        </button>
-                      ))}
-                    </div>
+              {currentStep === 4 && (
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-[16px] font-medium text-[var(--color-text-primary)]">{STEPS[3]}</p>
+                    <p className="text-[13px] text-[var(--color-text-muted)] mt-1">This becomes your call-to-action button</p>
                   </div>
-                )}
-
-                {currentStep === 4 && (
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-[16px] font-medium text-[var(--color-text-primary)]">{STEPS[3]}</p>
-                      <p className="text-[13px] text-[var(--color-text-muted)] mt-1">This becomes your call-to-action button</p>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {["Book a Free Call", "Get a Quote", "Start Free Trial", "Contact Us", "View My Work", "Shop Now"].map(chip => (
-                        <button
-                          key={chip}
-                          onClick={() => setAnswers({...answers, cta: chip})}
-                          className={`px-4 py-2 rounded-full text-[13px] font-medium border transition-all ${
-                            answers.cta === chip
-                              ? 'bg-[var(--color-green-700)] text-white border-[var(--color-green-700)]'
-                              : 'bg-[var(--color-offwhite)] text-[var(--color-text-secondary)] border-[var(--color-border)]'
-                          }`}
-                        >
-                          {chip}
-                        </button>
-                      ))}
-                      {!showCustomCtaInput ? (
-                        <button
-                          onClick={() => setShowCustomCtaInput(true)}
-                          className="px-4 py-2 rounded-full text-[13px] font-medium border border-dashed border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-green-700)]"
-                        >
-                          + Write my own
-                        </button>
-                      ) : (
-                        <div className="flex gap-2 w-full mt-2">
-                          <Input 
-                            autoFocus
-                            placeholder="Type CTA text..."
-                            className="h-10 bg-[var(--color-offwhite)] rounded-full text-[13px]"
-                            value={customCta}
-                            onChange={(e) => setCustomCta(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && addCustomCta()}
-                          />
-                          <Button onClick={addCustomCta} size="sm" className="rounded-full bg-[var(--color-green-700)]">Add</Button>
-                        </div>
-                      )}
-                    </div>
+                  <div className="flex flex-wrap gap-2">
+                    {["Book a Free Call", "Get a Quote", "Start Free Trial", "Contact Us", "View My Work", "Shop Now"].map(chip => (
+                      <button
+                        key={chip}
+                        onClick={() => setAnswers({...answers, cta: chip})}
+                        className={`px-4 py-2 rounded-full text-[13px] font-medium border transition-all ${
+                          answers.cta === chip
+                            ? 'bg-[var(--color-green-700)] text-white border-[var(--color-green-700)]'
+                            : 'bg-[var(--color-offwhite)] text-[var(--color-text-secondary)] border-[var(--color-border)]'
+                        }`}
+                      >
+                        {chip}
+                      </button>
+                    ))}
+                    {!showCustomCtaInput ? (
+                      <button
+                        onClick={() => setShowCustomCtaInput(true)}
+                        className="px-4 py-2 rounded-full text-[13px] font-medium border border-dashed border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-green-700)]"
+                      >
+                        + Write my own
+                      </button>
+                    ) : (
+                      <div className="flex gap-2 w-[100%] md:w-auto mt-2">
+                        <Input 
+                          autoFocus
+                          placeholder="Type CTA text..."
+                          className="h-10 bg-[var(--color-offwhite)] rounded-full text-[13px] flex-grow"
+                          value={customCta}
+                          onChange={(e) => setCustomCta(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && addCustomCta()}
+                        />
+                        <Button onClick={addCustomCta} size="sm" className="rounded-full bg-[var(--color-green-700)]">Add</Button>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
+              )}
 
-                {currentStep === 5 && (
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-[16px] font-medium text-[var(--color-text-primary)]">{STEPS[4]}</p>
-                      <p className="text-[13px] text-[var(--color-text-muted)] mt-1">Separate with commas</p>
-                    </div>
-                    <Input 
-                      autoFocus
-                      placeholder="e.g. SEO audits, Content writing, Link building"
-                      className="h-14 px-5 bg-[var(--color-offwhite)] border-[var(--color-border)] rounded-[16px] text-l focus:ring-4 focus:ring-[var(--color-green-700)]/10 focus:border-[var(--color-green-700)] transition-all"
-                      value={answers.highlights}
-                      onChange={(e) => setAnswers({...answers, highlights: e.target.value})}
-                    />
+              {currentStep === 5 && (
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-[16px] font-medium text-[var(--color-text-primary)]">{STEPS[4]}</p>
+                    <p className="text-[13px] text-[var(--color-text-muted)] mt-1">Separate with commas</p>
                   </div>
-                )}
+                  <Input 
+                    autoFocus
+                    placeholder="e.g. SEO audits, Content writing, Link building"
+                    className="h-14 px-5 bg-[var(--color-offwhite)] border-[var(--color-border)] rounded-[16px] text-l focus:ring-4 focus:ring-[var(--color-green-700)]/10 focus:border-[var(--color-green-700)] transition-all"
+                    value={answers.highlights}
+                    onChange={(e) => setAnswers({...answers, highlights: e.target.value})}
+                  />
+                </div>
+              )}
 
-                {currentStep === 6 && (
-                  <div className="space-y-4">
-                    <p className="text-[16px] font-medium text-[var(--color-text-primary)]">{STEPS[5]}</p>
-                    <div className="grid grid-cols-1 gap-2">
-                      {[
-                        { label: "Trustworthy", emoji: "🛡️" },
-                        { label: "Exciting & Bold", emoji: "🔥" },
-                        { label: "Premium & Luxury", emoji: "💎" },
-                        { label: "Friendly & Approachable", emoji: "🤝" },
-                        { label: "Clean & Minimal", emoji: "✨" }
-                      ].map(item => (
-                        <button
-                          key={item.label}
-                          onClick={() => setAnswers({...answers, feeling: item.label})}
-                          className={`px-5 py-3 rounded-xl text-left text-[14px] font-medium border transition-all flex items-center gap-3 ${
-                            answers.feeling === item.label
-                              ? 'bg-[var(--color-green-700)] text-white border-[var(--color-green-700)]'
-                              : 'bg-[var(--color-offwhite)] text-[var(--color-text-secondary)] border-[var(--color-border)]'
-                          }`}
-                        >
-                          <span className="text-lg">{item.emoji}</span>
-                          {item.label}
-                        </button>
-                      ))}
-                    </div>
+              {currentStep === 6 && (
+                <div className="space-y-4">
+                  <p className="text-[16px] font-medium text-[var(--color-text-primary)]">{STEPS[5]}</p>
+                  <div className="grid grid-cols-1 gap-2">
+                    {[
+                      { label: "Trustworthy", emoji: "🛡️" },
+                      { label: "Exciting & Bold", emoji: "🔥" },
+                      { label: "Premium & Luxury", emoji: "💎" },
+                      { label: "Friendly & Approachable", emoji: "🤝" },
+                      { label: "Clean & Minimal", emoji: "✨" }
+                    ].map(item => (
+                      <button
+                        key={item.label}
+                        onClick={() => setAnswers({...answers, feeling: item.label})}
+                        className={`px-5 py-3 rounded-xl text-left text-[14px] font-medium border transition-all flex items-center gap-3 ${
+                          answers.feeling === item.label
+                            ? 'bg-[var(--color-green-700)] text-white border-[var(--color-green-700)]'
+                            : 'bg-[var(--color-offwhite)] text-[var(--color-text-secondary)] border-[var(--color-border)]'
+                        }`}
+                      >
+                        <span className="text-lg">{item.emoji}</span>
+                        {item.label}
+                      </button>
+                    ))}
                   </div>
-                )}
-              </div>
-
-              {/* Navigation */}
-              <div className="flex items-center justify-between pt-4">
-                <button 
-                  onClick={handleBack}
-                  disabled={currentStep === 1}
-                  className={`text-[14px] font-medium flex items-center gap-2 transition-opacity ${currentStep === 1 ? 'opacity-0' : 'opacity-60 hover:opacity-100'}`}
-                >
-                  <ArrowLeft className="w-4 h-4" /> Back
-                </button>
-                <Button 
-                  onClick={handleNext}
-                  disabled={
-                    (currentStep === 1 && !answers.whatYouDo) ||
-                    (currentStep === 2 && answers.customers.length === 0) ||
-                    (currentStep === 3 && !answers.goal) ||
-                    (currentStep === 4 && !answers.cta) ||
-                    (currentStep === 5 && !answers.highlights) ||
-                    (currentStep === 6 && !answers.feeling)
-                  }
-                  className="bg-[var(--color-green-700)] hover:bg-[var(--color-green-600)] text-white font-bold h-12 px-8 rounded-xl shadow-lg shadow-[var(--color-green-700)]/20 active:scale-[0.98] transition-all"
-                >
-                  {currentStep === 6 ? 'Build My Prompt ✦' : 'Next →'}
-                </Button>
-              </div>
+                </div>
+              )}
             </div>
           ) : (
-            <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-6 pt-2 pb-6 animate-in slide-in-from-bottom-4 duration-500">
               <div className="space-y-2">
                 <h2 className="text-[20px] font-bold text-[var(--color-text-primary)]">Your prompt is ready</h2>
                 <p className="text-[14px] text-[var(--color-text-muted)]">We've written this based on your answers</p>
               </div>
 
-              <div className="bg-[var(--color-green-700)]/[0.06] border-l-[4px] border-[var(--color-green-700)] p-5 rounded-r-[12px] relative group">
+              <div 
+                className="relative group"
+                style={{
+                  background: 'rgba(22,101,52,0.06)',
+                  borderLeft: '3px solid #166534',
+                  borderRadius: '0 8px 8px 0',
+                  padding: '16px 20px',
+                  margin: '16px 0'
+                }}
+              >
                 {isEditingPrompt ? (
                   <Textarea 
                     autoFocus
@@ -332,38 +346,63 @@ export const PromptBuilder: React.FC<PromptBuilderProps> = ({ isOpen, onClose, o
                     onChange={(e) => setGeneratedPrompt(e.target.value)}
                   />
                 ) : (
-                  <p className="text-[14px] text-[var(--color-text-primary)] leading-relaxed font-dm">
+                  <p className="text-[14px] text-[var(--color-text-primary)] leading-[1.7] font-dm">
                     {generatedPrompt}
                   </p>
                 )}
-                {!isEditingPrompt && (
-                  <button 
-                    onClick={() => setIsEditingPrompt(true)}
-                    className="absolute top-2 right-2 p-1.5 bg-white/50 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <Edit2 className="w-3.5 h-3.5 text-[var(--color-text-muted)]" />
-                  </button>
-                )}
               </div>
 
-              <div className="flex flex-col gap-3 pt-4">
+              <div className="flex flex-col gap-3">
+                <Button 
+                  onClick={() => setIsEditingPrompt(!isEditingPrompt)}
+                  variant="outline"
+                  className="w-full text-[var(--color-text-secondary)] font-medium h-12 rounded-xl text-[14px] active:scale-[0.98] transition-all"
+                >
+                  {isEditingPrompt ? 'Save edit' : 'Edit prompt manually'}
+                </Button>
                 <Button 
                   onClick={() => onUsePrompt(generatedPrompt, answers.cta)}
-                  className="bg-[var(--color-green-700)] hover:bg-[var(--color-green-600)] text-white font-bold h-12 rounded-xl text-[15px] shadow-xl shadow-[var(--color-green-700)]/20 active:scale-[0.98] transition-all"
+                  className="bg-[#166534] hover:bg-[#14532d] text-white font-bold h-12 rounded-xl text-[15px] shadow-sm active:scale-[0.98] transition-all"
                 >
                   Use this prompt →
                 </Button>
-                <button 
-                  onClick={() => setIsGenerated(false)} 
-                  className="text-[13px] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] font-medium transition-colors"
-                >
-                  Edit answers
-                </button>
               </div>
             </div>
           )}
         </div>
+
+        {/* Navigation Sticky Bottom (Only visible before generated) */}
+        {!isGenerated && (
+          <div className="absolute bottom-0 left-0 right-0 bg-[var(--color-background-primary)] px-6 py-4 border-t border-[0.5px] border-[var(--color-border-tertiary)] flex items-center justify-between z-10 shrink-0">
+            {currentStep > 1 ? (
+              <button 
+                onClick={handleBack}
+                className="text-[14px] font-medium flex items-center gap-2 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
+                style={{ background: 'transparent', border: '1px solid var(--color-border)', borderRadius: '12px', padding: '8px 16px' }}
+              >
+                <ArrowLeft className="w-4 h-4" /> Back
+              </button>
+            ) : (
+              <div /> // Spacer
+            )}
+            
+            <Button 
+              onClick={handleNext}
+              disabled={
+                (currentStep === 1 && !answers.whatYouDo) ||
+                (currentStep === 2 && answers.customers.length === 0) ||
+                (currentStep === 3 && !answers.goal) ||
+                (currentStep === 4 && !answers.cta) ||
+                (currentStep === 5 && !answers.highlights) ||
+                (currentStep === 6 && !answers.feeling)
+              }
+              className="bg-[#166534] hover:bg-[#14532d] text-white font-bold h-11 px-6 rounded-xl shadow-sm active:scale-[0.98] transition-all"
+            >
+              {currentStep === 6 ? 'Build My Prompt' : 'Next →'}
+            </Button>
+          </div>
+        )}
       </div>
-    </div>
+    </>
   );
 };
