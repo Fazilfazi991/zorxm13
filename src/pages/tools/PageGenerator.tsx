@@ -6,7 +6,11 @@ import PreviewPanel from "./components/PreviewPanel";
 import { ChevronDown, Pencil, Wand2, Download, Layout, Sparkles } from "lucide-react";
 
 const PageGenerator = () => {
-  const [json, setJson] = React.useState<string | null>(null);
+  const [generatedData, setGeneratedData] = React.useState<{
+    data: any,
+    primaryColor: string,
+    businessName: string
+  } | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const [loadingStep, setLoadingStep] = React.useState(0);
   const [error, setError] = React.useState<string | null>(null);
@@ -37,7 +41,7 @@ const PageGenerator = () => {
     
     setIsLoading(true);
     setError(null);
-    setJson(null);
+    setGeneratedData(null);
     setLastInput(data);
     
     try {
@@ -63,11 +67,11 @@ const PageGenerator = () => {
         throw new Error(result?.error || result?.message || 'Generation failed. Our AI models are currently busy. Please try again in a moment.');
       }
 
-      if (!result.json) {
-        throw new Error('Generation succeeded but no content was returned. Please try again.');
-      }
-
-      setJson(result.json);
+      setGeneratedData({
+        data: result.data,
+        primaryColor: data.primaryColor,
+        businessName: data.businessName
+      });
       
       // Smooth scroll to preview on mobile
       if (typeof window !== 'undefined' && window.innerWidth < 1024) {
@@ -79,7 +83,7 @@ const PageGenerator = () => {
     } catch (err: any) {
       console.error("Generation Error:", err);
       setError(err instanceof Error ? err.message : 'Something went wrong during generation. Please check your connection and try again.');
-      setJson(null);
+      setGeneratedData(null);
     } finally {
       setIsLoading(false);
     }
@@ -202,8 +206,9 @@ const PageGenerator = () => {
             {/* Preview Section */}
             <div className="lg:col-span-7 xl:col-span-8 h-[740px]">
               <PreviewPanel 
-                json={json} 
-                businessName={lastInput?.businessName || 'Business'}
+                data={generatedData?.data || null} 
+                businessName={generatedData?.businessName || lastInput?.businessName || 'Business'}
+                primaryColor={generatedData?.primaryColor || lastInput?.primaryColor || '#ff0000'}
                 pageType={lastInput?.pageType || 'page'}
                 isLoading={isLoading} 
                 loadingMessage={loadingMessages[loadingStep]}

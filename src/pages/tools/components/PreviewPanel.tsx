@@ -3,11 +3,14 @@ import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { List, Code, Copy, Download, Check, AlertCircle, RotateCcw, Info, Layout, FileJson, Sparkles } from "lucide-react";
+import { List, Code, Copy, Download, Check, AlertCircle, RotateCcw, Info, Layout, FileJson, Sparkles, Smartphone, Monitor, ExternalLink } from "lucide-react";
+import { elementorToHtml } from '@/utils/elementorToHtml';
+import { toElementorClipboard, downloadElementorJSON } from '@/utils/elementorExport';
 
 interface PreviewPanelProps {
-  json: string | null;
+  data: any;
   businessName: string;
+  primaryColor: string;
   pageType: string;
   isLoading: boolean;
   loadingMessage?: string;
@@ -16,8 +19,9 @@ interface PreviewPanelProps {
 }
 
 const PreviewPanel: React.FC<PreviewPanelProps> = ({ 
-  json, 
+  data, 
   businessName = 'Business', 
+  primaryColor = '#ff0000',
   pageType = 'page', 
   isLoading, 
   loadingMessage,
@@ -25,26 +29,20 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({
   onRetry 
 }) => {
   const [copied, setCopied] = React.useState(false);
+  const [viewMode, setViewMode] = React.useState<'desktop' | 'mobile'>('desktop');
 
-  const parsedJson = React.useMemo(() => {
-    if (!json || typeof json !== 'string') return null;
-    try {
-      const data = JSON.parse(json);
-      // Validate basic structure to prevent mapping over undefined
-      if (!data || typeof data !== 'object') return null;
-      return data;
-    } catch (e) {
-      console.error("Failed to parse Elementor JSON", e);
-      return null;
-    }
-  }, [json]);
+  const htmlPreview = React.useMemo(() => {
+    if (!data) return '';
+    return elementorToHtml(data, primaryColor, businessName);
+  }, [data, primaryColor, businessName]);
 
-  const handleCopy = () => {
-    if (json) {
+  const handleCopyToElementor = () => {
+    if (data) {
       try {
-        navigator.clipboard.writeText(json);
+        const clipboardString = toElementorClipboard(data);
+        navigator.clipboard.writeText(clipboardString);
         setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        setTimeout(() => setCopied(false), 3000);
       } catch (err) {
         console.error("Copy failed:", err);
       }
@@ -52,21 +50,8 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({
   };
 
   const handleDownload = () => {
-    if (json) {
-      try {
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        const safeBusinessName = (businessName || 'business').toLowerCase().replace(/\s+/g, '-');
-        a.download = `elementor-${pageType || 'template'}-${safeBusinessName}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      } catch (err) {
-        console.error("Download failed:", err);
-      }
+    if (data) {
+      downloadElementorJSON(data, businessName, pageType);
     }
   };
 
@@ -122,7 +107,7 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({
     );
   }
 
-  if (!json || !parsedJson) {
+  if (!data) {
     return (
       <Card className="h-full flex flex-col items-center justify-center p-12 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[20px] shadow-sm text-center group">
         <div className="w-24 h-24 rounded-[32px] bg-[var(--color-offwhite)] flex items-center justify-center mb-8 transition-all duration-500 group-hover:scale-105 group-hover:bg-[var(--color-green-700)]/5 border border-transparent group-hover:border-[var(--color-green-700)]/10 shadow-sm">
@@ -140,25 +125,24 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({
 
   return (
     <div className="h-full flex flex-col gap-6 animate-fade-in overflow-hidden">
-      <div className="flex items-center justify-between bg-white p-4 px-6 rounded-[20px] border border-[var(--color-border)] shadow-sm">
+      <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between bg-white p-4 px-6 rounded-[20px] border border-[var(--color-border)] shadow-sm">
         <div className="flex items-center gap-3">
           <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.4)]" />
           <h3 className="font-semibold text-[15px] text-[var(--color-text-primary)]">AI Generation Ready</h3>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button 
+            onClick={handleCopyToElementor} 
+            className={`gap-2 h-10 shadow-sm rounded-[10px] px-6 transition-all active:scale-[0.98] ${copied ? 'bg-green-600 hover:bg-green-600' : 'bg-[var(--color-green-700)] hover:bg-[var(--color-green-600)]'} text-white w-full sm:w-auto`}
+          >
+            {copied ? <Check className="w-4 h-4" /> : <ExternalLink className="w-4 h-4" />}
+            {copied ? 'Copied! Now paste in Elementor' : 'Copy to Elementor'}
+          </Button>
           <Button 
             variant="outline" 
             size="sm" 
-            onClick={handleCopy} 
-            className="gap-2 h-10 border-[var(--color-green-700)] text-[var(--color-green-700)] hover:bg-[var(--color-green-700)] hover:text-white transition-all rounded-[10px] px-4"
-          >
-            {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-            {copied ? 'Copied!' : 'Copy JSON'}
-          </Button>
-          <Button 
-            size="sm" 
             onClick={handleDownload} 
-            className="gap-2 h-10 bg-[var(--color-green-700)] hover:bg-[var(--color-green-600)] text-white shadow-sm rounded-[10px] px-5 transition-all active:scale-[0.98]"
+            className="gap-2 h-10 border-[var(--color-green-700)] text-[var(--color-green-700)] hover:bg-[var(--color-green-700)] hover:text-white transition-all rounded-[10px] px-4 w-full sm:w-auto"
           >
             <Download className="w-4 h-4" />
             Download JSON
@@ -167,9 +151,13 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({
       </div>
 
       <Card className="flex-grow overflow-hidden border border-[var(--color-border)] shadow-sm flex flex-col bg-[var(--color-surface)] rounded-[20px]">
-        <Tabs defaultValue="sections" className="flex flex-col h-full">
-          <div className="px-5 py-3.5 border-b border-[var(--color-border)] flex items-center justify-between bg-white shrink-0">
+        <Tabs defaultValue="preview" className="flex flex-col h-full">
+          <div className="px-5 py-3.5 border-b border-[var(--color-border)] flex flex-wrap items-center justify-between bg-white shrink-0 gap-4">
             <TabsList className="bg-[var(--color-offwhite)] p-1 rounded-xl h-10">
+              <TabsTrigger value="preview" className="gap-2 px-5 h-8 transition-all data-[state=active]:bg-white data-[state=active]:text-[var(--color-green-700)] data-[state=active]:shadow-sm rounded-lg text-sm font-medium">
+                <Layout className="w-4 h-4" />
+                Preview
+              </TabsTrigger>
               <TabsTrigger value="sections" className="gap-2 px-5 h-8 transition-all data-[state=active]:bg-white data-[state=active]:text-[var(--color-green-700)] data-[state=active]:shadow-sm rounded-lg text-sm font-medium">
                 <List className="w-4 h-4" />
                 Sections
@@ -179,15 +167,53 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({
                 JSON
               </TabsTrigger>
             </TabsList>
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-green-700)]/[0.04] border border-[var(--color-green-700)]/10 text-[10px] font-bold text-[var(--color-green-800)] uppercase tracking-wider">
-              Elementor 0.4
+            
+            <div className="flex items-center gap-1 bg-[var(--color-offwhite)] p-1 rounded-lg">
+              <Button 
+                variant={viewMode === 'desktop' ? 'secondary' : 'ghost'} 
+                size="icon" 
+                className="w-8 h-8 h-8 rounded-md"
+                onClick={() => setViewMode('desktop')}
+              >
+                <Monitor className="w-4 h-4" />
+              </Button>
+              <Button 
+                variant={viewMode === 'mobile' ? 'secondary' : 'ghost'} 
+                size="icon" 
+                className="w-8 h-8 rounded-md"
+                onClick={() => setViewMode('mobile')}
+              >
+                <Smartphone className="w-4 h-4" />
+              </Button>
             </div>
           </div>
 
+          <TabsContent value="preview" className="flex-grow m-0 p-0 overflow-hidden bg-[var(--color-offwhite)]/50 relative">
+            <div className="h-full flex flex-col items-center">
+              <div className="w-full flex-grow overflow-auto p-4 flex justify-center custom-scrollbar">
+                <div 
+                  className={`bg-white shadow-2xl transition-all duration-300 overflow-hidden ${viewMode === 'mobile' ? 'w-[390px] border-[8px] border-slate-800 rounded-[40px] h-[700px]' : 'w-full min-h-full rounded-lg'}`}
+                >
+                  <iframe 
+                    srcDoc={htmlPreview}
+                    className="w-full h-full border-none"
+                    title="Elementor Page Preview"
+                    sandbox="allow-scripts allow-same-origin"
+                  />
+                </div>
+              </div>
+              <div className="px-4 py-2 bg-white border-t border-[var(--color-border)] w-full text-center">
+                <p className="text-[11px] text-[var(--color-text-muted)] font-medium italic">
+                  Preview is approximate — final output may vary in Elementor
+                </p>
+              </div>
+            </div>
+          </TabsContent>
+
           <TabsContent value="sections" className="flex-grow m-0 p-5 overflow-auto custom-scrollbar bg-[var(--color-offwhite)]/30">
             <div className="space-y-4">
-              {(parsedJson?.content || []).length > 0 ? (
-                parsedJson.content.map((section: any, idx: number) => (
+              {(data?.content || []).length > 0 ? (
+                data.content.map((section: any, idx: number) => (
                   <div key={idx} className="bg-white p-5 rounded-[16px] border border-[var(--color-border)] shadow-[0_1px_2px_rgba(0,0,0,0.02)] flex items-center justify-between group hover:border-[var(--color-green-700)]/20 transition-all hover:shadow-md">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-xl bg-[var(--color-offwhite)] flex items-center justify-center text-[var(--color-green-700)] border border-[var(--color-border)] group-hover:bg-[var(--color-green-700)]/[0.04] transition-colors">
@@ -227,7 +253,7 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({
           <TabsContent value="json" className="flex-grow m-0 p-0 overflow-hidden bg-[#0d1117] relative">
             <div className="h-full overflow-auto p-6 text-[#abb2bf] font-mono text-[11px] leading-relaxed custom-scrollbar">
               <pre className="whitespace-pre-wrap">
-                <code>{JSON.stringify(parsedJson, null, 2)}</code>
+                <code>{JSON.stringify(data, null, 2)}</code>
               </pre>
             </div>
           </TabsContent>
@@ -240,13 +266,13 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({
           <Info className="w-6 h-6" />
         </div>
         <div className="space-y-4">
-          <h4 className="text-[15px] font-semibold text-[var(--color-text-primary)]">How to use this in WordPress:</h4>
-          <ol className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-2.5 text-[13px] text-[var(--color-text-secondary)] list-decimal list-inside leading-loose">
-            <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Open <span className="text-[var(--color-green-700)] font-bold">Elementor</span></li>
-            <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Click folder icon</li>
-            <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors"><span className="text-[var(--color-green-700)] font-bold">My Templates → Import</span></li>
-            <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Upload <span className="text-[var(--color-green-700)] font-bold">JSON</span></li>
-            <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Click <span className="text-[var(--color-green-700)] font-bold">Insert</span></li>
+          <h4 className="text-[15px] font-semibold text-[var(--color-text-primary)]">How to paste in Elementor:</h4>
+          <ol className="grid gap-y-2.5 text-[13px] text-[var(--color-text-secondary)] list-decimal list-inside leading-loose">
+            <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Click <span className="text-[var(--color-green-700)] font-bold">'Copy to Elementor'</span> above</li>
+            <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Open your page in <span className="text-[var(--color-green-700)] font-bold">Elementor editor</span></li>
+            <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Right-click on <span className="text-[var(--color-green-700)] font-bold">any section</span></li>
+            <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Select <span className="text-[var(--color-green-700)] font-bold">'Paste'</span> from the context menu</li>
+            <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Your full page appears instantly</li>
           </ol>
         </div>
       </div>
