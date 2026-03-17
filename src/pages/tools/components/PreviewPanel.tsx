@@ -228,64 +228,83 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({
         </div>
       </div>
 
-      <Card className="flex-grow overflow-hidden border border-[var(--color-border)] shadow-sm flex flex-col bg-[var(--color-surface)] rounded-[20px]">
+      <Card className="flex-grow overflow-hidden border border-[var(--color-border)] shadow-sm flex flex-col bg-[var(--color-surface)] rounded-[20px] min-h-[750px] relative">
         <Tabs defaultValue="preview" className="flex flex-col h-full">
-          <div className="px-5 py-3.5 border-b border-[var(--color-border)] flex flex-wrap items-center justify-between bg-white shrink-0 gap-4">
-            <TabsList className="bg-[var(--color-offwhite)] p-1 rounded-xl h-10">
-              <TabsTrigger value="preview" className="gap-2 px-5 h-8 transition-all data-[state=active]:bg-white data-[state=active]:text-[var(--color-green-700)] data-[state=active]:shadow-sm rounded-lg text-sm font-medium">
-                <Layout className="w-4 h-4" />
+          <div style={{
+            borderBottom: '0.5px solid var(--color-border)',
+            padding: '0 16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            height: '44px',
+            background: 'var(--color-background-primary, #ffffff)',
+            borderRadius: '12px 12px 0 0'
+          }}>
+            <TabsList className="bg-[var(--color-offwhite)] p-0.5 rounded-lg h-8">
+              <TabsTrigger value="preview" className="gap-2 px-3 h-7 transition-all data-[state=active]:bg-white data-[state=active]:text-[var(--color-green-700)] data-[state=active]:shadow-sm rounded-md text-xs font-medium">
+                <Layout className="w-3.5 h-3.5" />
                 Preview
               </TabsTrigger>
-              <TabsTrigger value="sections" className="gap-2 px-5 h-8 transition-all data-[state=active]:bg-white data-[state=active]:text-[var(--color-green-700)] data-[state=active]:shadow-sm rounded-lg text-sm font-medium">
-                <List className="w-4 h-4" />
+              <TabsTrigger value="sections" className="gap-2 px-3 h-7 transition-all data-[state=active]:bg-white data-[state=active]:text-[var(--color-green-700)] data-[state=active]:shadow-sm rounded-md text-xs font-medium">
+                <List className="w-3.5 h-3.5" />
                 Sections
               </TabsTrigger>
-              <TabsTrigger value="json" className="gap-2 px-5 h-8 transition-all data-[state=active]:bg-white data-[state=active]:text-[var(--color-green-700)] data-[state=active]:shadow-sm rounded-lg text-sm font-medium">
-                <Code className="w-4 h-4" />
+              <TabsTrigger value="json" className="gap-2 px-3 h-7 transition-all data-[state=active]:bg-white data-[state=active]:text-[var(--color-green-700)] data-[state=active]:shadow-sm rounded-md text-xs font-medium">
+                <Code className="w-3.5 h-3.5" />
                 JSON
               </TabsTrigger>
             </TabsList>
             
-            <div className="flex items-center gap-1 bg-[var(--color-offwhite)] p-1 rounded-lg">
+            <div className="flex items-center gap-1 bg-[var(--color-offwhite)] p-0.5 rounded-lg h-8">
               <Button 
                 variant={viewMode === 'desktop' ? 'secondary' : 'ghost'} 
                 size="icon" 
-                className="w-8 h-8 rounded-md"
+                className="w-7 h-7 rounded-md"
                 onClick={() => setViewMode('desktop')}
+                style={{ 
+                  backgroundColor: viewMode === 'desktop' ? 'white' : 'transparent', 
+                  boxShadow: viewMode === 'desktop' ? '0 1px 2px rgba(0,0,0,0.05)' : 'none' 
+                }}
               >
-                <Monitor className="w-4 h-4" />
+                <Monitor className="w-3.5 h-3.5 text-slate-700" />
               </Button>
               <Button 
                 variant={viewMode === 'mobile' ? 'secondary' : 'ghost'} 
                 size="icon" 
-                className="w-8 h-8 rounded-md"
+                className="w-7 h-7 rounded-md"
                 onClick={() => setViewMode('mobile')}
+                style={{ 
+                  backgroundColor: viewMode === 'mobile' ? 'white' : 'transparent', 
+                  boxShadow: viewMode === 'mobile' ? '0 1px 2px rgba(0,0,0,0.05)' : 'none' 
+                }}
               >
-                <Smartphone className="w-4 h-4" />
+                <Smartphone className="w-3.5 h-3.5 text-slate-700" />
               </Button>
             </div>
           </div>
 
-          <TabsContent value="preview" className="flex-grow m-0 p-0 overflow-hidden bg-[var(--color-offwhite)]/50 relative">
-            <div className="h-full flex flex-col items-center">
-              <div className="w-full flex-grow overflow-auto p-4 flex justify-center">
-                <div 
-                  className={`bg-white shadow-2xl transition-all duration-300 overflow-auto ${viewMode === 'mobile' ? 'w-[390px] border-[8px] border-slate-800 rounded-[40px] h-[700px]' : 'w-full h-[700px] rounded-lg'}`}
-                >
-                  <iframe 
-                    srcDoc={htmlPreview}
-                    className="w-full h-full border-none"
-                    title="Elementor Page Preview"
-                    sandbox="allow-scripts allow-same-origin"
-                  />
-                </div>
-              </div>
-              <div className="px-4 py-2 bg-white border-t border-[var(--color-border)] w-full text-center">
-                <p className="text-[11px] text-[var(--color-text-muted)] font-medium italic">
-                  Preview is approximate — final output may vary in Elementor
-                </p>
-              </div>
-            </div>
+          <TabsContent value="preview" className="m-0 p-0" style={{
+            width: '100%',
+            height: '650px',
+            overflow: 'hidden',
+            borderRadius: '0 0 12px 12px',
+            background: '#ffffff',
+            position: 'relative'
+          }}>
+            <iframe 
+              srcDoc={htmlPreview}
+              title="Elementor Page Preview"
+              sandbox="allow-scripts allow-same-origin"
+              style={{
+                width: viewMode === 'mobile' ? '390px' : '100%',
+                height: '100%',
+                border: 'none',
+                display: 'block',
+                margin: viewMode === 'mobile' ? '0 auto' : '0',
+                borderRadius: viewMode === 'mobile' ? '12px' : '0',
+                transition: 'width 0.3s ease'
+              }}
+            />
           </TabsContent>
 
           <TabsContent value="sections" className="flex-grow m-0 p-5 overflow-auto custom-scrollbar bg-[var(--color-offwhite)]/30">
