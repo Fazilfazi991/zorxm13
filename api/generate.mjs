@@ -34,6 +34,8 @@ Structure:
 Allowed widgetTypes: heading, text-editor, button, 
 image, icon-box, spacer.
 Generate 5-6 sections with real business copy.
+Keep each text value concise — max 2 sentences.
+Total JSON must be under 6000 characters.
 Return ONLY the JSON object.`
 
 function buildUserPrompt(data) {
@@ -61,12 +63,21 @@ function extractJSON(raw) {
   cleaned = cleaned.substring(first, last + 1)
   try {
     return JSON.parse(cleaned)
-  } catch {
+  } catch (e) {
+    console.error('[generate] Parse error:', e.message)
+    console.error('[generate] JSON length:', cleaned.length)
+    console.error('[generate] Last 200 chars:', 
+      cleaned.substring(Math.max(0, cleaned.length - 200)))
+    // try fix trailing commas
     try {
       return JSON.parse(
         cleaned.replace(/,(\s*[}\]])/g, '$1')
       )
-    } catch { return null }
+    } catch (e2) {
+      console.error('[generate] Fixed parse also failed:', 
+        e2.message)
+      return null
+    }
   }
 }
 
@@ -81,12 +92,15 @@ async function tryGemini(userPrompt, modelName) {
       generationConfig: {
         responseMimeType: 'application/json',
         temperature: 0.7,
-        maxOutputTokens: 4000
+        maxOutputTokens: 8192
       }
     })
     const result = await model.generateContent(
       SYSTEM_PROMPT + '\n\n' + userPrompt
     )
+    const finishReason = result.response.candidates?.[0]?.finishReason
+    console.log(`[generate] ${modelName} Finish reason:`, finishReason)
+
     const text = result.response.text()
     console.log(`[generate] ${modelName} succeeded`)
     return text
