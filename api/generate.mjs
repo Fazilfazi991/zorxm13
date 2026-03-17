@@ -9,7 +9,7 @@ async function tryGemini(prompt, systemPrompt) {
       await import('@google/generative-ai')
     const genAI = new GoogleGenerativeAI(geminiKey)
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.0-flash-lite',
       generationConfig: {
         responseMimeType: 'application/json'
       }
@@ -112,44 +112,51 @@ export default async function handler(req, res) {
             description, tone, 
             primaryColor, ctaText } = body
 
-    const systemPrompt = `You are an Elementor JSON 
-generator. Return ONLY valid JSON. No markdown.
-No code fences. Start with { end with }.
-Every element needs unique 8-digit numeric id.
+    const systemPrompt = `Return ONLY a valid JSON object 
+for an Elementor page template. No markdown, no 
+explanation. Start with { end with }.
 
-Structure:
+Required structure:
 {
   "version": "0.4",
   "title": "string",
-  "content": [{
-    "id": "12345678",
-    "elType": "section",
-    "settings": { "background_color": "" },
-    "elements": [{
-      "id": "23456789",
-      "elType": "column",
-      "settings": { "_column_size": 100 },
+  "content": [
+    {
+      "id": "UNIQUE8DIG",
+      "elType": "section",
+      "settings": { "background_color": "#ffffff" },
       "elements": [{
-        "id": "34567890",
-        "elType": "widget",
-        "widgetType": "heading",
-        "settings": {
-          "title": "",
-          "header_size": "h1",
-          "align": "center"
-        }
+        "id": "UNIQUE8DIG",
+        "elType": "column",
+        "settings": { "_column_size": 100 },
+        "elements": [{
+          "id": "UNIQUE8DIG",
+          "elType": "widget",
+          "widgetType": "heading",
+          "settings": {
+            "title": "text here",
+            "header_size": "h1",
+            "align": "center"
+          }
+        }]
       }]
-    }]
-  }]
-}`
+    }
+  ]
+}
 
-    const userPrompt = `Generate a ${pageType} page for:
+Allowed widgetTypes: heading, text-editor, 
+button, image, icon-box, spacer
+Replace UNIQUE8DIG with random 8-digit numbers.`
+
+    const userPrompt = `${pageType} page for:
 Business: ${businessName}
-Description: ${description}
+About: ${description}
 Tone: ${tone}
-Primary color: ${primaryColor}
-CTA: ${ctaText}
-Write real copy. Return ONLY JSON.`
+Brand color: ${primaryColor}
+CTA button: ${ctaText}
+
+Generate 5-6 sections with real copy.
+JSON only.`
 
     // Try Gemini first, then Manus
     let rawResponse = await tryGemini(userPrompt, systemPrompt)
