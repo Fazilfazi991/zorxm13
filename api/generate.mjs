@@ -8,20 +8,6 @@ Generate 5 sections with real business copy.
 Keep text values concise — max 2 sentences.
 No HTML tags inside text values.`
 
-const GEMINI_SYSTEM_PROMPT = `You are an Elementor JSON 
-generator. Return ONLY a JSON object.
-No markdown. No code fences. Start with { end with }.
-Unique 8-digit numeric id on every element.
-Maximum 3 sections. Each text value max 10 words.
-No HTML in any value.
-
-Generate exactly 3 sections:
-1. Hero: one heading + one button widget
-2. Features: 3 columns, one icon-box each  
-3. CTA: one heading + one button
-
-Return JSON only.`
-
 function buildUserPrompt(data) {
   const { pageType, businessName, description,
           tone, primaryColor, ctaText } = data
@@ -93,33 +79,62 @@ async function tryKimi(userPrompt) {
   }
 }
 
-async function tryGemini(userPrompt, modelName, sysPrompt) {
+async function tryGeminiModel(userPrompt, modelName) {
   try {
     const key = process.env.GEMINI_API_KEY ||
                 process.env.VITE_GEMINI_API_KEY
     if (!key) throw new Error('No Gemini key')
-    const genAI = new GoogleGenerativeAI(key)
-    const model = genAI.getGenerativeModel({
-      model: modelName,
-      generationConfig: {
-        responseMimeType: 'application/json',
-        temperature: 0.3,
-        maxOutputTokens: 1024
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${key}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: {
+            parts: [{ text: SYSTEM_PROMPT }]
+          },
+          contents: [{
+            role: 'user',
+            parts: [{ text: userPrompt }]
+          }],
+          generationConfig: {
+            responseMimeType: 'application/json',
+            temperature: 0.3,
+            maxOutputTokens: 4096
+          }
+        })
       }
-    })
-    const result = await model.generateContent(
-      sysPrompt + '\n\n' + userPrompt
     )
-    const finishReason = result.response
-      .candidates?.[0]?.finishReason
+
+    console.log(`[gemini] ${modelName} status:`, 
+      response.status)
+    const rawText = await response.text()
+
+    if (!response.ok) {
+      throw new Error(
+        `${modelName} ${response.status}: ` +
+        rawText.substring(0, 200)
+      )
+    }
+
+    const data = JSON.parse(rawText)
+    const finishReason = data.candidates?.[0]
+      ?.finishReason
     console.log(`[gemini] ${modelName} finish:`, 
       finishReason)
+
     if (finishReason === 'MAX_TOKENS') {
       console.error(`[gemini] ${modelName} truncated`)
       return null
     }
-    const text = result.response.text()
-    console.log(`[gemini] ${modelName} succeeded`)
+
+    const text = data.candidates?.[0]
+      ?.content?.parts?.[0]?.text
+    if (!text) throw new Error('No text in response')
+
+    console.log(`[gemini] ${modelName} succeeded,`,
+      'length:', text.length)
     return text
   } catch (e) {
     console.error(`[gemini] ${modelName} failed:`, 
@@ -156,38 +171,32 @@ export default async function handler(req, res) {
 
     const userPrompt = buildUserPrompt(body)
 
-    let rawResponse = await tryKimi(userPrompt)
+    let rawResponse = await tryGeminiModel(
+      userPrompt, 'gemini-2.0-flash'
+    )
 
     if (!rawResponse) {
-      console.log('[generate] Trying gemini-2.0-flash-exp')
-      rawResponse = await tryGemini(
-        userPrompt,
-        'gemini-2.0-flash-exp',
-        GEMINI_SYSTEM_PROMPT
+      console.log('[generate] Trying gemini-2.0-flash-lite')
+      rawResponse = await tryGeminiModel(
+        userPrompt, 'gemini-2.0-flash-lite'
       )
     }
 
     if (!rawResponse) {
-      console.log('[generate] Trying gemini-1.5-flash')
-      rawResponse = await tryGemini(
-        userPrompt,
-        'gemini-1.5-flash',
-        GEMINI_SYSTEM_PROMPT
+      console.log('[generate] Trying gemini-2.0-flash-001')
+      rawResponse = await tryGeminiModel(
+        userPrompt, 'gemini-2.0-flash-001'
       )
     }
 
     if (!rawResponse) {
-      console.log('[generate] Trying gemini-1.5-pro')
-      rawResponse = await tryGemini(
-        userPrompt,
-        'gemini-1.5-pro',
-        GEMINI_SYSTEM_PROMPT
-      )
+      console.log('[generate] Trying Kimi')
+      rawResponse = await tryKimi(userPrompt)
     }
 
     if (!rawResponse) {
       return res.status(500).json({
-        error: 'All models failed. Please try again.'
+        error: 'Generation failed. Please try again.'
       })
     }
 
@@ -204,7 +213,8 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       success: true,
-      data: parsed
+      data: parsed,
+      json: JSON.stringify(parsed)
     })
 
   } catch (error) {
