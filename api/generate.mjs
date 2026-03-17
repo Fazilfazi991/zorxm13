@@ -188,20 +188,44 @@ export default async function handler(req, res) {
       })
     }
 
+    console.log('[generate] Raw length:', rawResponse.length)
+    console.log('[generate] Raw first 500 chars:', rawResponse.substring(0, 500))
+
     const parsed = extractJSON(rawResponse)
 
-    if (!parsed?.content?.length) {
+    console.log('[generate] Parsed keys:', parsed ? Object.keys(parsed) : 'null')
+    console.log('[generate] Content type:', parsed ? typeof parsed.content : 'no parsed')
+    console.log('[generate] Content length:', parsed?.content?.length ?? 'undefined')
+    console.log('[generate] Content is array:', Array.isArray(parsed?.content))
+
+    // Try to find content array wherever it is
+    let contentArray = parsed?.content
+
+    if (!contentArray && parsed?.data?.content) {
+      contentArray = parsed.data.content
+    }
+
+    if (!contentArray && parsed?.page?.content) {
+      contentArray = parsed.page.content
+    }
+
+    if (!Array.isArray(contentArray) || contentArray.length === 0) {
+      console.error('[generate] Content array issue:', JSON.stringify(parsed).substring(0, 300))
       return res.status(500).json({
         error: 'Invalid page structure. Please try again.'
       })
     }
 
-    console.log('[generate] Success, sections:', 
-      parsed.content.length)
+    // Use contentArray going forward
+    parsed.content = contentArray
 
+    console.log('[generate] Success, sections:', parsed.content.length)
+
+    // IMPORTANT: Maintain 'json' key for frontend compatibility
     return res.status(200).json({ 
       success: true, 
-      data: parsed 
+      data: parsed,
+      json: JSON.stringify(parsed)
     })
 
   } catch (error) {
