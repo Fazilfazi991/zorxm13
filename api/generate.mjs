@@ -19,14 +19,16 @@ export default async function handler(req, res) {
             description, tone, 
             primaryColor, ctaText } = body;
 
-    if (!process.env.GEMINI_API_KEY) {
+    const geminiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+
+    if (!geminiKey) {
       console.error('[generate] Gemini API key not configured');
       return res.status(500).json({ 
         error: 'Gemini API key not configured' 
       });
     }
 
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const genAI = new GoogleGenerativeAI(geminiKey);
     const model = genAI.getGenerativeModel({ 
       model: 'gemini-1.5-flash',
       generationConfig: {
