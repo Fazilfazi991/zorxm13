@@ -1,0 +1,16 @@
+.wpcraft-admin { max-width: 600px; }
+.wpcraft-admin .wpcraft-info {
+  margin-top: 24px;
+  padding: 20px;
+  background: #f9f9f9;
+  border-left: 4px solid #166534;
+  border-radius: 4px;
+}
+.wpcraft-admin .wpcraft-info ol {
+  margin-top: 12px;
+  padding-left: 20px;
+}
+.wpcraft-admin .wpcraft-info li {
+  margin-bottom: 8px;
+  font-size: 14px;
+}
