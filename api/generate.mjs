@@ -5,7 +5,7 @@ Return ONLY a valid JSON object. No markdown. No code fences.
 No explanation. Start with { and end with }.
 Every element needs a unique random 8-digit numeric id.
 
-Required structure:
+Structure:
 {
   "version": "0.4",
   "title": "string",
@@ -32,21 +32,20 @@ Required structure:
 }
 
 Allowed widgetTypes: heading, text-editor, button, 
-image, icon-box, spacer
+image, icon-box, spacer.
 Generate 5-6 sections with real business copy.
 Return ONLY the JSON object.`
 
 function buildUserPrompt(data) {
-  const { pageType, businessName, 
-          description, tone, 
-          primaryColor, ctaText } = data
+  const { pageType, businessName, description, 
+          tone, primaryColor, ctaText } = data
   return `Generate a ${pageType} page for:
 Business: ${businessName}
 About: ${description}
 Tone: ${tone}
 Brand color: ${primaryColor}
-CTA button text: ${ctaText}
-Write real copy specific to this business. JSON only.`
+CTA: ${ctaText}
+Write real copy. Return ONLY JSON.`
 }
 
 function extractJSON(raw) {
@@ -71,16 +70,14 @@ function extractJSON(raw) {
   }
 }
 
-async function tryGeminiFlashLite(userPrompt) {
+async function tryGemini(userPrompt, modelName) {
   try {
     const key = process.env.GEMINI_API_KEY || 
                 process.env.VITE_GEMINI_API_KEY
     if (!key) throw new Error('No Gemini key')
-    const { GoogleGenerativeAI } = 
-      await import('@google/generative-ai')
     const genAI = new GoogleGenerativeAI(key)
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash-lite',
+      model: modelName,
       generationConfig: {
         responseMimeType: 'application/json',
         temperature: 0.7,
@@ -91,10 +88,10 @@ async function tryGeminiFlashLite(userPrompt) {
       SYSTEM_PROMPT + '\n\n' + userPrompt
     )
     const text = result.response.text()
-    console.log('[generate] Gemini Flash Lite succeeded')
+    console.log(`[generate] ${modelName} succeeded`)
     return text
   } catch (e) {
-    console.error('[generate] Gemini Flash Lite failed:', 
+    console.error(`[generate] ${modelName} failed:`, 
       e.message)
     return null
   }
@@ -105,7 +102,6 @@ async function tryKimi(userPrompt) {
     const key = process.env.KIMI_API_KEY || 
                 process.env.MOONSHOT_API_KEY
     if (!key) throw new Error('No Kimi key')
-    
     const response = await fetch(
       'https://api.moonshot.ai/v1/chat/completions',
       {
@@ -140,35 +136,6 @@ async function tryKimi(userPrompt) {
   }
 }
 
-async function tryGeminiFlash(userPrompt) {
-  try {
-    const key = process.env.GEMINI_API_KEY || 
-                process.env.VITE_GEMINI_API_KEY
-    if (!key) throw new Error('No Gemini key')
-    const { GoogleGenerativeAI } = 
-      await import('@google/generative-ai')
-    const genAI = new GoogleGenerativeAI(key)
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash-latest',
-      generationConfig: {
-        responseMimeType: 'application/json',
-        temperature: 0.7,
-        maxOutputTokens: 4000
-      }
-    })
-    const result = await model.generateContent(
-      SYSTEM_PROMPT + '\n\n' + userPrompt
-    )
-    const text = result.response.text()
-    console.log('[generate] Gemini 1.5 Flash succeeded')
-    return text
-  } catch (e) {
-    console.error('[generate] Gemini 1.5 Flash failed:', 
-      e.message)
-    return null
-  }
-}
-
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 
@@ -189,11 +156,7 @@ export default async function handler(req, res) {
     const body = typeof req.body === 'string'
       ? JSON.parse(req.body) : req.body
 
-    const { pageType, businessName, 
-            description, tone,
-            primaryColor, ctaText } = body
-
-    if (!businessName || !description) {
+    if (!body?.businessName || !body?.description) {
       return res.status(400).json({ 
         error: 'Missing businessName or description' 
       })
@@ -201,18 +164,22 @@ export default async function handler(req, res) {
 
     const userPrompt = buildUserPrompt(body)
 
-    // Fallback chain: Gemini Flash Lite → Kimi → 
-    // Gemini 1.5 Flash
-    let rawResponse = await tryGeminiFlashLite(userPrompt)
-    
+    // Chain: gemini-2.5-flash → gemini-2.5-flash-lite 
+    //        → Kimi moonshot-v1-8k
+    let rawResponse = await tryGemini(
+      userPrompt, 'gemini-2.5-flash'
+    )
+
+    if (!rawResponse) {
+      console.log('[generate] Trying gemini-2.5-flash-lite')
+      rawResponse = await tryGemini(
+        userPrompt, 'gemini-2.5-flash-lite'
+      )
+    }
+
     if (!rawResponse) {
       console.log('[generate] Trying Kimi...')
       rawResponse = await tryKimi(userPrompt)
-    }
-    
-    if (!rawResponse) {
-      console.log('[generate] Trying Gemini 1.5 Flash...')
-      rawResponse = await tryGeminiFlash(userPrompt)
     }
 
     if (!rawResponse) {
@@ -232,11 +199,9 @@ export default async function handler(req, res) {
     console.log('[generate] Success, sections:', 
       parsed.content.length)
 
-    // IMPORTANT: Maintain 'json' key for frontend compatibility
     return res.status(200).json({ 
       success: true, 
-      data: parsed,
-      json: JSON.stringify(parsed)
+      data: parsed 
     })
 
   } catch (error) {
