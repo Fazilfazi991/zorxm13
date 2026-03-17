@@ -136,7 +136,7 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({
             className={`gap-2 h-10 shadow-sm rounded-[10px] px-6 transition-all active:scale-[0.98] ${copied ? 'bg-green-600 hover:bg-green-600' : 'bg-[var(--color-green-700)] hover:bg-[var(--color-green-600)]'} text-white w-full sm:w-auto`}
           >
             {copied ? <Check className="w-4 h-4" /> : <ExternalLink className="w-4 h-4" />}
-            {copied ? 'Copied! Now paste in Elementor' : 'Copy to Elementor'}
+            {copied ? 'Copied! Right-click → Paste from other site' : 'Copy for Elementor'}
           </Button>
           <Button 
             variant="outline" 
@@ -190,9 +190,9 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({
 
           <TabsContent value="preview" className="flex-grow m-0 p-0 overflow-hidden bg-[var(--color-offwhite)]/50 relative">
             <div className="h-full flex flex-col items-center">
-              <div className="w-full flex-grow overflow-auto p-4 flex justify-center custom-scrollbar">
+              <div className="w-full flex-grow overflow-auto p-4 flex justify-center">
                 <div 
-                  className={`bg-white shadow-2xl transition-all duration-300 overflow-hidden ${viewMode === 'mobile' ? 'w-[390px] border-[8px] border-slate-800 rounded-[40px] h-[700px]' : 'w-full min-h-full rounded-lg'}`}
+                  className={`bg-white shadow-2xl transition-all duration-300 overflow-auto ${viewMode === 'mobile' ? 'w-[390px] border-[8px] border-slate-800 rounded-[40px] h-[700px]' : 'w-full h-[700px] rounded-lg'}`}
                 >
                   <iframe 
                     srcDoc={htmlPreview}
@@ -268,12 +268,25 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({
         <div className="space-y-4">
           <h4 className="text-[15px] font-semibold text-[var(--color-text-primary)]">How to paste in Elementor:</h4>
           <ol className="grid gap-y-2.5 text-[13px] text-[var(--color-text-secondary)] list-decimal list-inside leading-loose">
-            <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Click <span className="text-[var(--color-green-700)] font-bold">'Copy to Elementor'</span> above</li>
+            <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Click <span className="text-[var(--color-green-700)] font-bold">'Copy for Elementor'</span> above</li>
             <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Open your page in <span className="text-[var(--color-green-700)] font-bold">Elementor editor</span></li>
-            <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Right-click on <span className="text-[var(--color-green-700)] font-bold">any section</span></li>
-            <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Select <span className="text-[var(--color-green-700)] font-bold">'Paste'</span> from the context menu</li>
+            <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Right-click <span className="text-[var(--color-green-700)] font-bold">anywhere on the canvas</span></li>
+            <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Click <span className="text-[var(--color-green-700)] font-bold">'Paste from other site'</span></li>
+            <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Press <span className="text-[var(--color-green-700)] font-bold">Ctrl+V (or Cmd+V on Mac)</span> in the popup</li>
             <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Your full page appears instantly</li>
           </ol>
+          
+          <div style={{
+            color: '#854F0B',
+            background: '#FAEEDA',
+            borderLeft: '3px solid #EF9F27',
+            borderRadius: '6px',
+            padding: '8px 12px',
+            fontSize: '12px',
+            marginTop: '10px'
+          }}>
+            Make sure Elementor is updated to the latest version before pasting.
+          </div>
         </div>
       </div>
     </div>
