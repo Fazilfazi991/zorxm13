@@ -99,7 +99,10 @@ async function tryGeminiModel(userPrompt, modelName) {
           }],
           generationConfig: {
             temperature: 0.3,
-            maxOutputTokens: 4096
+            maxOutputTokens: 4096,
+            thinkingConfig: {
+              thinkingBudget: 0
+            }
           }
         })
       }
@@ -170,20 +173,13 @@ export default async function handler(req, res) {
     const userPrompt = buildUserPrompt(body)
 
     let rawResponse = await tryGeminiModel(
-      userPrompt, 'gemini-2.0-flash'
+      userPrompt, 'gemini-2.5-flash'
     )
 
     if (!rawResponse) {
-      console.log('[generate] Trying gemini-2.0-flash-lite')
+      console.log('[generate] Trying gemini-2.5-pro')
       rawResponse = await tryGeminiModel(
-        userPrompt, 'gemini-2.0-flash-lite'
-      )
-    }
-
-    if (!rawResponse) {
-      console.log('[generate] Trying gemini-2.0-flash-001')
-      rawResponse = await tryGeminiModel(
-        userPrompt, 'gemini-2.0-flash-001'
+        userPrompt, 'gemini-2.5-pro'
       )
     }
 
