@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Layout, User, Briefcase, Zap, Heart, Flame, Laptop, ChevronDown, Check, Sparkles } from "lucide-react";
 import { PromptBuilder } from './PromptBuilder';
+import { StylePicker, styles, StyleOption } from './StylePicker';
 
 export type PageType = 'landing' | 'about' | 'portfolio';
 export type Tone = 'professional' | 'friendly' | 'bold' | 'minimal';
@@ -24,9 +25,9 @@ const EXAMPLES = [
       pageType: 'landing' as const,
       businessName: 'RankRight SEO Agency',
       description: "We help small and medium businesses rank on Google through technical SEO, content strategy, and link building. We've helped 200+ clients grow organic traffic by 300% in 6 months.",
-      tone: 'professional' as const,
+      style: styles.find(s => s.id === 'modern-dark') || styles[0],
       ctaText: 'Book a Free Strategy Call',
-      primaryColor: '#166534'
+      primaryColor: '#6366F1'
     }
   },
   {
@@ -36,9 +37,9 @@ const EXAMPLES = [
       pageType: 'portfolio' as const,
       businessName: 'Lena Visuals',
       description: "Dubai-based freelance photographer specialising in brand photography, corporate headshots, and product shoots for e-commerce brands and startups.",
-      tone: 'minimal' as const,
+      style: styles.find(s => s.id === 'clean-light') || styles[1],
       ctaText: 'View My Work',
-      primaryColor: '#1A1A2E'
+      primaryColor: '#166534'
     }
   },
   {
@@ -48,9 +49,9 @@ const EXAMPLES = [
       pageType: 'about' as const,
       businessName: 'Zorx Digital',
       description: "A Dubai-based digital marketing agency helping brands grow through AI-powered marketing, Meta Ads, SEO, and content creation. We work with startups and established businesses across the UAE.",
-      tone: 'bold' as const,
+      style: styles.find(s => s.id === 'bold-black') || styles[2],
       ctaText: 'Work With Us',
-      primaryColor: '#166534'
+      primaryColor: '#EF4444'
     }
   }
 ];
@@ -59,8 +60,8 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onSubmit, isLoading }) =>
   const [pageType, setPageType] = React.useState<PageType>('landing');
   const [businessName, setBusinessName] = React.useState('');
   const [description, setDescription] = React.useState('');
-  const [tone, setTone] = React.useState<Tone>('professional');
-  const [primaryColor, setPrimaryColor] = React.useState('#6C63FF');
+  const [selectedStyle, setSelectedStyle] = React.useState<StyleOption>(styles[0]);
+  const [primaryColor, setPrimaryColor] = React.useState(styles[0].accentColor);
   const [ctaText, setCtaText] = React.useState('Get Started');
   const [showExamples, setShowExamples] = React.useState(false);
   const [toast, setToast] = React.useState<string | null>(null);
@@ -106,9 +107,9 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onSubmit, isLoading }) =>
     setPageType(example.data.pageType);
     setBusinessName(example.data.businessName);
     setDescription(example.data.description);
-    setTone(example.data.tone);
-    setPrimaryColor(example.data.primaryColor);
+    handleStyleChange(example.data.style);
     setCtaText(example.data.ctaText);
+    setPrimaryColor(example.data.primaryColor); // override after handleStyleChange
     setShowExamples(false);
     showToast("Example loaded — feel free to customise it");
   };
@@ -129,9 +130,28 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onSubmit, isLoading }) =>
     }, 100);
   };
 
+  const handleStyleChange = (style: StyleOption) => {
+    setSelectedStyle(style);
+    setPrimaryColor(style.accentColor);
+    showToast("Color updated to match style");
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ pageType, businessName, description, tone, primaryColor, ctaText });
+    onSubmit({ 
+      pageType, 
+      businessName, 
+      description, 
+      tone: selectedStyle.tone,
+      styleId: selectedStyle.id,
+      styleName: selectedStyle.name,
+      heroColor: selectedStyle.heroColor,
+      accentColor: selectedStyle.accentColor,
+      cardColor: selectedStyle.cardColor,
+      fontFamily: selectedStyle.font,
+      primaryColor, 
+      ctaText 
+    });
   };
 
   const inputStyles = "bg-[var(--color-offwhite)] border-[var(--color-border)] rounded-[10px] text-[14px] focus:ring-4 focus:ring-[var(--color-green-700)]/10 focus:border-[var(--color-green-700)] transition-all";
@@ -296,34 +316,12 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onSubmit, isLoading }) =>
       </div>
 
       <div className="space-y-4">
-        <Label className="text-[12px] font-bold text-[var(--color-text-secondary)] uppercase tracking-[0.06em]">Tone</Label>
-        <div className="flex flex-wrap gap-2">
-          {[
-            { id: 'professional', label: 'Professional', icon: Zap },
-            { id: 'friendly', label: 'Friendly', icon: Heart },
-            { id: 'bold', label: 'Bold', icon: Flame },
-            { id: 'minimal', label: 'Minimal', icon: Laptop },
-          ].map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={`px-4 py-1.5 rounded-full text-[13px] font-medium transition-all flex items-center gap-2 border ${
-                tone === item.id
-                  ? 'bg-[var(--color-green-700)] text-white border-[var(--color-green-700)]'
-                  : 'bg-transparent text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-[var(--color-green-700)]/40 hover:bg-[var(--color-green-700)]/[0.02]'
-              }`}
-              onClick={() => setTone(item.id as Tone)}
-            >
-              <item.icon className="w-3.5 h-3.5" />
-              {item.label}
-            </button>
-          ))}
-        </div>
+        <StylePicker selectedStyle={selectedStyle} onChange={handleStyleChange} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="primaryColor" className="text-[14px] font-semibold text-[var(--color-text-primary)]">Brand Color</Label>
+          <Label htmlFor="primaryColor" className="text-[14px] font-semibold text-[var(--color-text-primary)]">Override accent color (optional)</Label>
           <div className="flex gap-2">
             <div 
               className="w-11 h-11 shrink-0 rounded-[8px] border border-[var(--color-border)] shadow-sm"

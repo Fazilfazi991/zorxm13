@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
-function buildSystemPrompt(tone, pageType) {
+function buildSystemPrompt(tone, pageType, data = {}) {
   
   const base = `You are an Elementor page designer.
 Return ONLY valid JSON. No markdown. No fences.
@@ -12,37 +12,40 @@ Every widget must have full typography settings.
 CRITICAL: The root array key MUST be called 'content' not 'elements'. 
 Use: { version, title, content: [...] }`
 
+  const heroColor = data.heroColor || '#0F172A'
+  const cardColor = data.cardColor || '#F8FAFC'
+
   const toneStyles = {
     professional: `
-Hero bg: #0F172A. 
+Hero bg: ${heroColor}. 
 Heading color: #FFFFFF.
 Body color: rgba(255,255,255,0.7).
-Feature bg: #F8FAFC. Feature text: #0F172A.
+Feature bg: ${cardColor}. Feature text: #0F172A.
 Card border: #E2E8F0. Card shadow: rgba(0,0,0,0.06).
 CTA bg: primaryColor.`,
 
     friendly: `
-Hero bg: warm dark primaryColor shade.
+Hero bg: ${heroColor}.
 Heading color: #FFFFFF.
 Body color: rgba(255,255,255,0.75).
-Feature bg: #FFFBF5. Feature text: #374151.
+Feature bg: ${cardColor}. Feature text: #374151.
 Card border: #FDE68A. Card shadow: rgba(0,0,0,0.05).
 CTA bg: primaryColor.`,
 
     bold: `
-Hero bg: #000000. 
+Hero bg: ${heroColor}. 
 Heading font-size: 68px desktop.
 Heading color: #FFFFFF.
 Body color: #9CA3AF.
-Feature bg: #111111. Feature text: #F9FAFB.
+Feature bg: ${cardColor}. Feature text: #F9FAFB.
 Card border: #1F2937. No card shadow.
 CTA bg: #000000. CTA heading color: primaryColor.`,
 
     minimal: `
-Hero bg: #FAFAFA.
+Hero bg: ${heroColor}.
 Heading color: #0A0A0A.
 Body color: #6B7280.
-Feature bg: #FFFFFF. Feature text: #374151.
+Feature bg: ${cardColor}. Feature text: #374151.
 Card border: #E5E7EB. No shadow.
 Lots of whitespace — padding 140px top/bottom.
 CTA bg: #FAFAFA. CTA heading color: #0A0A0A.`
@@ -143,12 +146,17 @@ container settings:
 }
 
 function buildUserPrompt(data) {
-  return `Generate for:
+  return `Generate a ${data.pageType} page for:
 Business: ${data.businessName}
 Description: ${data.description.substring(0, 800)}
-Primary color: ${data.primaryColor}
+Style: ${data.styleName || 'Modern Dark'}
+Hero background: ${data.heroColor || '#0F172A'}
+Accent/primary color: ${data.primaryColor}
+Card background: ${data.cardColor || '#FFFFFF'}
+Font family: ${data.fontFamily || 'DM Sans'}
 CTA text: ${data.ctaText}
-Write real copy. Return ONLY JSON.`
+Write real copy specific to this business.
+Return ONLY JSON.`
 }
 
 function extractJSON(raw) {
@@ -326,7 +334,7 @@ export default async function handler(req, res) {
     }
 
     const userPrompt = buildUserPrompt(body)
-    const systemPrompt = buildSystemPrompt(body.tone, body.pageType)
+    const systemPrompt = buildSystemPrompt(body.tone, body.pageType, body)
 
     let rawResponse = await tryGeminiModel(
       userPrompt, 'gemini-2.5-flash', 0, systemPrompt
