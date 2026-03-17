@@ -1,45 +1,34 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
-const SYSTEM_PROMPT = `You are an Elementor JSON 
-generator. Return ONLY a valid JSON object.
-No markdown. No code fences. No explanation.
-Start with { and end with }.
+const SYSTEM_PROMPT = `You are an Elementor JSON generator.
+Return ONLY a valid JSON object. No markdown. No code fences.
+No explanation. Start with { and end with }.
 Every element needs a unique random 8-digit numeric id.
+Generate 5 sections with real business copy.
+Keep text values concise — max 2 sentences.
+No HTML tags inside text values.`
 
-Generate 5 sections for the page type requested.
-Keep text values concise — max 2 sentences each.
-No HTML tags inside text values.
-Return ONLY the JSON object, nothing else.`
-
-const GEMINI_SYSTEM_PROMPT = `You are an Elementor 
-JSON generator. Return ONLY a JSON object.
+const GEMINI_SYSTEM_PROMPT = `You are an Elementor JSON 
+generator. Return ONLY a JSON object.
 No markdown. No code fences. Start with { end with }.
+Unique 8-digit numeric id on every element.
+Maximum 3 sections. Each text value max 10 words.
+No HTML in any value.
 
-STRICT RULES:
-- Maximum 3 sections total
-- Each text value maximum 10 words
-- No HTML in any value
-- No inline styles
-- Unique 8-digit numeric id on every element
+Generate exactly 3 sections:
+1. Hero: one heading + one button widget
+2. Features: 3 columns, one icon-box each  
+3. CTA: one heading + one button
 
-Generate exactly these 3 sections:
-1. Hero section: one heading widget + one button widget
-2. Features section: three columns, one icon-box each
-3. CTA section: one heading widget + one button widget
-
-Return the JSON only. Stop after the closing }.`
+Return JSON only.`
 
 function buildUserPrompt(data) {
-  const { pageType, businessName, 
-          description, tone, 
-          primaryColor, ctaText } = data
-  return `Generate a ${pageType} page for:
-Business: ${businessName}
-About: ${description}
-Tone: ${tone}
-Brand color: ${primaryColor}
-CTA button text: ${ctaText}
-Write real copy specific to this business. JSON only.`
+  const { pageType, businessName, description,
+          tone, primaryColor, ctaText } = data
+  return `${pageType} page for "${businessName}".
+About: ${description.substring(0, 200)}
+Tone: ${tone}. Color: ${primaryColor}. CTA: ${ctaText}
+Return ONLY JSON.`
 }
 
 function extractJSON(raw) {
@@ -51,61 +40,62 @@ function extractJSON(raw) {
     .trim()
   const first = cleaned.indexOf('{')
   const last = cleaned.lastIndexOf('}')
-  if (first === -1) return null
-  
-  // Use last } if exists, otherwise try to repair
-  const jsonStr = last !== -1 
-    ? cleaned.substring(first, last + 1)
-    : cleaned.substring(first)
-
-  // Attempt 1: direct parse
-  try { return JSON.parse(jsonStr) } catch {}
-  
-  // Attempt 2: fix trailing commas
+  if (first === -1 || last === -1) return null
+  cleaned = cleaned.substring(first, last + 1)
   try {
-    return JSON.parse(
-      jsonStr.replace(/,(\s*[}\]])/g, '$1')
-    )
-  } catch {}
+    return JSON.parse(cleaned)
+  } catch {
+    try {
+      return JSON.parse(
+        cleaned.replace(/,(\s*[}\]])/g, '$1')
+      )
+    } catch { return null }
+  }
+}
 
-  // Attempt 3: repair truncated JSON
-  // Count open brackets and close them
+async function tryKimi(userPrompt) {
   try {
-    let repaired = jsonStr
-    // Remove trailing incomplete property
-    repaired = repaired.replace(
-      /,?\s*"[^"]*"\s*:\s*"[^"]*$/,  ''
+    const key = process.env.KIMI_API_KEY ||
+                process.env.MOONSHOT_API_KEY
+    if (!key) throw new Error('No Kimi key')
+    const response = await fetch(
+      'https://api.moonshot.ai/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${key}`
+        },
+        body: JSON.stringify({
+          model: 'moonshot-v1-8k',
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user', content: userPrompt }
+          ],
+          temperature: 0.6,
+          max_tokens: 4000
+        })
+      }
     )
-    repaired = repaired.replace(
-      /,?\s*"[^"]*"\s*:\s*\{[^}]*$/,  ''
-    )
-    repaired = repaired.replace(/,\s*$/, '')
-    
-    // Count and close open brackets
-    const opens = (repaired.match(/\[/g) || []).length
-    const closes = (repaired.match(/\]/g) || []).length
-    const openBraces = (repaired.match(/\{/g) || []).length
-    const closeBraces = (repaired.match(/\}/g) || []).length
-    
-    repaired += ']'.repeat(
-      Math.max(0, opens - closes)
-    )
-    repaired += '}'.repeat(
-      Math.max(0, openBraces - closeBraces)
-    )
-    
-    const fixed = JSON.parse(repaired)
-    console.log('[generate] Repaired truncated JSON')
-    return fixed
+    console.log('[kimi] Status:', response.status)
+    const rawText = await response.text()
+    if (!response.ok) {
+      throw new Error(`Kimi ${response.status}: ${rawText}`)
+    }
+    const data = JSON.parse(rawText)
+    const text = data.choices?.[0]?.message?.content
+    if (!text) throw new Error('Empty Kimi response')
+    console.log('[kimi] Succeeded, length:', text.length)
+    return text
   } catch (e) {
-    console.error('[generate] Repair failed:', e.message)
+    console.error('[kimi] Failed:', e.message)
     return null
   }
 }
 
-async function tryGemini(userPrompt, modelName, systemPrompt = SYSTEM_PROMPT) {
+async function tryGemini(userPrompt, modelName, sysPrompt) {
   try {
-    const key = process.env.GEMINI_API_KEY || 
+    const key = process.env.GEMINI_API_KEY ||
                 process.env.VITE_GEMINI_API_KEY
     if (!key) throw new Error('No Gemini key')
     const genAI = new GoogleGenerativeAI(key)
@@ -118,103 +108,39 @@ async function tryGemini(userPrompt, modelName, systemPrompt = SYSTEM_PROMPT) {
       }
     })
     const result = await model.generateContent(
-      systemPrompt + '\n\n' + userPrompt
+      sysPrompt + '\n\n' + userPrompt
     )
-    
     const finishReason = result.response
       .candidates?.[0]?.finishReason
-    console.log(`[generate] ${modelName} finish:`, 
+    console.log(`[gemini] ${modelName} finish:`, 
       finishReason)
-
-    // Treat MAX_TOKENS as failure — JSON is truncated
     if (finishReason === 'MAX_TOKENS') {
-      console.error(`[generate] ${modelName} truncated,`
-        + ' falling back')
+      console.error(`[gemini] ${modelName} truncated`)
       return null
     }
-
     const text = result.response.text()
-    console.log(`[generate] ${modelName} succeeded`)
+    console.log(`[gemini] ${modelName} succeeded`)
     return text
   } catch (e) {
-    console.error(`[generate] ${modelName} failed:`, 
+    console.error(`[gemini] ${modelName} failed:`, 
       e.message)
-    return null
-  }
-}
-
-async function tryKimi(userPrompt) {
-  try {
-    const key = process.env.KIMI_API_KEY || 
-                process.env.MOONSHOT_API_KEY
-    
-    console.log('[kimi] Key exists:', !!key)
-    console.log('[kimi] Key prefix:', 
-      key?.substring(0, 12))
-    
-    if (!key) throw new Error('No Kimi key')
-    
-    const reqBody = {
-      model: 'moonshot-v1-8k',
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user', content: userPrompt }
-      ],
-      temperature: 0.6,
-      max_tokens: 4000
-    }
-    
-    console.log('[kimi] Sending request...')
-    
-    const response = await fetch(
-      'https://api.moonshot.ai/v1/chat/completions',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${key}`
-        },
-        body: JSON.stringify(reqBody)
-      }
-    )
-    
-    console.log('[kimi] Response status:', 
-      response.status)
-    
-    const rawText = await response.text()
-    console.log('[kimi] Response body:', 
-      rawText.substring(0, 300))
-    
-    if (!response.ok) {
-      throw new Error(
-        `Kimi ${response.status}: ${rawText}`
-      )
-    }
-    
-    const data = JSON.parse(rawText)
-    const text = data.choices?.[0]?.message?.content
-    if (!text) throw new Error('Empty Kimi response')
-    console.log('[kimi] Succeeded, length:', text.length)
-    return text
-  } catch (e) {
-    console.error('[kimi] Failed:', e.message)
     return null
   }
 }
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 
+  res.setHeader('Access-Control-Allow-Methods',
     'POST, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 
+  res.setHeader('Access-Control-Allow-Headers',
     'Content-Type')
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end()
   }
   if (req.method !== 'POST') {
-    return res.status(405).json({ 
-      error: 'Method not allowed' 
+    return res.status(405).json({
+      error: 'Method not allowed'
     })
   }
 
@@ -223,27 +149,26 @@ export default async function handler(req, res) {
       ? JSON.parse(req.body) : req.body
 
     if (!body?.businessName || !body?.description) {
-      return res.status(400).json({ 
-        error: 'Missing businessName or description' 
+      return res.status(400).json({
+        error: 'Missing businessName or description'
       })
     }
 
     const userPrompt = buildUserPrompt(body)
 
-    // Fallback chain: Kimi → gemini-2.0-flash-exp → gemini-1.5-flash → gemini-1.5-pro
     let rawResponse = await tryKimi(userPrompt)
-    
+
     if (!rawResponse) {
-      console.log('[generate] Kimi failed, trying gemini-2.0-flash-exp')
+      console.log('[generate] Trying gemini-2.0-flash-exp')
       rawResponse = await tryGemini(
         userPrompt,
         'gemini-2.0-flash-exp',
         GEMINI_SYSTEM_PROMPT
       )
     }
-    
+
     if (!rawResponse) {
-      console.log('[generate] gemini-2.0-flash-exp failed, trying gemini-1.5-flash')
+      console.log('[generate] Trying gemini-1.5-flash')
       rawResponse = await tryGemini(
         userPrompt,
         'gemini-1.5-flash',
@@ -252,7 +177,7 @@ export default async function handler(req, res) {
     }
 
     if (!rawResponse) {
-      console.log('[generate] gemini-1.5-flash failed, trying gemini-1.5-pro')
+      console.log('[generate] Trying gemini-1.5-pro')
       rawResponse = await tryGemini(
         userPrompt,
         'gemini-1.5-pro',
@@ -266,104 +191,26 @@ export default async function handler(req, res) {
       })
     }
 
-    console.log('[generate] Raw length:', rawResponse.length)
-    console.log('[generate] Raw first 500 chars:', rawResponse.substring(0, 500))
-
     const parsed = extractJSON(rawResponse)
 
-    console.log('[generate] Parsed keys:', parsed ? Object.keys(parsed) : 'null')
-    console.log('[generate] Content type:', parsed ? typeof parsed.content : 'no parsed')
-    console.log('[generate] Content length:', parsed?.content?.length ?? 'undefined')
-    console.log('[generate] Content is array:', Array.isArray(parsed?.content))
-
-    // Try to find content array wherever it is
-    let contentArray = parsed?.content
-
-    if (!contentArray && parsed?.data?.content) {
-      contentArray = parsed.data.content
-    }
-
-    if (!contentArray && parsed?.page?.content) {
-      contentArray = parsed.page.content
-    }
-
-    if (!Array.isArray(contentArray) || contentArray.length === 0) {
-      console.error('[generate] Content array issue:', JSON.stringify(parsed).substring(0, 300))
+    if (!parsed?.content?.length) {
       return res.status(500).json({
         error: 'Invalid page structure. Please try again.'
       })
     }
 
-    // Use contentArray going forward
-    parsed.content = contentArray
+    console.log('[generate] Success, sections:',
+      parsed.content.length)
 
-    console.log('[generate] Success, sections:', parsed.content.length)
-
-    // IMPORTANT: Maintain 'json' key for frontend compatibility
-    return res.status(200).json({ 
-      success: true, 
-      data: parsed,
-      json: JSON.stringify(parsed)
+    return res.status(200).json({
+      success: true,
+      data: parsed
     })
 
   } catch (error) {
     console.error('[generate] Fatal:', error.message)
-    return res.status(500).json({ 
-      error: error.message 
-    })
-  }
-}
-
-    if (!rawResponse) {
-      return res.status(500).json({
-        error: 'All models failed. Please try again.'
-      })
-    }
-
-    console.log('[generate] Raw length:', rawResponse.length)
-    console.log('[generate] Raw first 500 chars:', rawResponse.substring(0, 500))
-
-    const parsed = extractJSON(rawResponse)
-
-    console.log('[generate] Parsed keys:', parsed ? Object.keys(parsed) : 'null')
-    console.log('[generate] Content type:', parsed ? typeof parsed.content : 'no parsed')
-    console.log('[generate] Content length:', parsed?.content?.length ?? 'undefined')
-    console.log('[generate] Content is array:', Array.isArray(parsed?.content))
-
-    // Try to find content array wherever it is
-    let contentArray = parsed?.content
-
-    if (!contentArray && parsed?.data?.content) {
-      contentArray = parsed.data.content
-    }
-
-    if (!contentArray && parsed?.page?.content) {
-      contentArray = parsed.page.content
-    }
-
-    if (!Array.isArray(contentArray) || contentArray.length === 0) {
-      console.error('[generate] Content array issue:', JSON.stringify(parsed).substring(0, 300))
-      return res.status(500).json({
-        error: 'Invalid page structure. Please try again.'
-      })
-    }
-
-    // Use contentArray going forward
-    parsed.content = contentArray
-
-    console.log('[generate] Success, sections:', parsed.content.length)
-
-    // IMPORTANT: Maintain 'json' key for frontend compatibility
-    return res.status(200).json({ 
-      success: true, 
-      data: parsed,
-      json: JSON.stringify(parsed)
-    })
-
-  } catch (error) {
-    console.error('[generate] Fatal:', error.message)
-    return res.status(500).json({ 
-      error: error.message 
+    return res.status(500).json({
+      error: error.message
     })
   }
 }
