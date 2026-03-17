@@ -1,52 +1,49 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
-const SYSTEM_PROMPT = `You are an Elementor page 
-template JSON generator.
+const SYSTEM_PROMPT = `You are an Elementor JSON 
+generator for Elementor 3.6+ with Flexbox Container.
 
-You MUST return a JSON object with this EXACT 
-root structure - no variations allowed:
+Return ONLY a valid JSON object. No markdown.
+No code fences. Start with { end with }.
+Every element needs a unique random 8-digit numeric id.
 
+IMPORTANT: Use "container" for ALL layout elements.
+Do NOT use "section" or "column" — they are deprecated.
+
+Structure uses nested containers:
+- Outer container = full width row (like a section)
+- Inner container = column (flexbox child)
+- Widgets go inside inner containers
+
+Full example:
 {
   "version": "0.4",
-  "title": "Page Title Here",
-  "content": [
-    ... sections go here ...
-  ]
-}
-
-The root object MUST have exactly these 3 keys:
-- "version" with value "0.4"
-- "title" with the page title string  
-- "content" with an array of section objects
-
-Each section in content array MUST use 
-"elType": "section" (NOT container, NOT widget).
-
-Each section contains "elements" array with 
-columns using "elType": "column".
-
-Each column contains "elements" array with 
-widgets using "elType": "widget".
-
-Full example of ONE section with ONE column 
-and ONE widget:
-
-{
-  "version": "0.4",
-  "title": "My Page",
+  "title": "Page Title",
   "content": [
     {
       "id": "10000001",
-      "elType": "section",
+      "elType": "container",
       "settings": {
-        "background_color": "#ffffff"
+        "background_color": "#ffffff",
+        "padding": {
+          "unit": "px",
+          "top": "80",
+          "right": "40", 
+          "bottom": "80",
+          "left": "40",
+          "isLinked": false
+        },
+        "content_width": "boxed",
+        "flex_direction": "row",
+        "flex_wrap": "nowrap"
       },
       "elements": [
         {
           "id": "10000002",
-          "elType": "column",
+          "elType": "container",
           "settings": {
-            "_column_size": 100
+            "flex_direction": "column",
+            "width": { "unit": "%", "size": 100 }
           },
           "elements": [
             {
@@ -67,30 +64,31 @@ and ONE widget:
 }
 
 Rules:
-- Root object starts with version, title, content
-- content is array of sections
-- sections use elType: "section" only
-- columns use elType: "column" only  
-- widgets use elType: "widget" only
+- Root has version, title, content
+- content is array of outer containers (rows)
+- Each outer container has inner containers (columns)
+- Widgets go inside inner containers
+- For full width: one inner container width 100%
+- For 3 columns: three inner containers width 33%
 - Every element has unique 8-digit numeric id
-- No HTML tags in any text value
-- All text values under 15 words
-- Generate 3 sections total
+- No HTML tags in text values
+- Text values max 15 words
 
-Section 1 — Hero:
-  100% column with heading (h1), 
-  text-editor, button
+Generate exactly 3 containers (rows):
 
-Section 2 — Features:
-  3 columns (33% each), 
-  icon-box widget in each column
+Row 1 — Hero:
+  One inner container (100%) with:
+  heading (h1) + text-editor + button
 
-Section 3 — CTA:
-  100% column with heading (h2) 
-  and button
+Row 2 — Features:
+  Three inner containers (33% each) with:
+  one icon-box widget each
 
-Return ONLY the JSON. Start with { end with }.
-No markdown. No explanation.`
+Row 3 — CTA:
+  One inner container (100%) with:
+  heading (h2) + button
+
+Return ONLY the JSON.`
 
 function buildUserPrompt(data) {
   const { pageType, businessName, description,
