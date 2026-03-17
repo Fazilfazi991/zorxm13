@@ -11,6 +11,24 @@ Keep text values concise — max 2 sentences each.
 No HTML tags inside text values.
 Return ONLY the JSON object, nothing else.`
 
+const GEMINI_SYSTEM_PROMPT = `You are an Elementor 
+JSON generator. Return ONLY a JSON object.
+No markdown. No code fences. Start with { end with }.
+
+STRICT RULES:
+- Maximum 3 sections total
+- Each text value maximum 10 words
+- No HTML in any value
+- No inline styles
+- Unique 8-digit numeric id on every element
+
+Generate exactly these 3 sections:
+1. Hero section: one heading widget + one button widget
+2. Features section: three columns, one icon-box each
+3. CTA section: one heading widget + one button widget
+
+Return the JSON only. Stop after the closing }.`
+
 function buildUserPrompt(data) {
   const { pageType, businessName, 
           description, tone, 
@@ -85,7 +103,7 @@ function extractJSON(raw) {
   }
 }
 
-async function tryGemini(userPrompt, modelName) {
+async function tryGemini(userPrompt, modelName, systemPrompt = SYSTEM_PROMPT) {
   try {
     const key = process.env.GEMINI_API_KEY || 
                 process.env.VITE_GEMINI_API_KEY
@@ -95,12 +113,12 @@ async function tryGemini(userPrompt, modelName) {
       model: modelName,
       generationConfig: {
         responseMimeType: 'application/json',
-        temperature: 0.7,
-        maxOutputTokens: 8192
+        temperature: 0.3,
+        maxOutputTokens: 1024
       }
     })
     const result = await model.generateContent(
-      SYSTEM_PROMPT + '\n\n' + userPrompt
+      systemPrompt + '\n\n' + userPrompt
     )
     
     const finishReason = result.response
@@ -212,22 +230,89 @@ export default async function handler(req, res) {
 
     const userPrompt = buildUserPrompt(body)
 
-    // Fallback chain: Kimi → Gemini 2.5 Flash → Gemini 1.5 Flash
+    // Fallback chain: Kimi → gemini-2.0-flash-exp → gemini-1.5-flash → gemini-1.5-pro
     let rawResponse = await tryKimi(userPrompt)
     
     if (!rawResponse) {
-      console.log('[generate] Kimi failed, trying Gemini 2.5 Flash...')
+      console.log('[generate] Kimi failed, trying gemini-2.0-flash-exp')
       rawResponse = await tryGemini(
-        userPrompt, 'gemini-2.5-flash'
+        userPrompt,
+        'gemini-2.0-flash-exp',
+        GEMINI_SYSTEM_PROMPT
       )
     }
     
     if (!rawResponse) {
-      console.log('[generate] Gemini 2.5 failed, trying Gemini 1.5 Flash...')
+      console.log('[generate] gemini-2.0-flash-exp failed, trying gemini-1.5-flash')
       rawResponse = await tryGemini(
-        userPrompt, 'gemini-1.5-flash-latest'
+        userPrompt,
+        'gemini-1.5-flash',
+        GEMINI_SYSTEM_PROMPT
       )
     }
+
+    if (!rawResponse) {
+      console.log('[generate] gemini-1.5-flash failed, trying gemini-1.5-pro')
+      rawResponse = await tryGemini(
+        userPrompt,
+        'gemini-1.5-pro',
+        GEMINI_SYSTEM_PROMPT
+      )
+    }
+
+    if (!rawResponse) {
+      return res.status(500).json({
+        error: 'All models failed. Please try again.'
+      })
+    }
+
+    console.log('[generate] Raw length:', rawResponse.length)
+    console.log('[generate] Raw first 500 chars:', rawResponse.substring(0, 500))
+
+    const parsed = extractJSON(rawResponse)
+
+    console.log('[generate] Parsed keys:', parsed ? Object.keys(parsed) : 'null')
+    console.log('[generate] Content type:', parsed ? typeof parsed.content : 'no parsed')
+    console.log('[generate] Content length:', parsed?.content?.length ?? 'undefined')
+    console.log('[generate] Content is array:', Array.isArray(parsed?.content))
+
+    // Try to find content array wherever it is
+    let contentArray = parsed?.content
+
+    if (!contentArray && parsed?.data?.content) {
+      contentArray = parsed.data.content
+    }
+
+    if (!contentArray && parsed?.page?.content) {
+      contentArray = parsed.page.content
+    }
+
+    if (!Array.isArray(contentArray) || contentArray.length === 0) {
+      console.error('[generate] Content array issue:', JSON.stringify(parsed).substring(0, 300))
+      return res.status(500).json({
+        error: 'Invalid page structure. Please try again.'
+      })
+    }
+
+    // Use contentArray going forward
+    parsed.content = contentArray
+
+    console.log('[generate] Success, sections:', parsed.content.length)
+
+    // IMPORTANT: Maintain 'json' key for frontend compatibility
+    return res.status(200).json({ 
+      success: true, 
+      data: parsed,
+      json: JSON.stringify(parsed)
+    })
+
+  } catch (error) {
+    console.error('[generate] Fatal:', error.message)
+    return res.status(500).json({ 
+      error: error.message 
+    })
+  }
+}
 
     if (!rawResponse) {
       return res.status(500).json({
