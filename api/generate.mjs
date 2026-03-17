@@ -86,20 +86,18 @@ async function tryGeminiModel(userPrompt, modelName) {
     if (!key) throw new Error('No Gemini key')
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${key}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${key}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          system_instruction: {
-            parts: [{ text: SYSTEM_PROMPT }]
-          },
           contents: [{
             role: 'user',
-            parts: [{ text: userPrompt }]
+            parts: [{ 
+              text: SYSTEM_PROMPT + '\n\n' + userPrompt 
+            }]
           }],
           generationConfig: {
-            responseMimeType: 'application/json',
             temperature: 0.3,
             maxOutputTokens: 4096
           }
