@@ -145,7 +145,7 @@ container settings:
 function buildUserPrompt(data) {
   return `Generate for:
 Business: ${data.businessName}
-Description: ${data.description.substring(0,150)}
+Description: ${data.description.substring(0, 800)}
 Primary color: ${data.primaryColor}
 CTA text: ${data.ctaText}
 Write real copy. Return ONLY JSON.`

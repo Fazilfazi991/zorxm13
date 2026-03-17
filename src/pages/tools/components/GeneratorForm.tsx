@@ -288,7 +288,7 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onSubmit, isLoading }) =>
                 fontSize: '11px',
                 color: 'var(--color-text-muted)'
               }}>
-                {description.length} / 500
+                Be as detailed as you like — more detail = better results
               </span>
             </div>
           </div>
