@@ -2,55 +2,26 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const SYSTEM_PROMPT = `You are an Elementor JSON 
 generator. Return ONLY a valid JSON object.
-No markdown. No code fences. Start with { end with }.
+No markdown. No code fences. No explanation.
+Start with { and end with }.
 Every element needs a unique random 8-digit numeric id.
 
-CRITICAL: Keep total JSON under 4000 characters.
-Max 3 sections only. Keep ALL text values under 
-15 words. No HTML tags in text values.
-
-Structure:
-{
-  "version": "0.4",
-  "title": "string",
-  "content": [{
-    "id": "12345678",
-    "elType": "section",
-    "settings": { "background_color": "#ffffff" },
-    "elements": [{
-      "id": "23456789",
-      "elType": "column",
-      "settings": { "_column_size": 100 },
-      "elements": [{
-        "id": "34567890",
-        "elType": "widget",
-        "widgetType": "heading",
-        "settings": {
-          "title": "short heading here",
-          "header_size": "h1",
-          "align": "center"
-        }
-      }]
-    }]
-  }]
-}
-
-Generate exactly 3 sections:
-1. Hero: heading + text-editor + button
-2. Features: 3 columns with icon-box each
-3. CTA: heading + button
-
-Keep every text value SHORT. Return ONLY JSON.`
+Generate 5 sections for the page type requested.
+Keep text values concise — max 2 sentences each.
+No HTML tags inside text values.
+Return ONLY the JSON object, nothing else.`
 
 function buildUserPrompt(data) {
   const { pageType, businessName, 
           description, tone, 
           primaryColor, ctaText } = data
-  return `${pageType} page for "${businessName}".
-Business: ${description.substring(0, 200)}
-Tone: ${tone}. Color: ${primaryColor}. CTA: ${ctaText}
-Generate 3 sections. Keep all text under 15 words.
-Return ONLY the JSON.`
+  return `Generate a ${pageType} page for:
+Business: ${businessName}
+About: ${description}
+Tone: ${tone}
+Brand color: ${primaryColor}
+CTA button text: ${ctaText}
+Write real copy specific to this business. JSON only.`
 }
 
 function extractJSON(raw) {
@@ -125,14 +96,24 @@ async function tryGemini(userPrompt, modelName) {
       generationConfig: {
         responseMimeType: 'application/json',
         temperature: 0.7,
-        maxOutputTokens: 2048
+        maxOutputTokens: 8192
       }
     })
     const result = await model.generateContent(
       SYSTEM_PROMPT + '\n\n' + userPrompt
     )
-    const finishReason = result.response.candidates?.[0]?.finishReason
-    console.log(`[generate] ${modelName} Finish reason:`, finishReason)
+    
+    const finishReason = result.response
+      .candidates?.[0]?.finishReason
+    console.log(`[generate] ${modelName} finish:`, 
+      finishReason)
+
+    // Treat MAX_TOKENS as failure — JSON is truncated
+    if (finishReason === 'MAX_TOKENS') {
+      console.error(`[generate] ${modelName} truncated,`
+        + ' falling back')
+      return null
+    }
 
     const text = result.response.text()
     console.log(`[generate] ${modelName} succeeded`)
@@ -211,22 +192,21 @@ export default async function handler(req, res) {
 
     const userPrompt = buildUserPrompt(body)
 
-    // Chain: gemini-2.5-flash → gemini-2.5-flash-lite 
-    //        → Kimi moonshot-v1-8k
-    let rawResponse = await tryGemini(
-      userPrompt, 'gemini-2.5-flash'
-    )
-
+    // Fallback chain: Kimi → Gemini 2.5 Flash → Gemini 1.5 Flash
+    let rawResponse = await tryKimi(userPrompt)
+    
     if (!rawResponse) {
-      console.log('[generate] Trying gemini-2.5-flash-lite')
+      console.log('[generate] Kimi failed, trying Gemini 2.5 Flash...')
       rawResponse = await tryGemini(
-        userPrompt, 'gemini-2.5-flash-lite'
+        userPrompt, 'gemini-2.5-flash'
       )
     }
-
+    
     if (!rawResponse) {
-      console.log('[generate] Trying Kimi...')
-      rawResponse = await tryKimi(userPrompt)
+      console.log('[generate] Gemini 2.5 failed, trying Gemini 1.5 Flash...')
+      rawResponse = await tryGemini(
+        userPrompt, 'gemini-1.5-flash-latest'
+      )
     }
 
     if (!rawResponse) {
