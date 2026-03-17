@@ -19,4 +19,20 @@
       <li>Right-click → Paste to insert your page</li>
     </ol>
   </div>
+
+  <?php $nonce = wp_create_nonce('wp_rest'); ?>
+  <div class="wpcraft-nonce-box">
+    <label>Your Site Nonce (copy this):</label>
+    <input 
+      type="text" 
+      readonly 
+      onclick="this.select()" 
+      value="<?php echo esc_attr($nonce); ?>"
+    />
+    <p class="description">
+      Paste this in the WPCraft generator 
+      when connecting your site.
+      Note: Nonce expires after 24 hours.
+    </p>
+  </div>
 </div>
