@@ -9,7 +9,7 @@ async function tryGemini(prompt, systemPrompt) {
       await import('@google/generative-ai')
     const genAI = new GoogleGenerativeAI(geminiKey)
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash-preview-04-17',
+      model: 'gemini-2.5-flash',
       generationConfig: {
         responseMimeType: 'application/json'
       }
@@ -30,8 +30,12 @@ async function tryManus(prompt, systemPrompt) {
   try {
     const manusKey = process.env.MANUS_API_KEY
     const manusBase = process.env.MANUS_API_BASE || 
-                      'https://api.manus.im/v1'
+                      'https://api.manus.app/v1'
     if (!manusKey) throw new Error('No Manus key')
+
+    console.log('[generate] Manus URL:', `${manusBase}/chat/completions`)
+    console.log('[generate] Manus key exists:', !!manusKey)
+    console.log('[generate] Manus key prefix:', manusKey?.substring(0, 8))
 
     const response = await fetch(
       `${manusBase}/chat/completions`,
@@ -39,10 +43,12 @@ async function tryManus(prompt, systemPrompt) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${manusKey}`
+          'Authorization': `Bearer ${manusKey}`,
+          'HTTP-Referer': 'https://zorxm13.vercel.app',
+          'X-Title': 'WPCraft AI Generator'
         },
         body: JSON.stringify({
-          model: 'manus-default',
+          model: 'claude-3-5-sonnet-20241022',
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: prompt }
