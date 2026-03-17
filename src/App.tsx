@@ -21,13 +21,19 @@ import PageGenerator from "./pages/tools/PageGenerator";
 import Blogs from "./pages/Blogs";
 import WhatsAppButton from "./components/WhatsAppButton";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Dashboard from "./pages/Dashboard";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
       <Sonner />
       <WhatsAppButton />
       <BrowserRouter>
@@ -46,19 +52,19 @@ const App = () => (
           <Route path="/blogs" element={<Blogs />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/seo-tools" element={<SEOCopilotTools />} />
-          <Route 
-            path="/ai-generator" 
-            element={
-              <ErrorBoundary>
-                <PageGenerator />
-              </ErrorBoundary>
-            } 
-          />
+          <Route path="/ai-generator" element={<ErrorBoundary><PageGenerator /></ErrorBoundary>} />
+          
+          {/* Auth Routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

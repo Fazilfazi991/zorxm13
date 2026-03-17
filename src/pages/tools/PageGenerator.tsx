@@ -3,7 +3,15 @@ import React from 'react';
 import Navbar from "@/components/Navbar";
 import GeneratorForm from "./components/GeneratorForm";
 import PreviewPanel from "./components/PreviewPanel";
+import { AuthHeader } from "@/components/AuthHeader";
 import { ChevronDown, Pencil, Wand2, Download, Layout, Sparkles } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
+
+const GUEST_KEY = 'wpcraft_guest_generations';
 
 const PageGenerator = () => {
   const [generatedData, setGeneratedData] = React.useState<{
@@ -11,10 +19,9 @@ const PageGenerator = () => {
     primaryColor: string,
     businessName: string
   } | null>(null);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [loadingStep, setLoadingStep] = React.useState(0);
-  const [error, setError] = React.useState<string | null>(null);
   const [lastInput, setLastInput] = React.useState<any>(null);
+  const [showSignupPrompt, setShowSignupPrompt] = React.useState(false);
+  const { user, profile, refreshProfile } = useAuth();
 
   const loadingMessages = [
     "Analysing your business...",
@@ -38,6 +45,21 @@ const PageGenerator = () => {
 
   const generatePage = async (data: any) => {
     if (!data) return;
+    
+    // Auth & Credit Check Before Generation
+    if (user && profile) {
+      if (profile.credits <= 0) {
+        toast.error("You're out of credits! Please upgrade to continue generating.");
+        return;
+      }
+    } else {
+      const count = parseInt(localStorage.getItem(GUEST_KEY) || '0');
+      if (count >= 1) {
+        setShowSignupPrompt(true);
+        return;
+      }
+      localStorage.setItem(GUEST_KEY, String(count + 1));
+    }
     
     setIsLoading(true);
     setError(null);
@@ -73,6 +95,26 @@ const PageGenerator = () => {
         businessName: data.businessName
       });
       
+      // Post-Generation Tracking
+      if (user) {
+        try {
+          // Deduct credit
+          await supabase.rpc('deduct_credit', { user_id: user.id });
+          // Refresh UI
+          await refreshProfile();
+          // Log generation to history
+          await supabase.from('generations').insert({
+            user_id: user.id,
+            page_type: data.pageType,
+            business_name: data.businessName,
+            style_id: data.styleId || data.tone,
+            primary_color: data.primaryColor
+          });
+        } catch (dbErr) {
+          console.error("Failed to update credit/history:", dbErr);
+        }
+      }
+      
       // Smooth scroll to preview on mobile
       if (typeof window !== 'undefined' && window.innerWidth < 1024) {
         const previewElement = document.getElementById('generator-section');
@@ -95,6 +137,7 @@ const PageGenerator = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <AuthHeader />
       <Navbar />
       
       {/* SECTION 1: DARK HERO */}
@@ -231,6 +274,40 @@ const PageGenerator = () => {
           </a>
         </div>
       </footer>
+
+      {/* GUEST SIGNUP PROMPT MODAL */}
+      {showSignupPrompt && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white max-w-[440px] w-full rounded-2xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 p-8 text-center pointer-events-auto filter-none">
+            <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Sparkles className="w-8 h-8 text-[#166534]" />
+            </div>
+            <h2 className="text-[24px] font-semibold text-[var(--color-text-primary)] mb-3 tracking-tight">
+              Enjoying WPCraft?
+            </h2>
+            <p className="text-[15px] text-[var(--color-text-secondary)] mb-8 leading-relaxed">
+              Create a free account to get 3 more generations plus save your history to your dashboard.
+            </p>
+            <div className="flex flex-col gap-3">
+              <Link to="/signup" className="w-full">
+                <Button className="w-full h-12 bg-[#166534] hover:bg-[#14532d] text-white rounded-xl font-semibold text-[15px] shadow-sm">
+                  Create free account
+                </Button>
+              </Link>
+              <Button 
+                variant="ghost" 
+                className="w-full h-12 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] font-medium text-[14px]"
+                onClick={() => {
+                  setShowSignupPrompt(false);
+                  toast("1 generation left", { description: "Make sure to download your JSON before leaving." });
+                }}
+              >
+                Maybe later
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
