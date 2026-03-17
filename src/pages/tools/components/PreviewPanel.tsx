@@ -55,12 +55,7 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({
   // WordPress Connection State
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [siteUrl, setSiteUrl] = React.useState(() => localStorage.getItem('wpcraft_site_url') || '');
-  const [nonce, setNonce] = React.useState('');
-  const [pages, setPages] = React.useState<WordPressPage[]>([]);
-  const [selectedPageId, setSelectedPageId] = React.useState<string>('');
-  const [isFetchingPages, setIsFetchingPages] = React.useState(false);
-  const [isSending, setIsSending] = React.useState(false);
-  const [connError, setConnError] = React.useState<string | null>(null);
+  const [connSuccess, setConnSuccess] = React.useState(false);
 
   const htmlPreview = React.useMemo(() => {
     if (!data) return '';
@@ -86,72 +81,49 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({
     }
   };
 
-  const fetchPages = async (url: string) => {
-    if (!url) return;
-    setIsFetchingPages(true);
-    setConnError(null);
-    try {
-      // Clean URL
-      const cleanUrl = url.replace(/\/$/, '');
-      const response = await fetch(`${cleanUrl}/wp-json/wp/v2/pages?per_page=20`);
-      if (!response.ok) throw new Error('Could not connect to WordPress');
-      const data = await response.json();
-      setPages(data);
-      localStorage.setItem('wpcraft_site_url', cleanUrl);
-    } catch (err: any) {
-      console.error("Fetch pages failed:", err);
-      setConnError("Could not connect. Make sure WPCraft plugin is installed on your site.");
-    } finally {
-      setIsFetchingPages(false);
-    }
-  };
-
-  const handleSendToWordPress = async () => {
-    if (!siteUrl || !selectedPageId || !nonce) {
-      setConnError("Please fill in all fields");
-      return;
-    }
-
-    setIsSending(true);
-    setConnError(null);
-
-    try {
-      const cleanUrl = siteUrl.replace(/\/$/, '');
-      const response = await fetch(`${cleanUrl}/wp-json/wpcraft/v1/inject`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-WP-Nonce': nonce
-        },
-        body: JSON.stringify({
-          post_id: parseInt(selectedPageId),
-          elements: data.content
-        })
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 403) {
-          throw new Error("Invalid Nonce. Please check your WordPress admin page.");
-        }
-        throw new Error(result.message || "Failed to connect. Check your site URL and make sure WPCraft plugin is active.");
+  const sendToWordPress = async (url: string, elements: any[]) => {
+    // Clean the URL
+    const cleanUrl = url.replace(/\/$/, '')
+    
+    // Build the Elementor localStorage data
+    const clipboardData = {
+      "__expiration": {},
+      "clipboard": {
+        "type": "elementor",
+        "elements": elements
       }
+    }
+    
+    const encodedData = encodeURIComponent(
+      JSON.stringify(clipboardData)
+    )
+    
+    // Open the bridge page in a popup window
+    // The bridge page is served by the WPCraft plugin
+    const bridgeUrl = 
+      `${cleanUrl}/?wpcraft_bridge=1&data=${encodedData}`
+    
+    const popup = window.open(
+      bridgeUrl,
+      'wpcraft_bridge',
+      'width=400,height=300,scrollbars=no'
+    )
+    
+    // Show instruction toast
+    toast.success(
+      'Opening connection... Then open any page in Elementor and paste!',
+      { style: { background: '#16a34a', color: '#fff' } }
+    )
 
-      toast.success("Sent! Open the page in Elementor and right-click → Paste", {
-        style: { background: '#16a34a', color: '#fff' }
-      });
+    setConnSuccess(true);
+    
+    // Close popup after 3 seconds 
+    // (bridge page has already run by then)
+    setTimeout(() => {
+      if (popup && !popup.closed) popup.close()
       setIsModalOpen(false);
-    } catch (err: any) {
-      console.error("Send failed:", err);
-      if (err.message.includes('Failed to fetch')) {
-        setConnError("CORS error: WP REST API may be blocking requests. Add 'Header always set Access-Control-Allow-Origin \"*\"' to your .htaccess.");
-      } else {
-        setConnError(err.message);
-      }
-    } finally {
-      setIsSending(false);
-    }
+      setConnSuccess(false);
+    }, 3000)
   };
 
   if (error) {
@@ -373,14 +345,14 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({
             <Info className="w-6 h-6" />
           </div>
           <div className="space-y-4">
-            <h4 className="text-[15px] font-semibold text-[var(--color-text-primary)]">How to paste in Elementor:</h4>
+            <h4 className="text-[15px] font-semibold text-[var(--color-text-primary)]">PRIMARY METHOD &mdash; "Send to WordPress" button:</h4>
+            <p className="text-[13px] text-[var(--color-text-secondary)] mb-2 font-medium">Steps shown after connecting:</p>
             <ol className="grid gap-y-2.5 text-[13px] text-[var(--color-text-secondary)] list-decimal list-inside leading-loose">
-              <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Click <span className="text-[var(--color-green-700)] font-bold">'Copy for Elementor'</span> above</li>
-              <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Open your page in <span className="text-[var(--color-green-700)] font-bold">Elementor editor</span></li>
-              <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Right-click <span className="text-[var(--color-green-700)] font-bold">anywhere on the canvas</span></li>
-              <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Click <span className="text-[var(--color-green-700)] font-bold">'Paste from other site'</span></li>
-              <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Press <span className="text-[var(--color-green-700)] font-bold">Ctrl+V (or Cmd+V on Mac)</span> in the popup</li>
-              <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Your full page appears instantly</li>
+              <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Click "Send to WordPress" above</li>
+              <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Enter your site URL (once only)</li>
+              <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Open ANY page in Elementor</li>
+              <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Right-click &rarr; Paste</li>
+              <li className="font-medium hover:text-[var(--color-text-primary)] transition-colors">Done!</li>
             </ol>
             
             <div style={{
@@ -419,104 +391,50 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({
               Send to WordPress
             </DialogTitle>
             <DialogDescription>
-              Enter your site details to inject this layout directly.
+              Enter your site URL once &mdash; then paste into any Elementor page
             </DialogDescription>
           </DialogHeader>
           
           <div className="grid gap-6 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="siteUrl">WordPress Site URL</Label>
-              <div className="relative">
-                <Input
-                  id="siteUrl"
-                  placeholder="https://yoursite.com"
-                  value={siteUrl}
-                  onChange={(e) => setSiteUrl(e.target.value)}
-                  onBlur={() => fetchPages(siteUrl)}
-                  className="pl-9"
-                />
-                <Link2 className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
+            {connSuccess ? (
+              <div className="p-4 bg-green-50 border border-green-200 rounded-xl text-center flex flex-col items-center gap-2 text-green-800 animate-fade-in">
+                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 mb-1">
+                  <Check className="w-5 h-5" />
+                </div>
+                <p className="font-semibold text-[15px]">Connected!</p>
+                <p className="text-[13px] font-medium leading-snug">Now open any page in Elementor and right-click &rarr; Paste</p>
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="pageSelect">Which page to edit?</Label>
-              <Select 
-                value={selectedPageId} 
-                onValueChange={setSelectedPageId}
-                disabled={isFetchingPages || pages.length === 0}
-              >
-                <SelectTrigger id="pageSelect">
-                  <SelectValue placeholder={isFetchingPages ? "Fetching pages..." : "Select a page"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {pages.map((page) => (
-                    <SelectItem key={page.id} value={page.id.toString()}>
-                      {page.title.rendered}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="nonce">WordPress REST Nonce</Label>
-                <span className="text-[10px] text-muted-foreground italic">Required for secure connection</span>
-              </div>
-              <Input
-                id="nonce"
-                placeholder="Get this from WPCraft plugin page"
-                value={nonce}
-                onChange={(e) => setNonce(e.target.value)}
-              />
-              <p className="text-[11px] text-muted-foreground flex items-center gap-1 leading-relaxed">
-                <Info className="w-3 h-3 shrink-0" />
-                Find this in WordPress → WPCraft → Copy your site nonce
-              </p>
-            </div>
-
-            {connError && (
-              <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-[12px] flex gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <p className="font-semibold">{connError}</p>
-                  {connError.includes('installed') && (
-                    <a 
-                      href="https://github.com/Fazilfazi991/zorxm13/tree/main/wordpress/wpcraft" 
-                      target="_blank" 
-                      className="underline flex items-center gap-1 hover:text-destructive/80"
-                    >
-                      Download WPCraft Plugin <ExternalLink className="w-3 h-3" />
-                    </a>
-                  )}
+            ) : (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="siteUrl">WordPress Site URL</Label>
+                  <div className="relative">
+                    <Input
+                      id="siteUrl"
+                      placeholder="https://yoursite.com"
+                      value={siteUrl}
+                      onChange={(e) => setSiteUrl(e.target.value)}
+                      className="pl-9"
+                    />
+                    <Link2 className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
+                  </div>
+                </div>
+                <div className="pt-2">
+                  <Button 
+                    onClick={() => {
+                      if (!siteUrl) return;
+                      localStorage.setItem('wpcraft_site_url', siteUrl);
+                      sendToWordPress(siteUrl, data.content);
+                    }} 
+                    disabled={!siteUrl}
+                    className="w-full bg-[#166534] hover:bg-[#14532d] text-white rounded-xl h-11 font-semibold text-[15px]"
+                  >
+                    Connect & Copy &rarr;
+                  </Button>
                 </div>
               </div>
             )}
           </div>
-
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setIsModalOpen(false)} className="rounded-xl">
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleSendToWordPress} 
-              disabled={isSending || !selectedPageId || !nonce || !siteUrl}
-              className="bg-[#166534] hover:bg-[#14532d] text-white rounded-xl gap-2 min-w-[140px]"
-            >
-              {isSending ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Sending...
-                </>
-              ) : (
-                <>
-                  Send to Elementor
-                  <ChevronRight className="w-4 h-4" />
-                </>
-              )}
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

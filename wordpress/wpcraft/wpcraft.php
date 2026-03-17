@@ -33,8 +33,8 @@ class WPCraft {
             [$this, 'enqueue_editor_script']
         );
         
-        // Register REST API init
-        add_action('rest_api_init', [$this, 'register_routes']);
+        // Handle bridge connection
+        add_action('template_redirect', [$this, 'handle_bridge']);
         
         // Admin menu
         add_action('admin_menu', [$this, 'admin_menu']);
@@ -54,99 +54,72 @@ class WPCraft {
             WPCRAFT_VERSION,
             true
         );
-        
-        wp_localize_script(
-            'wpcraft-elementor',
-            'wpcraftData',
-            [
-                'postID' => get_the_ID(),
-                'ajaxurl' => admin_url('admin-ajax.php'),
-                'restUrl' => rest_url('wpcraft/v1/'),
-                'nonce' => wp_create_nonce('wp_rest'),
-                'siteUrl' => get_site_url(),
-            ]
-        );
     }
     
-    public function register_routes() {
-        // Endpoint to receive generated page data
-        // and inject into Elementor localStorage
-        register_rest_route('wpcraft/v1', '/inject', [
-            'methods' => 'POST',
-            'callback' => [$this, 'handle_inject'],
-            'permission_callback' => function() {
-                return current_user_can('edit_posts');
-            }
-        ]);
-        
-        // Endpoint to verify plugin is installed
-        register_rest_route('wpcraft/v1', '/ping', [
-            'methods' => 'GET',
-            'callback' => function() {
-                return rest_ensure_response([
-                    'status' => 'ok',
-                    'version' => WPCRAFT_VERSION,
-                    'site' => get_site_url()
-                ]);
-            },
-            'permission_callback' => '__return_true'
-        ]);
-
-        // REST endpoint to check for pending inject data
-        register_rest_route('wpcraft/v1', '/check-inject', [
-            'methods' => 'GET',
-            'callback' => function($request) {
-                $post_id = $request->get_param('post_id');
-                $elements = get_transient(
-                    'wpcraft_inject_' . $post_id
-                );
-                
-                if ($elements) {
-                    // Delete after reading (one-time use)
-                    delete_transient('wpcraft_inject_' . $post_id);
-                    return rest_ensure_response([
-                        'status' => 'ok',
-                        'elements' => $elements
-                    ]);
-                }
-                
-                return rest_ensure_response([
-                    'status' => 'empty',
-                    'elements' => []
-                ]);
-            },
-            'permission_callback' => function() {
-                return current_user_can('edit_posts');
-            }
-        ]);
-    }
-    
-    public function handle_inject($request) {
-        $params = $request->get_json_params();
-        $elements = $params['elements'] ?? [];
-        $post_id = $params['post_id'] ?? 0;
-        
-        if (empty($elements) || empty($post_id)) {
-            return new WP_Error(
-                'missing_data', 
-                'Missing elements or post_id', 
-                ['status' => 400]
-            );
+    public function handle_bridge() {
+        if (empty($_GET['wpcraft_bridge'])) return;
+        if (empty($_GET['data'])) {
+            echo '<script>window.close();</script>';
+            exit;
         }
         
-        // Store the elements in a transient
-        // The editor JS will pick this up on next load
-        set_transient(
-            'wpcraft_inject_' . $post_id, 
-            $elements, 
-            300 // 5 minute expiry
+        $data = stripslashes($_GET['data']);
+        // Sanitize - only allow valid JSON chars
+        $data = preg_replace(
+            '/[^\x20-\x7E]/', '', $data
         );
         
-        return rest_ensure_response([
-            'status' => 'ok',
-            'message' => 'Page ready to inject',
-            'post_id' => $post_id
-        ]);
+        ?>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>WPCraft - Connecting...</title>
+            <style>
+                body { 
+                    font-family: sans-serif; 
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    height: 100vh;
+                    margin: 0;
+                    background: #f0fdf4;
+                    flex-direction: column;
+                    gap: 12px;
+                }
+                .icon { font-size: 40px; }
+                p { 
+                    color: #166534; 
+                    font-size: 16px;
+                    font-weight: 600;
+                    margin: 0;
+                }
+                small { color: #6b7280; font-size: 13px; }
+            </style>
+        </head>
+        <body>
+            <div class="icon">✓</div>
+            <p>Page ready to paste!</p>
+            <small>You can close this window</small>
+            <script>
+                try {
+                    var data = <?php echo json_encode($data); ?>;
+                    var parsed = JSON.parse(data);
+                    localStorage.setItem(
+                        'elementor', 
+                        JSON.stringify(parsed)
+                    );
+                } catch(e) {
+                    document.querySelector('p').textContent = 
+                        'Error: ' + e.message;
+                }
+                setTimeout(function() { 
+                    window.close(); 
+                }, 2000);
+            </script>
+        </body>
+        </html>
+        <?php
+        exit;
     }
     
     public function admin_menu() {
