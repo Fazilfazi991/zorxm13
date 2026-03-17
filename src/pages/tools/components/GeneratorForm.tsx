@@ -136,6 +136,14 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onSubmit, isLoading }) =>
     showToast("Color updated to match style");
   };
 
+  const handleManualColorChange = (color: string) => {
+    setPrimaryColor(color);
+    setSelectedStyle((prev) => ({
+      ...prev,
+      accentColor: color
+    }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({ 
@@ -322,16 +330,53 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({ onSubmit, isLoading }) =>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="primaryColor" className="text-[14px] font-semibold text-[var(--color-text-primary)]">Override accent color (optional)</Label>
-          <div className="flex gap-2">
-            <div 
-              className="w-11 h-11 shrink-0 rounded-[8px] border border-[var(--color-border)] shadow-sm"
-              style={{ backgroundColor: primaryColor }}
-            />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ position: 'relative' }}>
+              <input
+                type="color"
+                value={primaryColor.length === 7 ? primaryColor : '#000000'}
+                onChange={(e) => handleManualColorChange(e.target.value)}
+                style={{
+                  position: 'absolute',
+                  opacity: 0,
+                  width: '44px',
+                  height: '44px',
+                  cursor: 'pointer',
+                  top: 0,
+                  left: 0,
+                  border: 'none',
+                  padding: 0
+                }}
+              />
+              <div
+                style={{
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '8px',
+                  background: primaryColor,
+                  border: '1px solid var(--color-border)',
+                  cursor: 'pointer',
+                  flexShrink: 0
+                }}
+              />
+            </div>
             <Input
               id="primaryColor"
               type="text"
               value={primaryColor}
-              onChange={(e) => setPrimaryColor(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value
+                setPrimaryColor(val)
+                if (/^#[0-9A-Fa-f]{3,6}$/.test(val)) {
+                  handleManualColorChange(val)
+                }
+              }}
+              style={{
+                fontFamily: 'monospace',
+                fontSize: '13px'
+              }}
+              placeholder="#EF4444"
+              maxLength={7}
               className={`h-11 font-mono uppercase ${inputStyles}`}
             />
           </div>
