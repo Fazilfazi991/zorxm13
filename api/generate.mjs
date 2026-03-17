@@ -1,12 +1,96 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
-const SYSTEM_PROMPT = `You are an Elementor JSON generator.
-Return ONLY a valid JSON object. No markdown. No code fences.
-No explanation. Start with { and end with }.
-Every element needs a unique random 8-digit numeric id.
-Generate 5 sections with real business copy.
-Keep text values concise — max 2 sentences.
-No HTML tags inside text values.`
+const SYSTEM_PROMPT = `You are an Elementor page 
+template JSON generator.
+
+You MUST return a JSON object with this EXACT 
+root structure - no variations allowed:
+
+{
+  "version": "0.4",
+  "title": "Page Title Here",
+  "content": [
+    ... sections go here ...
+  ]
+}
+
+The root object MUST have exactly these 3 keys:
+- "version" with value "0.4"
+- "title" with the page title string  
+- "content" with an array of section objects
+
+Each section in content array MUST use 
+"elType": "section" (NOT container, NOT widget).
+
+Each section contains "elements" array with 
+columns using "elType": "column".
+
+Each column contains "elements" array with 
+widgets using "elType": "widget".
+
+Full example of ONE section with ONE column 
+and ONE widget:
+
+{
+  "version": "0.4",
+  "title": "My Page",
+  "content": [
+    {
+      "id": "10000001",
+      "elType": "section",
+      "settings": {
+        "background_color": "#ffffff"
+      },
+      "elements": [
+        {
+          "id": "10000002",
+          "elType": "column",
+          "settings": {
+            "_column_size": 100
+          },
+          "elements": [
+            {
+              "id": "10000003",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Your Heading",
+                "header_size": "h1",
+                "align": "center"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+Rules:
+- Root object starts with version, title, content
+- content is array of sections
+- sections use elType: "section" only
+- columns use elType: "column" only  
+- widgets use elType: "widget" only
+- Every element has unique 8-digit numeric id
+- No HTML tags in any text value
+- All text values under 15 words
+- Generate 3 sections total
+
+Section 1 — Hero:
+  100% column with heading (h1), 
+  text-editor, button
+
+Section 2 — Features:
+  3 columns (33% each), 
+  icon-box widget in each column
+
+Section 3 — CTA:
+  100% column with heading (h2) 
+  and button
+
+Return ONLY the JSON. Start with { end with }.
+No markdown. No explanation.`
 
 function buildUserPrompt(data) {
   const { pageType, businessName, description,
