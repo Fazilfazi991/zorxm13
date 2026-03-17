@@ -132,8 +132,27 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // STEP 2 — Check env vars are being read correctly
+  console.log('[generate] Env check:', {
+    hasAnthropic: !!ANTHROPIC_API_KEY,
+    hasGemini: !!GEMINI_API_KEY,
+    hasManus: !!MANUS_API_KEY,
+  });
+
   try {
-    const { pageType, businessName, description, tone, primaryColor, ctaText } = req.body;
+    // STEP 3 — Check the request body is being parsed
+    const body = typeof req.body === 'string' 
+      ? JSON.parse(req.body) 
+      : req.body;
+
+    if (!body || !body.pageType) {
+      console.error('[generate] Invalid request body:', body);
+      return res.status(400).json({ 
+        error: 'Missing required fields in request body' 
+      });
+    }
+
+    const { pageType, businessName, description, tone, primaryColor, ctaText } = body;
     const heroBg = hexToRgba(primaryColor, 0.08);
 
     const systemPrompt = `You are a world-class WordPress and Elementor expert.
@@ -174,10 +193,17 @@ Return ONLY raw JSON. No markdown. No explanation.`;
     if (result) {
       return res.status(200).json({ success: true, json: JSON.stringify(result) });
     } else {
+      console.warn('[generate] All models failed to generate valid JSON');
       return res.status(500).json({ success: false, error: "Generation failed. Please try again." });
     }
   } catch (error) {
-    console.error("API Error:", error);
-    return res.status(500).json({ success: false, error: "Internal server error" });
+    // STEP 1 — Add proper error logging
+    console.error('[generate] Fatal error:', error);
+    return res.status(500).json({ 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' 
+        ? error.stack 
+        : undefined
+    });
   }
 }
