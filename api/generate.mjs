@@ -30,12 +30,25 @@ function extractJSON(raw) {
   cleaned = cleaned.substring(first, last + 1)
   try {
     return JSON.parse(cleaned)
-  } catch {
+  } catch (e1) {
+    const match = e1.message.match(/position (\d+)/)
+    const pos = match ? parseInt(match[1]) : 0
+    console.error('[parse] Error:', e1.message)
+    console.error('[parse] At position:', pos)
+    console.error('[parse] Context:', 
+      cleaned.substring(
+        Math.max(0, pos - 80), pos + 80
+      )
+    )
     try {
       return JSON.parse(
         cleaned.replace(/,(\s*[}\]])/g, '$1')
       )
-    } catch { return null }
+    } catch (e2) {
+      console.error('[parse] Fixed also failed:', 
+        e2.message)
+      return null
+    }
   }
 }
 
@@ -193,6 +206,11 @@ export default async function handler(req, res) {
         error: 'Generation failed. Please try again.'
       })
     }
+
+    console.log('[parse] Raw first 300:', 
+      rawResponse.substring(0, 300))
+    console.log('[parse] Raw last 200:', 
+      rawResponse.substring(rawResponse.length - 200))
 
     const parsed = extractJSON(rawResponse)
 
