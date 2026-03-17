@@ -8,7 +8,9 @@ Start with { end with }.
 Every element needs unique random 8-digit numeric id.
 Use DM Sans for headings, Inter for body text.
 Include responsive tablet and mobile font sizes.
-Every widget must have full typography settings.`
+Every widget must have full typography settings.
+CRITICAL: The root array key MUST be called 'content' not 'elements'. 
+Use: { version, title, content: [...] }`
 
   const toneStyles = {
     professional: `
@@ -355,7 +357,17 @@ export default async function handler(req, res) {
 
     const parsed = extractJSON(rawResponse)
 
+    // Normalize root array key
+    // Gemini sometimes returns "elements" instead of "content"
+    if (!parsed?.content && parsed?.elements) {
+      parsed.content = parsed.elements
+      delete parsed.elements
+    }
+
     if (!parsed?.content?.length) {
+      console.error('[generate] No content array found.')
+      console.error('[generate] Keys:', 
+        Object.keys(parsed || {}))
       return res.status(500).json({
         error: 'Invalid page structure. Please try again.'
       })
