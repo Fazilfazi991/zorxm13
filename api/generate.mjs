@@ -1,9 +1,13 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
-const SYSTEM_PROMPT = `You are an Elementor JSON generator.
-Return ONLY a valid JSON object. No markdown. No code fences.
-No explanation. Start with { and end with }.
+const SYSTEM_PROMPT = `You are an Elementor JSON 
+generator. Return ONLY a valid JSON object.
+No markdown. No code fences. Start with { end with }.
 Every element needs a unique random 8-digit numeric id.
+
+CRITICAL: Keep total JSON under 4000 characters.
+Max 3 sections only. Keep ALL text values under 
+15 words. No HTML tags in text values.
 
 Structure:
 {
@@ -22,7 +26,7 @@ Structure:
         "elType": "widget",
         "widgetType": "heading",
         "settings": {
-          "title": "text here",
+          "title": "short heading here",
           "header_size": "h1",
           "align": "center"
         }
@@ -31,23 +35,22 @@ Structure:
   }]
 }
 
-Allowed widgetTypes: heading, text-editor, button, 
-image, icon-box, spacer.
-Generate 5-6 sections with real business copy.
-Keep each text value concise — max 2 sentences.
-Total JSON must be under 6000 characters.
-Return ONLY the JSON object.`
+Generate exactly 3 sections:
+1. Hero: heading + text-editor + button
+2. Features: 3 columns with icon-box each
+3. CTA: heading + button
+
+Keep every text value SHORT. Return ONLY JSON.`
 
 function buildUserPrompt(data) {
-  const { pageType, businessName, description, 
-          tone, primaryColor, ctaText } = data
-  return `Generate a ${pageType} page for:
-Business: ${businessName}
-About: ${description}
-Tone: ${tone}
-Brand color: ${primaryColor}
-CTA: ${ctaText}
-Write real copy. Return ONLY JSON.`
+  const { pageType, businessName, 
+          description, tone, 
+          primaryColor, ctaText } = data
+  return `${pageType} page for "${businessName}".
+Business: ${description.substring(0, 200)}
+Tone: ${tone}. Color: ${primaryColor}. CTA: ${ctaText}
+Generate 3 sections. Keep all text under 15 words.
+Return ONLY the JSON.`
 }
 
 function extractJSON(raw) {
@@ -59,25 +62,55 @@ function extractJSON(raw) {
     .trim()
   const first = cleaned.indexOf('{')
   const last = cleaned.lastIndexOf('}')
-  if (first === -1 || last === -1) return null
-  cleaned = cleaned.substring(first, last + 1)
+  if (first === -1) return null
+  
+  // Use last } if exists, otherwise try to repair
+  const jsonStr = last !== -1 
+    ? cleaned.substring(first, last + 1)
+    : cleaned.substring(first)
+
+  // Attempt 1: direct parse
+  try { return JSON.parse(jsonStr) } catch {}
+  
+  // Attempt 2: fix trailing commas
   try {
-    return JSON.parse(cleaned)
+    return JSON.parse(
+      jsonStr.replace(/,(\s*[}\]])/g, '$1')
+    )
+  } catch {}
+
+  // Attempt 3: repair truncated JSON
+  // Count open brackets and close them
+  try {
+    let repaired = jsonStr
+    // Remove trailing incomplete property
+    repaired = repaired.replace(
+      /,?\s*"[^"]*"\s*:\s*"[^"]*$/,  ''
+    )
+    repaired = repaired.replace(
+      /,?\s*"[^"]*"\s*:\s*\{[^}]*$/,  ''
+    )
+    repaired = repaired.replace(/,\s*$/, '')
+    
+    // Count and close open brackets
+    const opens = (repaired.match(/\[/g) || []).length
+    const closes = (repaired.match(/\]/g) || []).length
+    const openBraces = (repaired.match(/\{/g) || []).length
+    const closeBraces = (repaired.match(/\}/g) || []).length
+    
+    repaired += ']'.repeat(
+      Math.max(0, opens - closes)
+    )
+    repaired += '}'.repeat(
+      Math.max(0, openBraces - closeBraces)
+    )
+    
+    const fixed = JSON.parse(repaired)
+    console.log('[generate] Repaired truncated JSON')
+    return fixed
   } catch (e) {
-    console.error('[generate] Parse error:', e.message)
-    console.error('[generate] JSON length:', cleaned.length)
-    console.error('[generate] Last 200 chars:', 
-      cleaned.substring(Math.max(0, cleaned.length - 200)))
-    // try fix trailing commas
-    try {
-      return JSON.parse(
-        cleaned.replace(/,(\s*[}\]])/g, '$1')
-      )
-    } catch (e2) {
-      console.error('[generate] Fixed parse also failed:', 
-        e2.message)
-      return null
-    }
+    console.error('[generate] Repair failed:', e.message)
+    return null
   }
 }
 
@@ -92,7 +125,7 @@ async function tryGemini(userPrompt, modelName) {
       generationConfig: {
         responseMimeType: 'application/json',
         temperature: 0.7,
-        maxOutputTokens: 8192
+        maxOutputTokens: 2048
       }
     })
     const result = await model.generateContent(
