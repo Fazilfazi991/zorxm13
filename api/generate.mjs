@@ -129,7 +129,25 @@ async function tryKimi(userPrompt) {
   try {
     const key = process.env.KIMI_API_KEY || 
                 process.env.MOONSHOT_API_KEY
+    
+    console.log('[kimi] Key exists:', !!key)
+    console.log('[kimi] Key prefix:', 
+      key?.substring(0, 12))
+    
     if (!key) throw new Error('No Kimi key')
+    
+    const reqBody = {
+      model: 'moonshot-v1-8k',
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: userPrompt }
+      ],
+      temperature: 0.6,
+      max_tokens: 4000
+    }
+    
+    console.log('[kimi] Sending request...')
+    
     const response = await fetch(
       'https://api.moonshot.ai/v1/chat/completions',
       {
@@ -138,28 +156,30 @@ async function tryKimi(userPrompt) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${key}`
         },
-        body: JSON.stringify({
-          model: 'moonshot-v1-8k',
-          messages: [
-            { role: 'system', content: SYSTEM_PROMPT },
-            { role: 'user', content: userPrompt }
-          ],
-          temperature: 0.6,
-          max_tokens: 4000
-        })
+        body: JSON.stringify(reqBody)
       }
     )
+    
+    console.log('[kimi] Response status:', 
+      response.status)
+    
+    const rawText = await response.text()
+    console.log('[kimi] Response body:', 
+      rawText.substring(0, 300))
+    
     if (!response.ok) {
-      const err = await response.text()
-      throw new Error(`Kimi ${response.status}: ${err}`)
+      throw new Error(
+        `Kimi ${response.status}: ${rawText}`
+      )
     }
-    const data = await response.json()
+    
+    const data = JSON.parse(rawText)
     const text = data.choices?.[0]?.message?.content
     if (!text) throw new Error('Empty Kimi response')
-    console.log('[generate] Kimi succeeded')
+    console.log('[kimi] Succeeded, length:', text.length)
     return text
   } catch (e) {
-    console.error('[generate] Kimi failed:', e.message)
+    console.error('[kimi] Failed:', e.message)
     return null
   }
 }
