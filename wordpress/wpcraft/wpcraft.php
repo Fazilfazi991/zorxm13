@@ -130,80 +130,62 @@ class WPCraft {
         $post_id->get_error_message()
       );
     }
-    
-    // Schedule immediate CSS regeneration
-    wp_schedule_single_event(
-      time(), 
-      'wpcraft_regenerate_css', 
-      [$post_id]
-    );
 
-    // Save Elementor data
     update_post_meta(
       $post_id,
       '_elementor_data',
       wp_slash(json_encode($elements))
     );
 
-    // Mark as Elementor page
     update_post_meta(
       $post_id, 
       '_elementor_edit_mode', 
       'builder'
     );
 
-    // Set Elementor version
     update_post_meta(
       $post_id,
       '_elementor_version',
       '3.0.0'
     );
 
-    // Set page template to Elementor Canvas
     update_post_meta(
       $post_id,
       '_wp_page_template',
       'elementor_canvas'
     );
 
-    // Force Elementor to regenerate CSS for this post
     if (class_exists('\Elementor\Plugin')) {
-      
-      // Clear all caches first
       \Elementor\Plugin::$instance
         ->files_manager->clear_cache();
-      
-      // Generate CSS file for this specific post
       $css_file = new \Elementor\Core\Files\CSS\Post(
         $post_id
       );
       $css_file->update();
-      $css_file->enqueue();
     }
 
-    // Extract and save custom CSS directly 
-    // as post meta so it loads on frontend
     $all_css = wpcraft_build_page_css(
       $elements, $post_id
     );
-
     if (!empty($all_css)) {
       update_post_meta(
-        $post_id,
-        '_wpcraft_custom_css',
-        $all_css
+        $post_id, '_wpcraft_custom_css', $all_css
       );
     }
 
-    // Save all used fonts
     $fonts = wpcraft_extract_fonts($elements);
     if (!empty($fonts)) {
       update_post_meta(
-        $post_id,
-        '_wpcraft_fonts',
+        $post_id, '_wpcraft_fonts',
         implode('|', array_unique($fonts))
       );
     }
+
+    wp_schedule_single_event(
+      time(), 
+      'wpcraft_regenerate_css', 
+      [$post_id]
+    );
 
     $edit_url = admin_url(
       'post.php?post=' . $post_id . 
@@ -221,59 +203,49 @@ class WPCraft {
 
   public function enqueue_page_fonts() {
     if (!is_singular()) return;
-    
     $post_id = get_the_ID();
     
-    // Enqueue Google Fonts
     $fonts = get_post_meta(
       $post_id, '_wpcraft_fonts', true
     );
-    
     if ($fonts) {
       $font_families = array_unique(
         explode('|', $fonts)
       );
-      $font_query = implode('&family=', 
+      $font_query = implode('&family=',
         array_map('urlencode', $font_families)
       );
       wp_enqueue_style(
         'wpcraft-fonts-' . $post_id,
-        'https://fonts.googleapis.com/css2?family=' . 
+        'https://fonts.googleapis.com/css2?family=' .
         $font_query . '&display=swap',
-        [],
-        null
+        [], null
       );
     }
     
-    // Inject custom CSS directly
     $custom_css = get_post_meta(
       $post_id, '_wpcraft_custom_css', true
     );
-    
     if ($custom_css) {
       wp_add_inline_style(
-        'elementor-frontend',
-        $custom_css
+        'elementor-frontend', $custom_css
       );
     }
   }
 
   public function inject_head_css() {
     if (!is_singular()) return;
-    
     $post_id = get_the_ID();
+    
     $custom_css = get_post_meta(
       $post_id, '_wpcraft_custom_css', true
     );
-    
     if ($custom_css) {
       echo '<style id="wpcraft-css-' . 
-        $post_id . '">' . 
-        $custom_css . 
-        '</style>';
+        esc_attr($post_id) . '">' .
+        $custom_css . '</style>';
     }
     
-    // Also inject Google Fonts in head
     $fonts = get_post_meta(
       $post_id, '_wpcraft_fonts', true
     );
@@ -284,9 +256,13 @@ class WPCraft {
       $query = implode('&family=',
         array_map('urlencode', $font_families)
       );
+      echo '<link rel="preconnect" 
+        href="https://fonts.googleapis.com">';
       echo '<link rel="stylesheet" href="' .
-        'https://fonts.googleapis.com/css2?family=' .
-        $query . '&display=swap">';
+        esc_url(
+          'https://fonts.googleapis.com/css2?family=' .
+          $query . '&display=swap'
+        ) . '">';
     }
   }
 
@@ -310,62 +286,56 @@ function wpcraft_build_page_css(
   $elements, $post_id, $depth = 0
 ) {
   $css = '';
-  
   foreach ($elements as $element) {
     $id = $element['id'] ?? '';
     $settings = $element['settings'] ?? [];
     
     if (!empty($settings['_custom_css'])) {
       $raw_css = $settings['_custom_css'];
-      
-      // Replace "selector" with actual 
-      // Elementor element selector
       if ($id) {
-        $selector = '.elementor-element-' . $id;
         $raw_css = str_replace(
-          'selector', 
-          $selector, 
+          'selector',
+          '.elementor-element-' . $id,
           $raw_css
         );
       }
-      
       $css .= "\n" . $raw_css;
     }
     
-    // Recurse into child elements
     if (!empty($element['elements'])) {
       $css .= wpcraft_build_page_css(
-        $element['elements'], 
-        $post_id, 
+        $element['elements'],
+        $post_id,
         $depth + 1
       );
     }
   }
-  
   return $css;
 }
 
 function wpcraft_extract_fonts($elements) {
-  $fonts = ['Barlow:400,600,700,800', 
-            'Inter:400,500,600'];
-  
+  $fonts = [
+    'Barlow:ital,wght@0,400;0,600;0,700;0,800',
+    'Inter:wght@400;500;600'
+  ];
   foreach ($elements as $element) {
     $settings = $element['settings'] ?? [];
-    
     if (!empty($settings['typography_font_family'])) {
-      $font = $settings['typography_font_family'];
+      $font = sanitize_text_field(
+        $settings['typography_font_family']
+      );
       $weight = $settings['typography_font_weight'] 
         ?? '400';
-      $fonts[] = $font . ':' . $weight;
+      if ($font && !in_array($font, ['', 'inherit'])) {
+        $fonts[] = $font . ':wght@' . $weight;
+      }
     }
-    
     if (!empty($element['elements'])) {
-      $child_fonts = wpcraft_extract_fonts(
+      $child = wpcraft_extract_fonts(
         $element['elements']
       );
-      $fonts = array_merge($fonts, $child_fonts);
+      $fonts = array_merge($fonts, $child);
     }
   }
-  
   return array_unique($fonts);
 }
