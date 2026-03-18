@@ -1,12 +1,11 @@
 <?php
 /**
- * Plugin Name: WPCraft — AI Page Importer
- * Description: Paste AI-generated JSON to 
- *   instantly create Elementor pages
+ * Plugin Name: WPCraft — AI Page Builder
+ * Description: AI-powered page builder. 
+ *   Generate and edit pages with AI.
  * Version: 2.0.0
  * Author: Zorx Digital
  * Author URI: https://zorx.co
- * Elementor tested up to: 3.25.0
  */
 
 if (!defined('ABSPATH')) exit;
@@ -15,7 +14,8 @@ define('WPCRAFT_VERSION', '2.0.0');
 define('WPCRAFT_DIR', plugin_dir_path(__FILE__));
 define('WPCRAFT_URL', plugin_dir_url(__FILE__));
 
-class WPCraft {
+class WPCraft_V2 {
+
   private static $instance = null;
 
   public static function instance() {
@@ -26,316 +26,301 @@ class WPCraft {
   }
 
   public function __construct() {
-    add_action('admin_menu', [$this, 'admin_menu']);
-    add_action('admin_enqueue_scripts', 
-      [$this, 'admin_enqueue']);
-    add_action('wp_ajax_wpcraft_create_page', 
-      [$this, 'handle_create_page']);
-    add_action('wp_enqueue_scripts', 
-      [$this, 'enqueue_page_fonts']);
-    add_action('wp_head', 
-      [$this, 'inject_head_css'], 99);
-    add_action('wpcraft_regenerate_css', 
-      [$this, 'regenerate_post_css']);
+    add_action('init', [$this, 'init']);
   }
 
-  public function admin_menu() {
+  public function init() {
+    // Load REST API
+    require_once WPCRAFT_DIR . 'includes/api.php';
+    require_once WPCRAFT_DIR . 'includes/renderer.php';
+    
+    // Add "Edit with WPCraft" button 
+    // to admin bar
+    add_action('admin_bar_menu', 
+      [$this, 'admin_bar_button'], 100);
+    
+    // Add edit button on post list
+    add_filter('page_row_actions', 
+      [$this, 'page_row_action'], 10, 2);
+    add_filter('post_row_actions',
+      [$this, 'page_row_action'], 10, 2);
+    
+    // Handle editor page load
+    add_action('admin_menu', 
+      [$this, 'register_editor_page']);
+    
+    // Render page on frontend
+    add_filter('the_content',
+      [$this, 'render_wpcraft_page']);
+    
+    // Enqueue frontend styles
+    add_action('wp_enqueue_scripts',
+      [$this, 'enqueue_frontend']);
+  }
+
+  public function admin_bar_button($wp_admin_bar) {
+    if (!is_singular()) return;
+    if (!current_user_can('edit_posts')) return;
+    
+    $post_id = get_the_ID();
+    $url = admin_url(
+      'admin.php?page=wpcraft-editor&post_id=' . 
+      $post_id
+    );
+    
+    $wp_admin_bar->add_node([
+      'id' => 'wpcraft-edit',
+      'title' => '✦ Edit with WPCraft',
+      'href' => $url,
+      'meta' => ['target' => '_blank']
+    ]);
+  }
+
+  public function page_row_action($actions, $post) {
+    if (!current_user_can('edit_post', $post->ID)) {
+      return $actions;
+    }
+    $url = admin_url(
+      'admin.php?page=wpcraft-editor&post_id=' . 
+      $post->ID
+    );
+    $actions['wpcraft'] = 
+      '<a href="' . $url . '" target="_blank">' .
+      '✦ WPCraft</a>';
+    return $actions;
+  }
+
+  public function register_editor_page() {
     add_menu_page(
-      'WPCraft',
+      'WPCraft Editor',
       'WPCraft',
       'edit_posts',
-      'wpcraft',
-      [$this, 'admin_page'],
+      'wpcraft-editor',
+      [$this, 'render_editor'],
       'dashicons-art',
       30
     );
+    add_submenu_page(
+      'wpcraft-editor',
+      'Settings',
+      'Settings', 
+      'manage_options',
+      'wpcraft-settings',
+      [$this, 'render_settings']
+    );
   }
 
-  public function admin_enqueue($hook) {
-    if ($hook !== 'toplevel_page_wpcraft') return;
+  public function render_settings() {
+    if (isset($_POST['wpcraft_gemini_key'])) {
+      check_admin_referer('wpcraft_settings');
+      update_option(
+        'wpcraft_gemini_key',
+        sanitize_text_field(
+          $_POST['wpcraft_gemini_key']
+        )
+      );
+      echo '<div class="notice notice-success">
+        <p>Settings saved.</p></div>';
+    }
+    $key = get_option('wpcraft_gemini_key', '');
+    ?>
+    <div class="wrap">
+      <h1>WPCraft Settings</h1>
+      <form method="post">
+        <?php wp_nonce_field('wpcraft_settings'); ?>
+        <table class="form-table">
+          <tr>
+            <th>Gemini API Key</th>
+            <td>
+              <input type="password" 
+                name="wpcraft_gemini_key"
+                value="<?php echo esc_attr($key); ?>"
+                class="regular-text" />
+              <p class="description">
+                Get your key from 
+                <a href="https://aistudio.google.com" 
+                  target="_blank">
+                  Google AI Studio
+                </a>
+              </p>
+            </td>
+          </tr>
+        </table>
+        <?php submit_button(); ?>
+      </form>
+    </div>
+    <?php
+  }
+
+  public function render_editor() {
+    $post_id = intval($_GET['post_id'] ?? 0);
+    
+    if (!$post_id) {
+      // Show page selector if no post_id
+      $this->render_page_selector();
+      return;
+    }
+    
+    if (!current_user_can('edit_post', $post_id)) {
+      wp_die('Permission denied');
+    }
+    
+    $post = get_post($post_id);
+    if (!$post) wp_die('Page not found');
+    
+    $nonce = wp_create_nonce('wpcraft_nonce');
+    $api_base = rest_url('wpcraft/v2/');
+    $existing_data = get_post_meta(
+      $post_id, '_wpcraft_data', true
+    ) ?: '{}';
+    
+    // Full screen editor - hide WP chrome
+    ?>
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" 
+        content="width=device-width, 
+        initial-scale=1.0">
+      <title>WPCraft — 
+        <?php echo esc_html($post->post_title); ?>
+      </title>
+      <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html, body { 
+          width:100%; height:100%; 
+          overflow:hidden; 
+          background:#0f0f0f;
+        }
+        #wpcraft-editor { 
+          width:100%; height:100vh; 
+        }
+      </style>
+    </head>
+    <body>
+      <div id="wpcraft-editor"></div>
+      <script>
+        window.WPCRAFT_CONFIG = {
+          postId: <?php echo $post_id; ?>,
+          postTitle: <?php echo json_encode(
+            $post->post_title
+          ); ?>,
+          nonce: "<?php echo $nonce; ?>",
+          apiBase: "<?php echo $api_base; ?>",
+          pageData: <?php echo $existing_data; ?>,
+          siteUrl: "<?php echo get_site_url(); ?>",
+          adminUrl: "<?php echo admin_url(); ?>"
+        };
+      </script>
+      <?php
+      // Load the React editor bundle
+      $js = WPCRAFT_URL . 'editor/assets/index.js';
+      $css = WPCRAFT_URL . 'editor/assets/index.css';
+      ?>
+      <link rel="stylesheet" href="<?php echo $css; ?>">
+      <script type="module" src="<?php echo $js; ?>">
+      </script>
+    </body>
+    </html>
+    <?php
+    exit;
+  }
+
+  private function render_page_selector() {
+    $pages = get_posts([
+      'post_type' => ['page', 'post'],
+      'posts_per_page' => 20,
+      'post_status' => 'any',
+      'orderby' => 'modified',
+      'order' => 'DESC'
+    ]);
+    ?>
+    <div class="wrap">
+      <h1>✦ WPCraft Editor</h1>
+      <p>Select a page to edit:</p>
+      <table class="wp-list-table widefat">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php foreach ($pages as $page): ?>
+          <tr>
+            <td><?php echo esc_html(
+              $page->post_title
+            ); ?></td>
+            <td><?php echo esc_html(
+              $page->post_status
+            ); ?></td>
+            <td>
+              <a href="<?php echo admin_url(
+                'admin.php?page=wpcraft-editor&post_id=' 
+                . $page->ID
+              ); ?>" target="_blank">
+                Edit with WPCraft →
+              </a>
+            </td>
+          </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+      <br>
+      <a href="<?php echo admin_url(
+        'post-new.php?post_type=page'
+      ); ?>" class="button button-primary">
+        Create New Page
+      </a>
+    </div>
+    <?php
+  }
+
+  public function render_wpcraft_page($content) {
+    if (!is_singular()) return $content;
+    
+    $post_id = get_the_ID();
+    $wpcraft_data = get_post_meta(
+      $post_id, '_wpcraft_data', true
+    );
+    
+    if (!$wpcraft_data) return $content;
+    
+    $data = json_decode($wpcraft_data, true);
+    if (!$data || empty($data['sections'])) {
+      return $content;
+    }
+    
+    return wpcraft_render_page($data);
+  }
+
+  public function enqueue_frontend() {
+    if (!is_singular()) return;
+    $post_id = get_the_ID();
+    $has_wpcraft = get_post_meta(
+      $post_id, '_wpcraft_data', true
+    );
+    if (!$has_wpcraft) return;
+    
+    // Enqueue Google Fonts
     wp_enqueue_style(
-      'wpcraft-admin',
-      WPCRAFT_URL . 'assets/admin.css',
-      [],
-      WPCRAFT_VERSION
+      'wpcraft-fonts',
+      'https://fonts.googleapis.com/css2?' .
+      'family=Inter:wght@400;500;600;700&' .
+      'family=DM+Sans:wght@400;500;600;700;800&' .
+      'display=swap',
+      [], null
     );
-    wp_enqueue_script(
-      'wpcraft-admin',
-      WPCRAFT_URL . 'assets/admin.js',
-      ['jquery'],
-      WPCRAFT_VERSION,
-      true
-    );
-    wp_localize_script('wpcraft-admin', 'wpcraftData', [
-      'ajaxurl' => admin_url('admin-ajax.php'),
-      'nonce' => wp_create_nonce('wpcraft_nonce'),
-    ]);
-  }
-
-  public function handle_create_page() {
-    check_ajax_referer('wpcraft_nonce', 'nonce');
     
-    if (!current_user_can('edit_posts')) {
-      wp_send_json_error('Permission denied');
-    }
-
-    $json_input = stripslashes(
-      $_POST['json_data'] ?? ''
-    );
-    $page_title = sanitize_text_field(
-      $_POST['page_title'] ?? 'WPCraft Page'
-    );
-    $page_title = $page_title ?: 'WPCraft Page';
-
-    if (empty($json_input)) {
-      wp_send_json_error('No JSON provided');
-    }
-
-    $data = json_decode($json_input, true);
-    
-    if (!$data) {
-      wp_send_json_error(
-        'Invalid JSON — please check your input'
-      );
-    }
-
-    $elements = null;
-    
-    if (isset($data['elements']) && 
-        is_array($data['elements'])) {
-      $elements = $data['elements'];
-    } elseif (isset($data['content']) && 
-               is_array($data['content'])) {
-      $elements = $data['content'];
-    } elseif (is_array($data) && 
-               isset($data[0]['elType'])) {
-      $elements = $data;
-    }
-
-    if (!$elements || count($elements) === 0) {
-      wp_send_json_error(
-        'No page sections found in JSON'
-      );
-    }
-
-    $post_id = wp_insert_post([
-      'post_title' => $page_title,
-      'post_status' => 'draft',
-      'post_type' => 'page',
-      'post_content' => '',
-    ]);
-
-    if (is_wp_error($post_id)) {
-      wp_send_json_error(
-        $post_id->get_error_message()
-      );
-    }
-
-    update_post_meta(
-      $post_id,
-      '_elementor_data',
-      wp_slash(json_encode($elements))
-    );
-
-    update_post_meta(
-      $post_id, 
-      '_elementor_edit_mode', 
-      'builder'
-    );
-
-    update_post_meta(
-      $post_id,
-      '_elementor_version',
-      '3.0.0'
-    );
-
-    update_post_meta(
-      $post_id,
-      '_wp_page_template',
-      'elementor_canvas'
-    );
-
-    if (class_exists('\Elementor\Plugin')) {
-      \Elementor\Plugin::$instance
-        ->files_manager->clear_cache();
-      $css_file = new \Elementor\Core\Files\CSS\Post(
-        $post_id
-      );
-      $css_file->update();
-    }
-
-    $all_css = wpcraft_build_page_css(
-      $elements, $post_id
-    );
-    if (!empty($all_css)) {
-      update_post_meta(
-        $post_id, '_wpcraft_custom_css', $all_css
-      );
-    }
-
-    $fonts = wpcraft_extract_fonts($elements);
-    if (!empty($fonts)) {
-      update_post_meta(
-        $post_id, '_wpcraft_fonts',
-        implode('|', array_unique($fonts))
-      );
-    }
-
-    wp_schedule_single_event(
-      time(), 
-      'wpcraft_regenerate_css', 
-      [$post_id]
-    );
-
-    $edit_url = admin_url(
-      'post.php?post=' . $post_id . 
-      '&action=elementor'
-    );
-    $view_url = get_permalink($post_id);
-
-    wp_send_json_success([
-      'post_id' => $post_id,
-      'edit_url' => $edit_url,
-      'view_url' => $view_url,
-      'message' => 'Page created successfully!'
-    ]);
-  }
-
-  public function enqueue_page_fonts() {
-    if (!is_singular()) return;
-    $post_id = get_the_ID();
-    
-    $fonts = get_post_meta(
-      $post_id, '_wpcraft_fonts', true
-    );
-    if ($fonts) {
-      $font_families = array_unique(
-        explode('|', $fonts)
-      );
-      $font_query = implode('&family=',
-        array_map('urlencode', $font_families)
-      );
-      wp_enqueue_style(
-        'wpcraft-fonts-' . $post_id,
-        'https://fonts.googleapis.com/css2?family=' .
-        $font_query . '&display=swap',
-        [], null
-      );
-    }
-    
-    $custom_css = get_post_meta(
-      $post_id, '_wpcraft_custom_css', true
-    );
-    if ($custom_css) {
-      wp_add_inline_style(
-        'elementor-frontend', $custom_css
-      );
-    }
-  }
-
-  public function inject_head_css() {
-    if (!is_singular()) return;
-    $post_id = get_the_ID();
-    
-    $custom_css = get_post_meta(
-      $post_id, '_wpcraft_custom_css', true
-    );
-    if ($custom_css) {
-      echo '<style id="wpcraft-css-' . 
-        esc_attr($post_id) . '">' .
-        $custom_css . '</style>';
-    }
-    
-    $fonts = get_post_meta(
-      $post_id, '_wpcraft_fonts', true
-    );
-    if ($fonts) {
-      $font_families = array_unique(
-        explode('|', $fonts)
-      );
-      $query = implode('&family=',
-        array_map('urlencode', $font_families)
-      );
-      echo '<link rel="preconnect" 
-        href="https://fonts.googleapis.com">';
-      echo '<link rel="stylesheet" href="' .
-        esc_url(
-          'https://fonts.googleapis.com/css2?family=' .
-          $query . '&display=swap'
-        ) . '">';
-    }
-  }
-
-  public function regenerate_post_css($post_id) {
-    if (class_exists('\Elementor\Plugin')) {
-      $css_file = new \Elementor\Core\Files\CSS\Post(
-        $post_id
-      );
-      $css_file->update();
-    }
-  }
-
-  public function admin_page() {
-    require_once WPCRAFT_DIR . 'admin-page.php';
+    // Inline reset styles
+    wp_add_inline_style('wpcraft-fonts', '
+      .wpcraft-page * { box-sizing: border-box; }
+      .wpcraft-page img { max-width: 100%; }
+      .wpcraft-page a { text-decoration: none; }
+    ');
   }
 }
 
-WPCraft::instance();
-
-function wpcraft_build_page_css(
-  $elements, $post_id, $depth = 0
-) {
-  $css = '';
-  foreach ($elements as $element) {
-    $id = $element['id'] ?? '';
-    $settings = $element['settings'] ?? [];
-    
-    if (!empty($settings['_custom_css'])) {
-      $raw_css = $settings['_custom_css'];
-      if ($id) {
-        $raw_css = str_replace(
-          'selector',
-          '.elementor-element-' . $id,
-          $raw_css
-        );
-      }
-      $css .= "\n" . $raw_css;
-    }
-    
-    if (!empty($element['elements'])) {
-      $css .= wpcraft_build_page_css(
-        $element['elements'],
-        $post_id,
-        $depth + 1
-      );
-    }
-  }
-  return $css;
-}
-
-function wpcraft_extract_fonts($elements) {
-  $fonts = [
-    'Barlow:ital,wght@0,400;0,600;0,700;0,800',
-    'Inter:wght@400;500;600'
-  ];
-  foreach ($elements as $element) {
-    $settings = $element['settings'] ?? [];
-    if (!empty($settings['typography_font_family'])) {
-      $font = sanitize_text_field(
-        $settings['typography_font_family']
-      );
-      $weight = $settings['typography_font_weight'] 
-        ?? '400';
-      if ($font && !in_array($font, ['', 'inherit'])) {
-        $fonts[] = $font . ':wght@' . $weight;
-      }
-    }
-    if (!empty($element['elements'])) {
-      $child = wpcraft_extract_fonts(
-        $element['elements']
-      );
-      $fonts = array_merge($fonts, $child);
-    }
-  }
-  return array_unique($fonts);
-}
+WPCraft_V2::instance();
