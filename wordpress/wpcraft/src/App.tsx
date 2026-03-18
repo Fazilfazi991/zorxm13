@@ -28,7 +28,7 @@ export default function App() {
   
   // Only show AI prompt if NO existing content
   const [showAI, setShowAI] = useState(
-    !initialData
+    !initialData && !config.hasExistingContent
   )
 
   const handleSave = async () => {

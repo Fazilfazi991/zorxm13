@@ -300,7 +300,7 @@ class WPCraft_V2 {
       : (is_array($existing_data) ? $existing_data : []);
       
     if (!$page_data_obj) {
-      $page_data_obj = new stdClass();
+      $page_data_obj = ['sections' => []];
     }
     
     $has_content = false;
