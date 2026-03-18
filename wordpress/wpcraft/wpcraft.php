@@ -341,27 +341,19 @@ class WPCraft_V2 {
       
       <!-- Critical: config must be in head to bypass caching plugin deferrals -->
       <script data-cfasync="false" data-no-optimize="1">
-        // WordPress REST API nonce
-        // Generated fresh on page load
-        window.WPCRAFT_CONFIG = {
-          postId: <?php echo intval($post_id); ?>,
-          postTitle: <?php echo wp_json_encode(
-            $post->post_title
-          ); ?>,
-          nonce: <?php echo wp_json_encode($nonce); ?>,
-          apiBase: <?php echo wp_json_encode(
-            $api_base
-          ); ?>,
-          // Safely parse JSON structure without risking HTML </script> breaks
-          pageData: JSON.parse(decodeURIComponent("<?php echo rawurlencode(wp_json_encode($page_data_obj)); ?>")),
-          hasExistingContent: <?php echo $has_content ? 'true' : 'false'; ?>,
-          siteUrl: <?php echo wp_json_encode(
-            get_site_url()
-          ); ?>,
-          adminUrl: <?php echo wp_json_encode(
-            admin_url()
-          ); ?>
-        };
+        (function() {
+          var cfg = {
+            postId: <?php echo intval($post_id); ?>,
+            postTitle: <?php echo wp_json_encode($post->post_title); ?>,
+            nonce: <?php echo wp_json_encode($nonce); ?>,
+            apiBase: <?php echo wp_json_encode($api_base); ?>,
+            hasExistingContent: <?php echo $has_content ? 'true' : 'false'; ?>,
+            siteUrl: <?php echo wp_json_encode(get_site_url()); ?>,
+            adminUrl: <?php echo wp_json_encode(admin_url()); ?>,
+            pageData: <?php echo wp_json_encode($page_data_obj); ?>
+          };
+          window.WPCRAFT_CONFIG = cfg;
+        })();
       </script>
     </head>
     <body>
