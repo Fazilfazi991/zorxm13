@@ -10,7 +10,9 @@
 
 if (!defined('ABSPATH')) exit;
 
-define('WPCRAFT_VERSION', '2.0.0');
+define('WPCRAFT_VERSION', time());
+define('WPCRAFT_DEV_MODE', true);
+
 define('WPCRAFT_DIR', plugin_dir_path(__FILE__));
 define('WPCRAFT_URL', plugin_dir_url(__FILE__));
 

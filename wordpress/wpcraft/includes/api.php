@@ -184,11 +184,16 @@ function wpcraft_ai_generate($request) {
     'wpcraft_license_key', ''
   );
   
-  if (empty($license_key)) {
-    return new WP_Error('no_license',
-      'Please activate WPCraft first. ' .
-      'Go to WPCraft → Settings.',
-      ['status' => 401]);
+  // TESTING BYPASS - remove before production
+  if (defined('WPCRAFT_DEV_MODE') && WPCRAFT_DEV_MODE === true) {
+    // Skip license/credits check entirely
+  } else {
+    if (empty($license_key)) {
+      return new WP_Error('no_license',
+        'Please activate WPCraft first. ' .
+        'Go to WPCraft → Settings.',
+        ['status' => 401]);
+    }
   }
   
   if (empty($prompt)) {
