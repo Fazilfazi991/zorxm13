@@ -258,7 +258,16 @@ class WPCraft_V2 {
       $post_id, '_wpcraft_data', true
     );
     
-    if (!$existing_data) {
+    // Purge corrupted JSON metadata left over from the update_post_meta slashes bug
+    if (is_string($existing_data) && !empty($existing_data)) {
+      json_decode($existing_data);
+      if (json_last_error() !== JSON_ERROR_NONE) {
+        $existing_data = '';
+        delete_post_meta($post_id, '_wpcraft_data');
+      }
+    }
+    
+    if (empty($existing_data)) {
       $elementor_data = get_post_meta(
         $post_id, '_elementor_data', true
       );
