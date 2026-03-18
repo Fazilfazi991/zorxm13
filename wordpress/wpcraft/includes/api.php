@@ -281,7 +281,7 @@ function wpcraft_convert_from_elementor($elementor) {
     $elementor['content'] ?? [];
   
   foreach ($elements as $el) {
-    if (($el['elType'] ?? '') !== 'section') {
+    if (!isset($el['elType']) || ($el['elType'] !== 'section' && $el['elType'] !== 'container')) {
       continue;
     }
     
@@ -289,7 +289,7 @@ function wpcraft_convert_from_elementor($elementor) {
     $columns = [];
     
     foreach ($el['elements'] ?? [] as $col) {
-      if (($col['elType'] ?? '') !== 'column') {
+      if (!isset($col['elType']) || ($col['elType'] !== 'column' && $col['elType'] !== 'container')) {
         continue;
       }
       $width = $col['settings']['_column_size'] 
