@@ -260,8 +260,8 @@ class WPCraft_V2 {
     
     // Purge corrupted JSON metadata left over from the update_post_meta slashes bug
     if (is_string($existing_data) && !empty($existing_data)) {
-      json_decode($existing_data);
-      if (json_last_error() !== JSON_ERROR_NONE) {
+      $test_decode = json_decode($existing_data, true);
+      if (json_last_error() !== JSON_ERROR_NONE || empty($test_decode['sections'])) {
         $existing_data = '';
         delete_post_meta($post_id, '_wpcraft_data');
       }
