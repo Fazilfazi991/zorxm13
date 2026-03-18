@@ -25,17 +25,20 @@ export default function RightPanel({
   onRefine
 }: Props) {
 
+  const [activeTab, setActiveTab] = useState<'ai' | 'manual'>('ai')
   const [prompt, setPrompt] = useState('')
   const [refining, setRefining] = useState(false)
   const [error, setError] = useState('')
 
-  const handleRefine = async () => {
-    if (!prompt.trim() || refining) return
+  const handleRefine = async (textToRefine: string) => {
+    if (!textToRefine.trim() || refining) return
     setRefining(true)
     setError('')
     try {
-      await onRefine(prompt)
-      setPrompt('')
+      await onRefine(textToRefine)
+      if (textToRefine === prompt) {
+        setPrompt('')
+      }
     } catch (err: any) {
       setError(err.message || 'Refinement failed')
     } finally {
@@ -46,94 +49,131 @@ export default function RightPanel({
   // Nothing selected
   if (!selection) {
     return (
-      <div className="w-64 bg-[#141414] 
+      <div className="w-[300px] bg-[#141414] 
         border-l border-white/10 
         flex items-center justify-center 
         flex-shrink-0">
         <p className="text-xs text-white/30 
           text-center px-6 leading-relaxed">
           Click any section or element
-          to edit its settings
+          to open AI Assistant
         </p>
       </div>
     )
   }
 
+  const isEl = selection.type === 'element'
+  const typeLabel = isEl ? 'Element settings' : 'Section settings'
+  const nameLabel = isEl ? selectedElement?.type : selectedSection?.type
+
   return (
-    <div className="w-64 bg-[#141414] 
+    <div className="w-[300px] bg-[#141414] 
       border-l border-white/10 
       flex flex-col flex-shrink-0">
       
-      {/* Header */}
-      <div className="px-3 py-3 border-b border-white/10 flex-shrink-0">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-xs text-white/30">
-            {selection.type === 'element' ? '◈ Element' : '▭ Section'}
-          </span>
-          <span className="text-xs font-medium text-white/70 capitalize">
-            {selection.type === 'element'
-              ? selectedElement?.type || ''
-              : selectedSection?.type || ''}
-          </span>
-        </div>
+      {/* Header Context Bar */}
+      <div className="px-4 py-3 border-b border-white/10 flex items-center gap-2 bg-white/[0.02]">
+        <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+        <span className="text-xs font-medium text-white/50">
+          {typeLabel} — <span className="capitalize text-white/90">{nameLabel}</span>
+        </span>
+      </div>
 
-        {/* AI Assistant Input */}
-        <div className="relative group">
-          <input
-            type="text"
-            value={prompt}
-            onChange={e => setPrompt(e.target.value)}
-            onKeyDown={e => {
-              if (e.key === 'Enter') handleRefine()
-            }}
-            placeholder="✨ Modify with AI..."
-            className="w-full bg-black/40 border border-white/5 
-              rounded-lg pl-3 pr-8 py-2 text-xs text-white
-              placeholder:text-white/20 focus:outline-none 
-              focus:border-green-500/50 focus:bg-black/60
-              transition-all"
-            disabled={refining}
-          />
-          {refining ? (
-            <div className="absolute right-2.5 top-2.5">
-              <div className="w-3.5 h-3.5 border-2 border-green-500/30 
-                border-t-green-500 rounded-full animate-spin"/>
-            </div>
-          ) : (
-            <button
-              onClick={handleRefine}
-              disabled={!prompt.trim()}
-              className="absolute right-2 top-1.5 p-1 
-                text-green-500 hover:text-green-400
-                disabled:opacity-20 disabled:hover:text-green-500
-                transition-colors"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" 
-                stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </button>
-          )}
+      {/* Tabs */}
+      <div className="p-3 border-b border-white/10 bg-black/20">
+        <div className="flex bg-white/5 rounded-lg p-1 gap-1 border border-white/5">
+          <button
+            onClick={() => setActiveTab('ai')}
+            className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${
+              activeTab === 'ai' 
+                ? 'bg-[#2a2a2a] text-white shadow-sm border border-white/10' 
+                : 'text-white/50 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            ✦ AI Assistant
+          </button>
+          <button
+            onClick={() => setActiveTab('manual')}
+            className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${
+              activeTab === 'manual' 
+                ? 'bg-[#2a2a2a] text-white shadow-sm border border-white/10' 
+                : 'text-white/50 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            Manual
+          </button>
         </div>
-        {error && (
-          <p className="text-[10px] text-red-400 mt-1.5 px-1">{error}</p>
-        )}
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
-        {selection.type === 'element' && 
-         selectedElement ? (
-          <ElementSettings
-            element={selectedElement}
-            onUpdate={onUpdateElement}
-          />
-        ) : selectedSection ? (
-          <SectionSettings
-            section={selectedSection}
-            onUpdate={onUpdateSection}
-          />
-        ) : null}
+        {activeTab === 'ai' ? (
+          <div className="p-4 flex flex-col gap-6">
+            
+            {/* Prompt Box */}
+            <div className="bg-black/40 border border-white/10 rounded-xl overflow-hidden focus-within:border-white/20 transition-all">
+              <textarea
+                value={prompt}
+                onChange={e => setPrompt(e.target.value)}
+                placeholder="Describe what you want... e.g. Add a wave divider at the bottom"
+                className="w-full h-24 p-3 text-sm resize-none bg-transparent text-white focus:outline-none placeholder:text-white/30"
+                disabled={refining}
+              />
+              <div className="p-2 pt-0 flex justify-end">
+                <button
+                  onClick={() => handleRefine(prompt)}
+                  disabled={!prompt.trim() || refining}
+                  className="px-4 py-1.5 bg-white/10 border border-white/10 rounded-lg text-xs font-medium text-white hover:bg-white/20 disabled:opacity-30 transition-all flex items-center gap-2"
+                >
+                  {refining ? 'Thinking...' : 'Refine →'}
+                </button>
+              </div>
+            </div>
+            
+            {error && (
+              <p className="text-[11px] text-red-400 mt-[-12px] px-1">{error}</p>
+            )}
+
+            {/* Quick Prompts */}
+            <div>
+              <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-3">
+                Quick prompts
+              </p>
+              <div className="flex flex-col gap-2">
+                {[
+                  'Add a wave divider at the bottom',
+                  'Make this section darker and more dramatic',
+                  'Improve the heading typography',
+                  'Add a CTA button below the subtitle'
+                ].map((txt, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleRefine(txt)}
+                    disabled={refining}
+                    className="text-left px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs hover:bg-white/10 transition-all text-white/70 hover:text-white disabled:opacity-30"
+                  >
+                    {txt}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+          </div>
+        ) : (
+          <div className="p-0">
+            {isEl && selectedElement ? (
+              <ElementSettings
+                element={selectedElement}
+                onUpdate={onUpdateElement}
+              />
+            ) : selectedSection ? (
+              <SectionSettings
+                section={selectedSection}
+                onUpdate={onUpdateSection}
+              />
+            ) : null}
+          </div>
+        )}
       </div>
     </div>
   )
