@@ -108,9 +108,9 @@ function wpcraft_save_page($request) {
       'Missing data', ['status' => 400]);
   }
   
-  $json = json_encode($body['data']);
+  $json = wp_json_encode($body['data']);
   update_post_meta(
-    $post_id, '_wpcraft_data', $json
+    $post_id, '_wpcraft_data', wp_slash($json)
   );
   
   // Also update post title if provided

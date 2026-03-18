@@ -45,9 +45,13 @@ class WPCraft_V2 {
     add_filter('post_row_actions',
       [$this, 'page_row_action'], 10, 2);
     
-    // Handle editor page load
+    // Handle editor page load via submenu string
     add_action('admin_menu', 
       [$this, 'register_editor_page']);
+      
+    // Handle true full-screen load prior to admin-header
+    add_action('admin_init', 
+      [$this, 'intercept_fullscreen_editor']);
     
     // Render page on frontend
     add_filter('the_content',
@@ -212,6 +216,12 @@ class WPCraft_V2 {
     <?php
   }
 
+  public function intercept_fullscreen_editor() {
+    if (isset($_GET['page']) && $_GET['page'] === 'wpcraft-editor' && !empty($_GET['post_id'])) {
+      $this->render_editor();
+    }
+  }
+
   public function render_editor() {
     $post_id = intval($_GET['post_id'] ?? 0);
     
@@ -251,17 +261,22 @@ class WPCraft_V2 {
             'elements' => $decoded
           ]);
           if (!empty($converted['sections'])) {
-            $existing_data = json_encode($converted);
+            $existing_data = wp_json_encode($converted);
+            // Critical: wp_slash prevents WordPress from breaking JSON strings
             update_post_meta(
               $post_id, '_wpcraft_data', 
-              $existing_data
+              wp_slash($existing_data)
             );
           }
         }
       }
     }
     
-    $page_data_json = $existing_data ?: '{}';
+    // Parse it back to array to ensure validity and allow safe JSON printing
+    $page_data_obj = json_decode($existing_data ?: '{}', true);
+    if (!$page_data_obj) {
+      $page_data_obj = new stdClass();
+    }
     
     // Must call these to set up WP properly
     // before outputting custom HTML
@@ -307,9 +322,10 @@ class WPCraft_V2 {
           apiBase: <?php echo wp_json_encode(
             $api_base
           ); ?>,
-          pageData: <?php echo $page_data_json; ?>,
+          // Safely parse JSON structure without risking HTML </script> breaks
+          pageData: JSON.parse(decodeURIComponent("<?php echo rawurlencode(wp_json_encode($page_data_obj)); ?>")),
           hasExistingContent: <?php echo 
-            $existing_data ? 'true' : 'false'; ?>,
+            (!empty($page_data_obj['sections']) || !empty($page_data_obj->sections)) ? 'true' : 'false'; ?>,
           siteUrl: <?php echo wp_json_encode(
             get_site_url()
           ); ?>,
