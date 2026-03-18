@@ -33,6 +33,10 @@ class WPCraft {
       [$this, 'handle_create_page']);
     add_action('wp_enqueue_scripts', 
       [$this, 'enqueue_page_fonts']);
+    add_action('wp_head', 
+      [$this, 'inject_head_css'], 99);
+    add_action('wpcraft_regenerate_css', 
+      [$this, 'regenerate_post_css']);
   }
 
   public function admin_menu() {
@@ -95,10 +99,6 @@ class WPCraft {
       );
     }
 
-    // Extract elements array
-    // Supports both formats:
-    // { type: "elementor", elements: [...] }
-    // { version: "0.4", content: [...] }
     $elements = null;
     
     if (isset($data['elements']) && 
@@ -109,7 +109,6 @@ class WPCraft {
       $elements = $data['content'];
     } elseif (is_array($data) && 
                isset($data[0]['elType'])) {
-      // Raw array of elements
       $elements = $data;
     }
 
@@ -119,7 +118,6 @@ class WPCraft {
       );
     }
 
-    // Create the WordPress page
     $post_id = wp_insert_post([
       'post_title' => $page_title,
       'post_status' => 'draft',
@@ -132,12 +130,12 @@ class WPCraft {
         $post_id->get_error_message()
       );
     }
-
-    // Store fonts needed for this page
-    update_post_meta(
-      $post_id,
-      '_wpcraft_fonts',
-      'Barlow:400,600,700,800|Inter:400,500,600'
+    
+    // Schedule immediate CSS regeneration
+    wp_schedule_single_event(
+      time(), 
+      'wpcraft_regenerate_css', 
+      [$post_id]
     );
 
     // Save Elementor data
@@ -162,35 +160,49 @@ class WPCraft {
     );
 
     // Set page template to Elementor Canvas
-    // (removes theme header/footer, full control)
     update_post_meta(
       $post_id,
       '_wp_page_template',
       'elementor_canvas'
     );
 
-    // Process and save custom CSS from elements
-    $custom_css = wpcraft_extract_custom_css(
+    // Force Elementor to regenerate CSS for this post
+    if (class_exists('\Elementor\Plugin')) {
+      
+      // Clear all caches first
+      \Elementor\Plugin::$instance
+        ->files_manager->clear_cache();
+      
+      // Generate CSS file for this specific post
+      $css_file = new \Elementor\Core\Files\CSS\Post(
+        $post_id
+      );
+      $css_file->update();
+      $css_file->enqueue();
+    }
+
+    // Extract and save custom CSS directly 
+    // as post meta so it loads on frontend
+    $all_css = wpcraft_build_page_css(
       $elements, $post_id
     );
-    if (!empty($custom_css)) {
+
+    if (!empty($all_css)) {
       update_post_meta(
         $post_id,
-        '_elementor_css',
-        ['status' => 'empty']
+        '_wpcraft_custom_css',
+        $all_css
       );
     }
 
-    // Clear ALL Elementor caches
-    if (class_exists('\Elementor\Plugin')) {
-      \Elementor\Plugin::$instance
-        ->files_manager->clear_cache();
-        
-      // Also clear post CSS
-      $post_css = new \Elementor\Core\Files\CSS\Post(
-        $post_id
+    // Save all used fonts
+    $fonts = wpcraft_extract_fonts($elements);
+    if (!empty($fonts)) {
+      update_post_meta(
+        $post_id,
+        '_wpcraft_fonts',
+        implode('|', array_unique($fonts))
       );
-      $post_css->update();
     }
 
     $edit_url = admin_url(
@@ -208,18 +220,82 @@ class WPCraft {
   }
 
   public function enqueue_page_fonts() {
+    if (!is_singular()) return;
+    
     $post_id = get_the_ID();
+    
+    // Enqueue Google Fonts
+    $fonts = get_post_meta(
+      $post_id, '_wpcraft_fonts', true
+    );
+    
+    if ($fonts) {
+      $font_families = array_unique(
+        explode('|', $fonts)
+      );
+      $font_query = implode('&family=', 
+        array_map('urlencode', $font_families)
+      );
+      wp_enqueue_style(
+        'wpcraft-fonts-' . $post_id,
+        'https://fonts.googleapis.com/css2?family=' . 
+        $font_query . '&display=swap',
+        [],
+        null
+      );
+    }
+    
+    // Inject custom CSS directly
+    $custom_css = get_post_meta(
+      $post_id, '_wpcraft_custom_css', true
+    );
+    
+    if ($custom_css) {
+      wp_add_inline_style(
+        'elementor-frontend',
+        $custom_css
+      );
+    }
+  }
+
+  public function inject_head_css() {
+    if (!is_singular()) return;
+    
+    $post_id = get_the_ID();
+    $custom_css = get_post_meta(
+      $post_id, '_wpcraft_custom_css', true
+    );
+    
+    if ($custom_css) {
+      echo '<style id="wpcraft-css-' . 
+        $post_id . '">' . 
+        $custom_css . 
+        '</style>';
+    }
+    
+    // Also inject Google Fonts in head
     $fonts = get_post_meta(
       $post_id, '_wpcraft_fonts', true
     );
     if ($fonts) {
-      wp_enqueue_style(
-        'wpcraft-fonts-' . $post_id,
-        'https://fonts.googleapis.com/css2?family=' . 
-        urlencode($fonts) . '&display=swap',
-        [],
-        null
+      $font_families = array_unique(
+        explode('|', $fonts)
       );
+      $query = implode('&family=',
+        array_map('urlencode', $font_families)
+      );
+      echo '<link rel="stylesheet" href="' .
+        'https://fonts.googleapis.com/css2?family=' .
+        $query . '&display=swap">';
+    }
+  }
+
+  public function regenerate_post_css($post_id) {
+    if (class_exists('\Elementor\Plugin')) {
+      $css_file = new \Elementor\Core\Files\CSS\Post(
+        $post_id
+      );
+      $css_file->update();
     }
   }
 
@@ -230,39 +306,66 @@ class WPCraft {
 
 WPCraft::instance();
 
-function wpcraft_extract_custom_css(
-  $elements, $post_id
+function wpcraft_build_page_css(
+  $elements, $post_id, $depth = 0
 ) {
   $css = '';
   
   foreach ($elements as $element) {
-    if (!empty($element['settings']['_custom_css'])) {
-      $element_css = $element['settings']['_custom_css'];
-      $element_id = $element['id'] ?? '';
+    $id = $element['id'] ?? '';
+    $settings = $element['settings'] ?? [];
+    
+    if (!empty($settings['_custom_css'])) {
+      $raw_css = $settings['_custom_css'];
       
-      // Replace "selector" with actual Elementor 
-      // element selector
-      $selector = '.elementor-' . $post_id . 
-        ' .elementor-element';
-      if ($element_id) {
-        $selector .= '.elementor-element-' . 
-          $element_id;
+      // Replace "selector" with actual 
+      // Elementor element selector
+      if ($id) {
+        $selector = '.elementor-element-' . $id;
+        $raw_css = str_replace(
+          'selector', 
+          $selector, 
+          $raw_css
+        );
       }
-      $element_css = str_replace(
-        'selector', 
-        $selector, 
-        $element_css
-      );
-      $css .= $element_css . "\n";
+      
+      $css .= "\n" . $raw_css;
     }
     
-    // Recursively check nested elements
+    // Recurse into child elements
     if (!empty($element['elements'])) {
-      $css .= wpcraft_extract_custom_css(
-        $element['elements'], $post_id
+      $css .= wpcraft_build_page_css(
+        $element['elements'], 
+        $post_id, 
+        $depth + 1
       );
     }
   }
   
   return $css;
+}
+
+function wpcraft_extract_fonts($elements) {
+  $fonts = ['Barlow:400,600,700,800', 
+            'Inter:400,500,600'];
+  
+  foreach ($elements as $element) {
+    $settings = $element['settings'] ?? [];
+    
+    if (!empty($settings['typography_font_family'])) {
+      $font = $settings['typography_font_family'];
+      $weight = $settings['typography_font_weight'] 
+        ?? '400';
+      $fonts[] = $font . ':' . $weight;
+    }
+    
+    if (!empty($element['elements'])) {
+      $child_fonts = wpcraft_extract_fonts(
+        $element['elements']
+      );
+      $fonts = array_merge($fonts, $child_fonts);
+    }
+  }
+  
+  return array_unique($fonts);
 }
