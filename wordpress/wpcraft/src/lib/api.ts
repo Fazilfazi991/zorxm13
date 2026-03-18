@@ -14,6 +14,7 @@ export async function savePage(
         'Content-Type': 'application/json',
         'X-WP-Nonce': nonce
       },
+      credentials: 'include',
       body: JSON.stringify({ data })
     }
   )
@@ -32,7 +33,8 @@ export async function publishPage(
       headers: {
         'Content-Type': 'application/json',
         'X-WP-Nonce': nonce
-      }
+      },
+      credentials: 'include'
     }
   )
   return res.json()
@@ -52,8 +54,24 @@ export async function generatePage(
         'Content-Type': 'application/json',
         'X-WP-Nonce': nonce
       },
-      body: JSON.stringify({ prompt, postId })
+      credentials: 'include',
+      body: JSON.stringify({ 
+        prompt, 
+        post_id: postId 
+      })
     }
   )
+  
+  if (!res.ok) {
+    const error = await res.json().catch(
+      () => ({ message: 'Request failed' })
+    )
+    throw new Error(
+      error.message || 
+      error.data?.message ||
+      `HTTP ${res.status}`
+    )
+  }
+  
   return res.json()
 }

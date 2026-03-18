@@ -216,7 +216,6 @@ class WPCraft_V2 {
     $post_id = intval($_GET['post_id'] ?? 0);
     
     if (!$post_id) {
-      // Show page selector if no post_id
       $this->render_page_selector();
       return;
     }
@@ -228,97 +227,110 @@ class WPCraft_V2 {
     $post = get_post($post_id);
     if (!$post) wp_die('Page not found');
     
-    $nonce = wp_create_nonce('wpcraft_nonce');
+    // Create a fresh nonce
+    $nonce = wp_create_nonce('wp_rest');
     $api_base = rest_url('wpcraft/v2/');
+    
+    // Load and convert existing data
     $existing_data = get_post_meta(
       $post_id, '_wpcraft_data', true
-    ) ?: null;
-
-    // If no WPCraft data, try to import 
-    // from Elementor
+    );
+    
     if (!$existing_data) {
       $elementor_data = get_post_meta(
         $post_id, '_elementor_data', true
       );
-      
       if ($elementor_data) {
-        // Convert Elementor to WPCraft format
-        require_once WPCRAFT_DIR . 'includes/api.php';
         $decoded = json_decode(
           $elementor_data, true
         );
         if ($decoded) {
+          require_once WPCRAFT_DIR . 
+            'includes/api.php';
           $converted = wpcraft_convert_from_elementor([
             'elements' => $decoded
           ]);
           if (!empty($converted['sections'])) {
             $existing_data = json_encode($converted);
-            // Save as WPCraft data immediately
             update_post_meta(
-              $post_id,
-              '_wpcraft_data',
+              $post_id, '_wpcraft_data', 
               $existing_data
             );
           }
         }
       }
     }
-
-    // Also get raw post content as fallback
-    $post_content = $post->post_content;
-
-    // Pass to editor
-    $page_data_json = $existing_data 
-      ? $existing_data : '{}';
     
-    // Full screen editor - hide WP chrome
+    $page_data_json = $existing_data ?: '{}';
+    
+    // Must call these to set up WP properly
+    // before outputting custom HTML
+    remove_all_actions('wp_head');
+    remove_all_actions('wp_footer');
+    
     ?>
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" 
-        content="width=device-width, 
-        initial-scale=1.0">
+        content="width=device-width,initial-scale=1">
       <title>WPCraft — 
         <?php echo esc_html($post->post_title); ?>
       </title>
+      <?php
+      // This is critical — outputs the WP 
+      // admin cookies and auth headers
+      wp_enqueue_script('jquery');
+      ?>
       <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
-        html, body { 
-          width:100%; height:100%; 
-          overflow:hidden; 
-          background:#0f0f0f;
+        * { margin:0;padding:0;box-sizing:border-box; }
+        html,body { 
+          width:100%;height:100%;
+          overflow:hidden;background:#111;
         }
-        #wpcraft-editor { 
-          width:100%; height:100vh; 
-        }
+        #wpcraft-editor { width:100%;height:100vh; }
       </style>
     </head>
     <body>
       <div id="wpcraft-editor"></div>
+      
       <script>
+        // WordPress REST API nonce
+        // Generated fresh on page load
         window.WPCRAFT_CONFIG = {
-          postId: <?php echo $post_id; ?>,
-          postTitle: <?php echo json_encode(
+          postId: <?php echo intval($post_id); ?>,
+          postTitle: <?php echo wp_json_encode(
             $post->post_title
           ); ?>,
-          nonce: "<?php echo $nonce; ?>",
-          apiBase: "<?php echo $api_base; ?>",
+          nonce: <?php echo wp_json_encode($nonce); ?>,
+          apiBase: <?php echo wp_json_encode(
+            $api_base
+          ); ?>,
           pageData: <?php echo $page_data_json; ?>,
-          hasExistingContent: <?php echo $existing_data 
-            ? 'true' : 'false'; ?>,
-          siteUrl: "<?php echo get_site_url(); ?>",
-          adminUrl: "<?php echo admin_url(); ?>"
+          hasExistingContent: <?php echo 
+            $existing_data ? 'true' : 'false'; ?>,
+          siteUrl: <?php echo wp_json_encode(
+            get_site_url()
+          ); ?>,
+          adminUrl: <?php echo wp_json_encode(
+            admin_url()
+          ); ?>
         };
       </script>
+      
       <?php
-      // Load the React editor bundle
+      // Output jQuery (needed for WP REST auth)
+      wp_print_scripts('jquery');
+      
       $js = WPCRAFT_URL . 'editor/assets/index.js';
       $css = WPCRAFT_URL . 'editor/assets/index.css';
       ?>
-      <link rel="stylesheet" href="<?php echo $css; ?>">
-      <script type="module" src="<?php echo $js; ?>">
+      
+      <link rel="stylesheet" 
+        href="<?php echo esc_url($css); ?>">
+      <script type="module" 
+        src="<?php echo esc_url($js); ?>">
       </script>
     </body>
     </html>

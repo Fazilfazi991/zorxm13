@@ -7,8 +7,18 @@ add_action('rest_api_init', function() {
   register_rest_route('wpcraft/v2', '/page/(?P<id>\d+)', [
     'methods' => 'GET',
     'callback' => 'wpcraft_get_page',
-    'permission_callback' => function() {
-      return current_user_can('edit_posts');
+    'permission_callback' => function($request) {
+      $nonce = $request->get_header('X-WP-Nonce');
+      if (!$nonce) {
+        $nonce = $request->get_param('_wpnonce');
+      }
+      if ($nonce && wp_verify_nonce($nonce, 'wp_rest')) {
+        return current_user_can('edit_posts');
+      }
+      if (is_user_logged_in()) {
+        return current_user_can('edit_posts');
+      }
+      return new WP_Error('rest_forbidden', 'Authentication required.', ['status' => 401]);
     }
   ]);
 
@@ -16,8 +26,18 @@ add_action('rest_api_init', function() {
   register_rest_route('wpcraft/v2', '/page/(?P<id>\d+)', [
     'methods' => 'POST',
     'callback' => 'wpcraft_save_page',
-    'permission_callback' => function() {
-      return current_user_can('edit_posts');
+    'permission_callback' => function($request) {
+      $nonce = $request->get_header('X-WP-Nonce');
+      if (!$nonce) {
+        $nonce = $request->get_param('_wpnonce');
+      }
+      if ($nonce && wp_verify_nonce($nonce, 'wp_rest')) {
+        return current_user_can('edit_posts');
+      }
+      if (is_user_logged_in()) {
+        return current_user_can('edit_posts');
+      }
+      return new WP_Error('rest_forbidden', 'Authentication required.', ['status' => 401]);
     }
   ]);
 
@@ -25,8 +45,18 @@ add_action('rest_api_init', function() {
   register_rest_route('wpcraft/v2', '/publish/(?P<id>\d+)', [
     'methods' => 'POST',
     'callback' => 'wpcraft_publish_page',
-    'permission_callback' => function() {
-      return current_user_can('edit_posts');
+    'permission_callback' => function($request) {
+      $nonce = $request->get_header('X-WP-Nonce');
+      if (!$nonce) {
+        $nonce = $request->get_param('_wpnonce');
+      }
+      if ($nonce && wp_verify_nonce($nonce, 'wp_rest')) {
+        return current_user_can('edit_posts');
+      }
+      if (is_user_logged_in()) {
+        return current_user_can('edit_posts');
+      }
+      return new WP_Error('rest_forbidden', 'Authentication required.', ['status' => 401]);
     }
   ]);
 
@@ -34,8 +64,18 @@ add_action('rest_api_init', function() {
   register_rest_route('wpcraft/v2', '/generate', [
     'methods' => 'POST',
     'callback' => 'wpcraft_ai_generate',
-    'permission_callback' => function() {
-      return current_user_can('edit_posts');
+    'permission_callback' => function($request) {
+      $nonce = $request->get_header('X-WP-Nonce');
+      if (!$nonce) {
+        $nonce = $request->get_param('_wpnonce');
+      }
+      if ($nonce && wp_verify_nonce($nonce, 'wp_rest')) {
+        return current_user_can('edit_posts');
+      }
+      if (is_user_logged_in()) {
+        return current_user_can('edit_posts');
+      }
+      return new WP_Error('rest_forbidden', 'Authentication required.', ['status' => 401]);
     }
   ]);
 
