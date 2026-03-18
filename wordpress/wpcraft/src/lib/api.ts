@@ -45,7 +45,8 @@ export async function generatePage(
   prompt: string,
   nonce: string,
   apiBase: string,
-  generationType: 'page' | 'section' = 'page'
+  generationType: 'page' | 'section' | 'refine' = 'page',
+  contextJson?: string
 ) {
   const res = await fetch(
     `${apiBase}generate`,
@@ -59,7 +60,8 @@ export async function generatePage(
       body: JSON.stringify({ 
         prompt,
         post_id: postId,
-        generation_type: generationType
+        generation_type: generationType,
+        contextJson: contextJson || ''
       })
     }
   )

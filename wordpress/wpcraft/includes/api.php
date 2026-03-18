@@ -188,8 +188,8 @@ function wpcraft_ai_generate($request) {
         'license_key' => $license_key,
         'generation_type' => $generation_type,
         'pageType' => 
-          $generation_type === 'section' 
-            ? 'section' 
+          $generation_type === 'section' || $generation_type === 'refine'
+            ? $generation_type 
             : ($body['pageType'] ?? 'landing'),
         'businessName' => sanitize_text_field(
           $body['businessName'] ?? $prompt
@@ -197,6 +197,7 @@ function wpcraft_ai_generate($request) {
         'description' => sanitize_textarea_field(
           $prompt
         ),
+        'contextJson' => $body['contextJson'] ?? '',
         'tone' => $body['tone'] ?? 'professional',
         'primaryColor' => sanitize_hex_color(
           $body['primaryColor'] ?? '#166534'
@@ -248,6 +249,16 @@ function wpcraft_ai_generate($request) {
       'wpcraft_credits', 
       $data['credits_remaining']
     );
+  }
+  
+  if ($generation_type === 'refine') {
+    // Return precisely the updated component JSON from Vercel bypassing elementor -> wpcraft total page conversion
+    return rest_ensure_response([
+      'success' => true,
+      'data' => $data['data'] ?? [],
+      'credits_remaining' => 
+        $data['credits_remaining'] ?? null
+    ]);
   }
   
   // Convert Elementor JSON to WPCraft format

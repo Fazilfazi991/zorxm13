@@ -5,7 +5,7 @@ import Canvas from './components/Canvas'
 import RightPanel from './components/RightPanel'
 import AIPrompt from './components/AIPrompt'
 import { PageData, Section, Selection, Element } from './types/schema'
-import { savePage, publishPage } from './lib/api'
+import { savePage, publishPage, generatePage } from './lib/api'
 
 export default function App() {
   const config = window.WPCRAFT_CONFIG
@@ -77,6 +77,14 @@ export default function App() {
     })
   }
 
+  // Helper to get selected section
+  const getSelectedSection = () => {
+    if (!selection || !pageData) return null
+    return pageData.sections.find(
+      s => s.id === selection.sectionId
+    ) ?? null
+  }
+
   // Helper to get selected element
   const getSelectedElement = () => {
     if (!selection || 
@@ -129,6 +137,39 @@ export default function App() {
         }
       )
     })
+  }
+
+  const handleRefine = async (prompt: string) => {
+    if (!selection || !pageData) return
+    
+    const isSection = selection.type === 'section'
+    const contextObj = isSection 
+      ? getSelectedSection() 
+      : getSelectedElement()
+      
+    if (!contextObj) return
+    
+    const result = await generatePage(
+      config.postId,
+      prompt,
+      config.nonce,
+      config.apiBase,
+      'refine',
+      JSON.stringify(contextObj)
+    )
+    
+    if (result.success && result.data) {
+      if (isSection) {
+        updateSection(selection.sectionId, result.data)
+      } else if (selection.columnId && selection.elementId) {
+        updateElement(
+          selection.sectionId, 
+          selection.columnId, 
+          selection.elementId, 
+          result.data
+        )
+      }
+    }
   }
 
   return (
@@ -224,6 +265,7 @@ export default function App() {
               )
             }
           }}
+          onRefine={handleRefine}
         />
 
       </div>
