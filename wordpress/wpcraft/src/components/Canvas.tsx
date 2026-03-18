@@ -1,15 +1,16 @@
 import { useEffect, useRef } from 'react'
-import { PageData } from '../types/schema'
+import { PageData, Selection } from '../types/schema'
 
 interface Props {
   pageData: PageData | null
-  selectedId: string | null
-  onSelect: (id: string) => void
+  selection: Selection | null
+  onSelectSection: (id: string) => void
+  onSelectElement: (sectionId: string, columnId: string, elementId: string) => void
   siteUrl: string
 }
 
 export default function Canvas({
-  pageData, selectedId, onSelect, siteUrl
+  pageData, selection, onSelectSection, onSelectElement, siteUrl
 }: Props) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
@@ -20,16 +21,22 @@ export default function Canvas({
     if (!doc) return
 
     const html = renderPageToHtml(
-      pageData, selectedId, siteUrl
+      pageData, selection, siteUrl
     )
     doc.open()
     doc.write(html)
     doc.close()
 
-    // Listen for section clicks from iframe
     const handleMessage = (e: MessageEvent) => {
       if (e.data?.type === 'wpcraft-select') {
-        onSelect(e.data.id)
+        onSelectSection(e.data.id)
+      }
+      if (e.data?.type === 'wpcraft-select-element') {
+        onSelectElement(
+          e.data.sectionId,
+          e.data.columnId,
+          e.data.elementId
+        )
       }
     }
     window.addEventListener('message', handleMessage)
@@ -38,7 +45,7 @@ export default function Canvas({
         'message', handleMessage
       )
     }
-  }, [pageData, selectedId])
+  }, [pageData, selection])
 
   return (
     <div className="flex-1 bg-[#1a1a1a] flex flex-col overflow-hidden">
@@ -63,7 +70,7 @@ export default function Canvas({
 
 function renderPageToHtml(
   pageData: PageData | null,
-  selectedId: string | null,
+  selection: Selection | null,
   siteUrl: string
 ): string {
   if (!pageData || !pageData.sections?.length) {
@@ -97,7 +104,7 @@ function renderPageToHtml(
 
   const sectionsHtml = pageData.sections
     .map(section => {
-      const isSelected = section.id === selectedId
+      const isSelected = selection?.type === 'section' && selection.sectionId === section.id
       const settings = section.settings
       
       let bgStyle = ''
@@ -121,7 +128,10 @@ function renderPageToHtml(
             '1 1 100%' : `0 0 ${col.width}%`
           
           const elementsHtml = col.elements
-            .map(el => renderElement(el))
+            .map(el => {
+              const isElSelected = selection?.type === 'element' && selection.elementId === el.id
+              return renderElement(el, section.id, col.id, isElSelected)
+            })
             .join('')
           
           return `<div style="flex:${flex};
@@ -174,6 +184,10 @@ body { font-family: 'Inter', sans-serif; }
 img { max-width: 100%; }
 a { text-decoration: none; }
 section:hover { outline: 1px solid rgba(22,101,52,0.3) !important; }
+.wpcraft-element:hover {
+  outline: 1px dashed rgba(34,197,94,0.5) !important;
+  outline-offset: 2px;
+}
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -189,66 +203,117 @@ ${sectionsHtml}
 </html>`
 }
 
-function renderElement(el: any): string {
-  const s = el.settings
-  const style = [
+function buildElementStyle(s: any): string {
+  return [
     s.fontSize ? `font-size:${s.fontSize}px` : '',
     s.fontWeight ? `font-weight:${s.fontWeight}` : '',
     s.fontFamily ? 
       `font-family:'${s.fontFamily}',sans-serif` : '',
     s.color ? `color:${s.color}` : '',
     s.align ? `text-align:${s.align}` : '',
-    s.marginBottom ? 
-      `margin-bottom:${s.marginBottom}px` : '',
-    s.lineHeight ? 
-      `line-height:${s.lineHeight}` : '',
+    s.lineHeight ? `line-height:${s.lineHeight}` : '',
   ].filter(Boolean).join(';')
+}
+
+function renderElement(
+  el: any,
+  sectionId: string,
+  columnId: string,
+  isSelected: boolean
+): string {
+  const s = el.settings
+  const dataAttrs = 
+    `data-section-id="${sectionId}" 
+     data-column-id="${columnId}"
+     data-element-id="${el.id}"
+     data-el-type="${el.type}"`
+  
+  const clickHandler = 
+    `onclick="event.stopPropagation();
+      window.parent.postMessage({
+        type:'wpcraft-select-element',
+        sectionId:'${sectionId}',
+        columnId:'${columnId}',
+        elementId:'${el.id}',
+        elType:'${el.type}'
+      },'*')"` 
+  
+  const selectedStyle = isSelected
+    ? 'outline: 2px solid #22c55e !important;' +
+      'outline-offset: 2px;'
+    : ''
+  
+  const hoverClass = 'wpcraft-element'
+  
+  const baseStyle = `cursor: pointer; position: relative; ${selectedStyle}`
+
+  const style = buildElementStyle(s)
 
   switch (el.type) {
     case 'heading':
       const tag = s.tag || 'h2'
-      return `<${tag} style="${style}" 
-        class="wpcraft-animate">
-        ${s.text || ''}
+      return `<${tag} 
+        ${dataAttrs} ${clickHandler}
+        class="${hoverClass}"
+        style="${style};${baseStyle}">
+        ${s.text || 'Click to edit'}
       </${tag}>`
     
     case 'text':
-      return `<p style="${style};line-height:1.7;
-        class="wpcraft-animate">
-        ${s.text || ''}
+      return `<p 
+        ${dataAttrs} ${clickHandler}
+        class="${hoverClass}"
+        style="${style};line-height:1.7;${baseStyle}">
+        ${s.text || 'Click to edit'}
       </p>`
     
     case 'button':
-      return `<div style="margin-bottom:${
-        s.marginBottom || 0}px;
-        text-align:${s.align || 'left'}">
-        <a href="${s.url || '#'}" 
+      return `<div 
+        ${dataAttrs} ${clickHandler}
+        class="${hoverClass}"
+        style="margin-bottom:${
+          s.marginBottom||0}px;
+        text-align:${s.align||'left'};
+        ${selectedStyle}">
+        <a href="#" 
+          onclick="return false"
           style="display:inline-block;
-          background:${s.backgroundColor || '#166534'};
-          color:${s.color || '#fff'};
+          background:${s.backgroundColor||'#166534'};
+          color:${s.color||'#fff'};
           padding:14px 32px;
-          border-radius:${s.borderRadius || 8}px;
+          border-radius:${s.borderRadius||8}px;
           font-weight:600;font-size:15px;
-          font-family:'Inter',sans-serif;
-          transition:all 0.3s ease;">
-          ${s.text || 'Click Here'}
+          cursor:pointer;
+          transition:all 0.2s ease;">
+          ${s.text || 'Button'}
         </a>
       </div>`
     
     case 'image':
-      return `<img src="${s.url || ''}" 
-        alt="${s.alt || ''}"
-        style="width:100%;
-        ${s.height ? `height:${s.height}px;` : ''}
-        object-fit:cover;display:block;
-        border-radius:${s.borderRadius || 0}px;
-        margin-bottom:${s.marginBottom || 0}px;">`
+      return `<div
+        ${dataAttrs} ${clickHandler}
+        class="${hoverClass}"
+        style="${selectedStyle}">
+        <img src="${s.url||''}" 
+          alt="${s.alt||''}"
+          style="width:100%;
+          ${s.height ? 
+            `height:${s.height}px;` : ''}
+          object-fit:cover;display:block;
+          border-radius:${s.borderRadius||0}px;
+          margin-bottom:${s.marginBottom||0}px;
+          pointer-events:none;">
+      </div>`
     
     case 'spacer':
-      return `<div style="height:${s.height||40}px;
+      return `<div 
+        ${dataAttrs} ${clickHandler}
+        class="${hoverClass}"
+        style="height:${s.height||40}px;
         ${s.backgroundColor ? 
           `background:${s.backgroundColor};` : ''}
-        ${s.width ? `width:${s.width};` : ''}">
+        ${s.width ? `width:${s.width};` : ''}
+        ${baseStyle}">
       </div>`
     
     default:

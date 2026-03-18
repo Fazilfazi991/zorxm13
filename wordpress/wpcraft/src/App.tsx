@@ -4,7 +4,7 @@ import LeftPanel from './components/LeftPanel'
 import Canvas from './components/Canvas'
 import RightPanel from './components/RightPanel'
 import AIPrompt from './components/AIPrompt'
-import { PageData, Section } from './types/schema'
+import { PageData, Section, Selection, Element } from './types/schema'
 import { savePage, publishPage } from './lib/api'
 
 export default function App() {
@@ -18,8 +18,12 @@ export default function App() {
   const [pageData, setPageData] = 
     useState<PageData | null>(initialData)
   
-  const [selectedId, setSelectedId] = 
-    useState<string | null>(null)
+  const [selection, setSelection] = 
+    useState<Selection | null>(null)
+  
+  const [expandedSections, setExpandedSections] = 
+    useState<string[]>([])
+
   const [saving, setSaving] = useState(false)
   
   // Only show AI prompt if NO existing content
@@ -60,9 +64,6 @@ export default function App() {
     }
   }
 
-  const selectedSection = pageData?.sections
-    .find(s => s.id === selectedId) ?? null
-
   const updateSection = (
     id: string, 
     updates: Partial<Section>
@@ -72,6 +73,60 @@ export default function App() {
       ...pageData,
       sections: pageData.sections.map(s =>
         s.id === id ? { ...s, ...updates } : s
+      )
+    })
+  }
+
+  // Helper to get selected element
+  const getSelectedElement = () => {
+    if (!selection || 
+        selection.type !== 'element' || 
+        !pageData) return null
+    
+    const section = pageData.sections.find(
+      s => s.id === selection.sectionId
+    )
+    if (!section) return null
+    
+    const column = section.columns.find(
+      c => c.id === selection.columnId
+    )
+    if (!column) return null
+    
+    return column.elements.find(
+      e => e.id === selection.elementId
+    ) ?? null
+  }
+
+  // Helper to update a specific element
+  const updateElement = (
+    sectionId: string,
+    columnId: string, 
+    elementId: string,
+    updates: Partial<Element>
+  ) => {
+    if (!pageData) return
+    setPageData({
+      ...pageData,
+      sections: pageData.sections.map(s => 
+        s.id !== sectionId ? s : {
+          ...s,
+          columns: s.columns.map(c =>
+            c.id !== columnId ? c : {
+              ...c,
+              elements: c.elements.map(e =>
+                e.id !== elementId ? e : {
+                  ...e,
+                  ...updates,
+                  settings: {
+                    ...e.settings,
+                    ...(updates.settings || {})
+                  }
+                }
+              )
+            }
+          )
+        }
       )
     })
   }
@@ -93,11 +148,26 @@ export default function App() {
       {/* MAIN AREA */}
       <div className="flex flex-1 overflow-hidden">
         
-        {/* LEFT - just section list */}
+        {/* LEFT - section/element tree */}
         <LeftPanel
           sections={pageData?.sections ?? []}
-          selectedId={selectedId}
-          onSelect={setSelectedId}
+          selection={selection}
+          onSelectSection={(sectionId) => setSelection({
+            type: 'section',
+            sectionId
+          })}
+          onSelectElement={(sectionId, columnId, elementId) => setSelection({
+            type: 'element',
+            sectionId,
+            columnId,
+            elementId
+          })}
+          expandedSections={expandedSections}
+          onToggleExpand={(id) => setExpandedSections(prev => 
+            prev.includes(id) 
+              ? prev.filter(x => x !== id)
+              : [...prev, id]
+          )}
           onReorder={(sections) => 
             setPageData(prev => 
               prev ? {...prev, sections} : prev
@@ -109,17 +179,49 @@ export default function App() {
         {/* CENTER - full canvas */}
         <Canvas
           pageData={pageData}
-          selectedId={selectedId}
-          onSelect={setSelectedId}
+          selection={selection}
+          onSelectSection={(sectionId) => setSelection({
+            type: 'section',
+            sectionId
+          })}
+          onSelectElement={(
+            sectionId, columnId, elementId
+          ) => setSelection({
+            type: 'element',
+            sectionId,
+            columnId,
+            elementId
+          })}
           siteUrl={config.siteUrl}
         />
 
         {/* RIGHT - context settings */}
         <RightPanel
-          section={selectedSection}
-          onUpdate={(updates) => {
-            if (selectedId) {
-              updateSection(selectedId, updates)
+          selection={selection}
+          selectedSection={
+            selection?.type === 'section'
+              ? pageData?.sections.find(
+                  s => s.id === selection.sectionId
+                ) ?? null
+              : null
+          }
+          selectedElement={getSelectedElement()}
+          onUpdateSection={(updates) => {
+            if (selection?.sectionId) {
+              updateSection(selection.sectionId, updates)
+            }
+          }}
+          onUpdateElement={(updates) => {
+            if (selection?.type === 'element' &&
+                selection.sectionId &&
+                selection.columnId &&
+                selection.elementId) {
+              updateElement(
+                selection.sectionId,
+                selection.columnId,
+                selection.elementId,
+                updates
+              )
             }
           }}
         />

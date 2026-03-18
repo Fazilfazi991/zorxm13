@@ -1,3 +1,12 @@
+export type SelectionType = 'section' | 'element'
+
+export interface Selection {
+  type: SelectionType
+  sectionId: string
+  columnId?: string
+  elementId?: string
+}
+
 export interface PageData {
   title: string
   sections: Section[]
