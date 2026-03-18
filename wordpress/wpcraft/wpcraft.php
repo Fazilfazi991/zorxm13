@@ -294,6 +294,13 @@ class WPCraft_V2 {
       $page_data_obj = new stdClass();
     }
     
+    $has_content = false;
+    if (is_array($page_data_obj) && !empty($page_data_obj['sections'])) {
+      $has_content = true;
+    } elseif (is_object($page_data_obj) && !empty($page_data_obj->sections)) {
+      $has_content = true;
+    }
+    
     // Must call these to set up WP properly
     // before outputting custom HTML
     remove_all_actions('wp_head');
@@ -340,8 +347,7 @@ class WPCraft_V2 {
           ); ?>,
           // Safely parse JSON structure without risking HTML </script> breaks
           pageData: JSON.parse(decodeURIComponent("<?php echo rawurlencode(wp_json_encode($page_data_obj)); ?>")),
-          hasExistingContent: <?php echo 
-            (!empty($page_data_obj['sections']) || !empty($page_data_obj->sections)) ? 'true' : 'false'; ?>,
+          hasExistingContent: <?php echo $has_content ? 'true' : 'false'; ?>,
           siteUrl: <?php echo wp_json_encode(
             get_site_url()
           ); ?>,
