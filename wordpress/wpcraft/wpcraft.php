@@ -338,11 +338,9 @@ class WPCraft_V2 {
         }
         #wpcraft-editor { width:100%;height:100vh; }
       </style>
-    </head>
-    <body>
-      <div id="wpcraft-editor"></div>
       
-      <script>
+      <!-- Critical: config must be in head to bypass caching plugin deferrals -->
+      <script data-cfasync="false" data-no-optimize="1">
         // WordPress REST API nonce
         // Generated fresh on page load
         window.WPCRAFT_CONFIG = {
@@ -365,6 +363,9 @@ class WPCraft_V2 {
           ); ?>
         };
       </script>
+    </head>
+    <body>
+      <div id="wpcraft-editor"></div>
       
       <?php
       // Output jQuery (needed for WP REST auth)
