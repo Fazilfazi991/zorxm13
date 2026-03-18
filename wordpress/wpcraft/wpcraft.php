@@ -263,9 +263,10 @@ class WPCraft_V2 {
         $post_id, '_elementor_data', true
       );
       if ($elementor_data) {
-        $decoded = json_decode(
-          $elementor_data, true
-        );
+        $decoded = is_string($elementor_data) 
+          ? json_decode($elementor_data, true) 
+          : (is_array($elementor_data) ? $elementor_data : null);
+          
         if ($decoded) {
           require_once WPCRAFT_DIR . 
             'includes/api.php';
@@ -285,7 +286,10 @@ class WPCraft_V2 {
     }
     
     // Parse it back to array to ensure validity and allow safe JSON printing
-    $page_data_obj = json_decode($existing_data ?: '{}', true);
+    $page_data_obj = is_string($existing_data) 
+      ? json_decode($existing_data ?: '{}', true) 
+      : (is_array($existing_data) ? $existing_data : []);
+      
     if (!$page_data_obj) {
       $page_data_obj = new stdClass();
     }
@@ -430,7 +434,10 @@ class WPCraft_V2 {
     
     if (!$wpcraft_data) return $content;
     
-    $data = json_decode($wpcraft_data, true);
+    $data = is_string($wpcraft_data) 
+      ? json_decode($wpcraft_data, true) 
+      : (is_array($wpcraft_data) ? $wpcraft_data : []);
+      
     if (!$data || empty($data['sections'])) {
       return $content;
     }
