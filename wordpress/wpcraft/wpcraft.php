@@ -365,8 +365,10 @@ class WPCraft_V2 {
       // Output jQuery (needed for WP REST auth)
       wp_print_scripts('jquery');
       
-      $js = WPCRAFT_URL . 'editor/assets/index.js';
-      $css = WPCRAFT_URL . 'editor/assets/index.css';
+      // Cache-bust assets securely on load
+      $version = defined('WPCRAFT_VERSION') ? WPCRAFT_VERSION : time();
+      $js = WPCRAFT_URL . 'editor/assets/index.js?ver=' . $version;
+      $css = WPCRAFT_URL . 'editor/assets/index.css?ver=' . $version;
       ?>
       
       <link rel="stylesheet" 
