@@ -2,6 +2,8 @@ interface Props {
   title: string
   saving: boolean
   hasData: boolean
+  canUndo: boolean
+  onUndo: () => void
   onSave: () => void
   onPublish: () => void
   onToggleAI: () => void
@@ -9,8 +11,8 @@ interface Props {
 }
 
 export default function TopBar({
-  title, saving, hasData,
-  onSave, onPublish, onToggleAI, onExit
+  title, saving, hasData, canUndo,
+  onUndo, onSave, onPublish, onToggleAI, onExit
 }: Props) {
   return (
     <div className="flex items-center 
@@ -58,6 +60,23 @@ export default function TopBar({
             transition-colors">
           ✦ Generate with AI
         </button>
+
+        {/* Undo AI Change */}
+        {canUndo && (
+          <button
+            onClick={onUndo}
+            className="flex items-center gap-1.5 
+              px-3 py-1.5 text-xs font-medium 
+              rounded-lg bg-orange-900/30 
+              text-orange-400 
+              border border-orange-800/50
+              hover:bg-orange-900/60 
+              transition-colors"
+            title="Undo last AI change (Ctrl+Z)"
+          >
+            ↩ Undo last AI change
+          </button>
+        )}
 
         {/* Save - only when has content */}
         {hasData && (

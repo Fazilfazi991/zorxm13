@@ -97,3 +97,23 @@ create policy "Users can insert own generations"
 create policy "Users can view own transactions"
   on public.credit_transactions for select
   using (auth.uid() = user_id);
+
+create table public.plugin_licenses (
+  id uuid default gen_random_uuid() primary key,
+  license_key text unique not null,
+  email text not null,
+  site_url text,
+  credits integer default 3,
+  plan text default 'free',
+  last_used timestamptz,
+  created_at timestamptz default now()
+);
+
+create index on public.plugin_licenses(license_key);
+create index on public.plugin_licenses(email);
+
+alter table public.plugin_licenses 
+  enable row level security;
+
+-- Service key bypasses RLS so no policies needed
+-- for server-side operations

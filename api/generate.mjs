@@ -138,6 +138,18 @@ Team: https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=900&f
 In ALL settings, replace:
 - PRIMARY_COLOR → actual primaryColor hex`
 
+  if (pageType === 'refine') {
+    return `You are an expert Elementor designer refining a specific existing section or element.
+You will be provided with the CURRENT JSON structure of the user's selection and their revision request.
+CRITICAL RULES:
+1. ONLY return the updated JSON structure.
+2. DO NOT change element IDs, as they map to existing React state.
+3. Modify settings, typography, content, or CSS classes exactly as requested.
+4. Return ONLY valid JSON starting with { and ending with }, without markdown formatting.
+5. If the context represents a single widget (like an image or heading), return just the updated widget object.
+6. If the context represents a full section, return the updated section object.`
+  }
+
   if (pageType === 'section') {
     return SYSTEM_PROMPT_BASE + `
     
@@ -188,6 +200,16 @@ Dark overlay section at bottom...
 }
 
 function buildUserPrompt(data) {
+  if (data.pageType === 'refine') {
+    return `Refine this Elementor component based on the request: "${data.description}"
+Primary Action Color Context: ${data.primaryColor || '#166534'}
+
+CURRENT COMPONENT JSON:
+${data.contextJson || '{}'}
+
+Return EXACTLY the modified JSON object. No explanations. Return ONLY valid JSON.`
+  }
+
   if (data.pageType === 'section') {
     return `Generate ONLY A SINGLE custom section for our page.
 Business Context: ${data.businessName}
@@ -403,7 +425,7 @@ export default async function handler(req, res) {
       }
     }
 
-    if (!body?.businessName || (!body?.description && !isPluginRequest)) {
+    if (!body?.businessName && body?.pageType !== 'refine' && !isPluginRequest) {
       return res.status(400).json({
         error: 'Missing businessName or description'
       })
@@ -444,8 +466,21 @@ export default async function handler(req, res) {
     // Normalize root array key
     // Gemini sometimes returns "elements" instead of "content"
     if (!parsed?.content && parsed?.elements) {
-      parsed.content = parsed.elements
-      delete parsed.elements
+      if (parsed.type === 'elementor') {
+        parsed.content = parsed.elements
+        delete parsed.elements
+      }
+    }
+
+    // If pageType is refine, we might return a raw object directly rather than `{ content: [...] }`.
+    if (body?.pageType === 'refine') {
+      // Return the specific object immediately without worrying about 'content' arrays
+      console.log('[generate] Refine Success')
+      return res.status(200).json({
+        success: true,
+        data: parsed,
+        json: JSON.stringify(parsed)
+      })
     }
 
     if (!parsed?.content?.length) {

@@ -78,8 +78,33 @@ add_action('rest_api_init', function() {
       return new WP_Error('rest_forbidden', 'Authentication required.', ['status' => 401]);
     }
   ]);
+  
+  // Get credits
+  register_rest_route('wpcraft/v2', '/credits', [
+    'methods' => 'GET',
+    'callback' => 'wpcraft_get_credits',
+    'permission_callback' => function($request) {
+      $nonce = $request->get_header('X-WP-Nonce');
+      if (!$nonce) {
+        $nonce = $request->get_param('_wpnonce');
+      }
+      if ($nonce && wp_verify_nonce($nonce, 'wp_rest')) {
+        return current_user_can('edit_posts');
+      }
+      if (is_user_logged_in()) {
+        return current_user_can('edit_posts');
+      }
+      return new WP_Error('rest_forbidden', 'Authentication required.', ['status' => 401]);
+    }
+  ]);
 
 });
+
+function wpcraft_get_credits($request) {
+  return rest_ensure_response([
+    'credits' => (int) get_option('wpcraft_credits', 0)
+  ]);
+}
 
 function wpcraft_get_page($request) {
   $post_id = $request['id'];
@@ -176,6 +201,25 @@ function wpcraft_ai_generate($request) {
   );
 
   // Call YOUR Vercel API — not Gemini directly
+  $payload = [
+    'source' => 'wpcraft-plugin',
+    'license_key' => $license_key,
+    'generation_type' => $generation_type
+  ];
+  
+  if ($generation_type === 'refine') {
+    $payload['systemPrompt'] = "You are a JSON page builder assistant. The user will give you a single section or element JSON object and a text instruction. Return ONLY the updated JSON object for that section or element. Do not wrap it in markdown. Do not explain anything. Return raw JSON only.";
+    $payload['prompt'] = $prompt;
+    $payload['contextJson'] = $body['contextJson'] ?? '';
+  } else {
+    $payload['pageType'] = $body['pageType'] ?? 'landing';
+    $payload['businessName'] = sanitize_text_field($body['businessName'] ?? $prompt);
+    $payload['description'] = sanitize_textarea_field($prompt);
+    $payload['tone'] = $body['tone'] ?? 'professional';
+    $payload['primaryColor'] = sanitize_hex_color($body['primaryColor'] ?? '#166534') ?: '#166534';
+    $payload['ctaText'] = sanitize_text_field($body['ctaText'] ?? 'Get Started');
+  }
+
   $response = wp_remote_post(
     'https://zorxm13.vercel.app/api/generate',
     [
@@ -183,29 +227,7 @@ function wpcraft_ai_generate($request) {
       'headers' => [
         'Content-Type' => 'application/json'
       ],
-      'body' => json_encode([
-        'source' => 'wpcraft-plugin',
-        'license_key' => $license_key,
-        'generation_type' => $generation_type,
-        'pageType' => 
-          $generation_type === 'section' || $generation_type === 'refine'
-            ? $generation_type 
-            : ($body['pageType'] ?? 'landing'),
-        'businessName' => sanitize_text_field(
-          $body['businessName'] ?? $prompt
-        ),
-        'description' => sanitize_textarea_field(
-          $prompt
-        ),
-        'contextJson' => $body['contextJson'] ?? '',
-        'tone' => $body['tone'] ?? 'professional',
-        'primaryColor' => sanitize_hex_color(
-          $body['primaryColor'] ?? '#166534'
-        ) ?: '#166534',
-        'ctaText' => sanitize_text_field(
-          $body['ctaText'] ?? 'Get Started'
-        )
-      ])
+      'body' => json_encode($payload)
     ]
   );
   

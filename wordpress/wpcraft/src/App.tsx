@@ -30,6 +30,47 @@ export default function App() {
   const [showAI, setShowAI] = useState(
     !initialData && !config.hasExistingContent
   )
+  
+  const [undoStack, setUndoStack] = useState<PageData[]>([])
+  const [hasPreview, setHasPreview] = useState(false)
+
+  const pushUndoSnapshot = () => {
+    if (pageData) {
+      setUndoStack(prev => {
+        const next = [...prev, pageData]
+        if (next.length > 20) return next.slice(next.length - 20)
+        return next
+      })
+    }
+  }
+
+  const handleUndo = () => {
+    if (undoStack.length === 0) return
+    const prev = undoStack[undoStack.length - 1]
+    setUndoStack(s => s.slice(0, -1))
+    setPageData(prev)
+    
+    const el = document.createElement('div')
+    el.className = 'fixed bottom-4 left-1/2 -translate-x-1/2 bg-white/10 text-white px-4 py-2 rounded-lg text-sm backdrop-blur border border-white/20 z-50 shadow-lg transition-opacity duration-300'
+    el.innerText = 'Undid last AI change'
+    document.body.appendChild(el)
+    setTimeout(() => {
+      el.style.opacity = '0'
+      setTimeout(() => el.remove(), 300)
+    }, 2000)
+  }
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        // Prevent default browser undo
+        e.preventDefault()
+        handleUndo()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [undoStack, pageData])
 
   const handleSave = async () => {
     if (!pageData) return
@@ -140,14 +181,14 @@ export default function App() {
   }
 
   const handleRefine = async (prompt: string) => {
-    if (!selection || !pageData) return
+    if (!selection || !pageData) return null
     
     const isSection = selection.type === 'section'
     const contextObj = isSection 
       ? getSelectedSection() 
       : getSelectedElement()
       
-    if (!contextObj) return
+    if (!contextObj) return null
     
     const result = await generatePage(
       config.postId,
@@ -159,17 +200,11 @@ export default function App() {
     )
     
     if (result.success && result.data) {
-      if (isSection) {
-        updateSection(selection.sectionId, result.data)
-      } else if (selection.columnId && selection.elementId) {
-        updateElement(
-          selection.sectionId, 
-          selection.columnId, 
-          selection.elementId, 
-          result.data
-        )
-      }
+      return result.data
     }
+    
+    console.error('WP Refine Failed Payload:', result);
+    throw new Error('AI returned an unexpected result. Please try a different prompt.')
   }
 
   return (
@@ -181,6 +216,8 @@ export default function App() {
         title={config.postTitle}
         saving={saving}
         hasData={!!pageData}
+        canUndo={undoStack.length > 0}
+        onUndo={handleUndo}
         onSave={handleSave}
         onPublish={handlePublish}
         onToggleAI={() => setShowAI(!showAI)}
@@ -226,6 +263,7 @@ export default function App() {
         <Canvas
           pageData={pageData}
           selection={selection}
+          hasPreview={hasPreview}
           onSelectSection={(sectionId) => setSelection({
             type: 'section',
             sectionId
@@ -271,6 +309,8 @@ export default function App() {
             }
           }}
           onRefine={handleRefine}
+          onPreviewChange={setHasPreview}
+          onApplyAI={pushUndoSnapshot}
         />
 
       </div>

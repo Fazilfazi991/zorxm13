@@ -4,13 +4,14 @@ import { PageData, Selection } from '../types/schema'
 interface Props {
   pageData: PageData | null
   selection: Selection | null
+  hasPreview?: boolean
   onSelectSection: (id: string) => void
   onSelectElement: (sectionId: string, columnId: string, elementId: string) => void
   siteUrl: string
 }
 
 export default function Canvas({
-  pageData, selection, onSelectSection, onSelectElement, siteUrl
+  pageData, selection, hasPreview = false, onSelectSection, onSelectElement, siteUrl
 }: Props) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
@@ -21,7 +22,7 @@ export default function Canvas({
     if (!doc) return
 
     const html = renderPageToHtml(
-      pageData, selection, siteUrl
+      pageData, selection, hasPreview, siteUrl
     )
     doc.open()
     doc.write(html)
@@ -45,7 +46,7 @@ export default function Canvas({
         'message', handleMessage
       )
     }
-  }, [pageData, selection])
+  }, [pageData, selection, hasPreview])
 
   return (
     <div className="flex-1 bg-[#1a1a1a] flex flex-col overflow-hidden">
@@ -71,6 +72,7 @@ export default function Canvas({
 function renderPageToHtml(
   pageData: PageData | null,
   selection: Selection | null,
+  hasPreview: boolean,
   siteUrl: string
 ): string {
   if (!pageData || !pageData.sections?.length) {
@@ -130,7 +132,7 @@ function renderPageToHtml(
           const elementsHtml = col.elements
             .map(el => {
               const isElSelected = selection?.type === 'element' && selection.elementId === el.id
-              return renderElement(el, section.id, col.id, isElSelected)
+              return renderElement(el, section.id, col.id, isElSelected, hasPreview)
             })
             .join('')
           
@@ -159,7 +161,7 @@ function renderPageToHtml(
           padding:${pt}px 40px ${pb}px;
           ${minH}
           ${isSelected ? 
-            'outline:2px solid #166534;' : 
+            `outline:2px ${hasPreview ? 'dashed' : 'solid'} ${hasPreview ? '#eab308' : '#166534'};` : 
             'outline:none;'}
           transition:outline 0.15s;">
         ${overlay}
@@ -219,7 +221,8 @@ function renderElement(
   el: any,
   sectionId: string,
   columnId: string,
-  isSelected: boolean
+  isSelected: boolean,
+  hasPreview: boolean
 ): string {
   const s = el.settings
   const dataAttrs = 
@@ -239,8 +242,7 @@ function renderElement(
       },'*')"` 
   
   const selectedStyle = isSelected
-    ? 'outline: 2px solid #22c55e !important;' +
-      'outline-offset: 2px;'
+    ? `outline: 2px ${hasPreview ? 'dashed' : 'solid'} ${hasPreview ? '#eab308' : '#22c55e'} !important; outline-offset: 2px;`
     : ''
   
   const hoverClass = 'wpcraft-element'
