@@ -1,8 +1,9 @@
 export function toElementorClipboard(data: any): string {
-  const content = data.content || []
-  const jsonString = JSON.stringify(content)
-  // btoa doesn't handle non-latin1 characters, so we use encodeURIComponent + unescape
-  return btoa(unescape(encodeURIComponent(jsonString)))
+  const exportData = {
+    type: "elementor",
+    elements: data.content || data.elements || []
+  }
+  return JSON.stringify(exportData)
 }
 
 export function downloadElementorJSON(
