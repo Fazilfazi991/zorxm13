@@ -31,6 +31,8 @@ class WPCraft {
       [$this, 'admin_enqueue']);
     add_action('wp_ajax_wpcraft_create_page', 
       [$this, 'handle_create_page']);
+    add_action('wp_enqueue_scripts', 
+      [$this, 'enqueue_page_fonts']);
   }
 
   public function admin_menu() {
@@ -131,17 +133,24 @@ class WPCraft {
       );
     }
 
-    // Save Elementor data to page
+    // Store fonts needed for this page
+    update_post_meta(
+      $post_id,
+      '_wpcraft_fonts',
+      'Barlow:400,600,700,800|Inter:400,500,600'
+    );
+
+    // Save Elementor data
     update_post_meta(
       $post_id,
       '_elementor_data',
       wp_slash(json_encode($elements))
     );
 
-    // Mark page as built with Elementor
+    // Mark as Elementor page
     update_post_meta(
-      $post_id,
-      '_elementor_edit_mode',
+      $post_id, 
+      '_elementor_edit_mode', 
       'builder'
     );
 
@@ -152,10 +161,36 @@ class WPCraft {
       '3.0.0'
     );
 
-    // Clear Elementor cache
+    // Set page template to Elementor Canvas
+    // (removes theme header/footer, full control)
+    update_post_meta(
+      $post_id,
+      '_wp_page_template',
+      'elementor_canvas'
+    );
+
+    // Process and save custom CSS from elements
+    $custom_css = wpcraft_extract_custom_css(
+      $elements, $post_id
+    );
+    if (!empty($custom_css)) {
+      update_post_meta(
+        $post_id,
+        '_elementor_css',
+        ['status' => 'empty']
+      );
+    }
+
+    // Clear ALL Elementor caches
     if (class_exists('\Elementor\Plugin')) {
       \Elementor\Plugin::$instance
         ->files_manager->clear_cache();
+        
+      // Also clear post CSS
+      $post_css = new \Elementor\Core\Files\CSS\Post(
+        $post_id
+      );
+      $post_css->update();
     }
 
     $edit_url = admin_url(
@@ -172,9 +207,62 @@ class WPCraft {
     ]);
   }
 
+  public function enqueue_page_fonts() {
+    $post_id = get_the_ID();
+    $fonts = get_post_meta(
+      $post_id, '_wpcraft_fonts', true
+    );
+    if ($fonts) {
+      wp_enqueue_style(
+        'wpcraft-fonts-' . $post_id,
+        'https://fonts.googleapis.com/css2?family=' . 
+        urlencode($fonts) . '&display=swap',
+        [],
+        null
+      );
+    }
+  }
+
   public function admin_page() {
     require_once WPCRAFT_DIR . 'admin-page.php';
   }
 }
 
 WPCraft::instance();
+
+function wpcraft_extract_custom_css(
+  $elements, $post_id
+) {
+  $css = '';
+  
+  foreach ($elements as $element) {
+    if (!empty($element['settings']['_custom_css'])) {
+      $element_css = $element['settings']['_custom_css'];
+      $element_id = $element['id'] ?? '';
+      
+      // Replace "selector" with actual Elementor 
+      // element selector
+      $selector = '.elementor-' . $post_id . 
+        ' .elementor-element';
+      if ($element_id) {
+        $selector .= '.elementor-element-' . 
+          $element_id;
+      }
+      $element_css = str_replace(
+        'selector', 
+        $selector, 
+        $element_css
+      );
+      $css .= $element_css . "\n";
+    }
+    
+    // Recursively check nested elements
+    if (!empty($element['elements'])) {
+      $css .= wpcraft_extract_custom_css(
+        $element['elements'], $post_id
+      );
+    }
+  }
+  
+  return $css;
+}
