@@ -55,57 +55,22 @@ export default function AIPrompt({
   }
 
   return (
-    <div className="absolute inset-0 z-50 
-      flex items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.85)' }}>
+    <div className="absolute bottom-0 left-0 right-0 z-50 
+      bg-[#1a1a1a] border-t border-white/10 pt-4 pb-4 px-6">
       
-      <div className="bg-[#1a1a1a] rounded-2xl 
-        border border-white/10 p-6 w-full 
-        max-w-lg mx-4">
-        
-        <div className="flex items-center 
-          justify-between mb-4">
-          <div>
-            <h2 className="text-white font-semibold 
-              text-base">
-              ✦ Generate with AI
-            </h2>
-            <p className="text-white/40 text-xs mt-0.5">
-              Describe your page and AI will build it
-            </p>
-          </div>
-          <button onClick={onClose}
-            className="text-white/30 
-              hover:text-white/60 text-xl">
-            ×
-          </button>
-        </div>
+      <div className="max-w-4xl mx-auto relative">
+        <button onClick={onClose}
+          className="absolute -top-[10px] right-0 text-white/30 
+            hover:text-white/60 text-xl leading-none">
+          &times;
+        </button>
 
-        <textarea
-          value={prompt}
-          onChange={e => setPrompt(e.target.value)}
-          placeholder="Describe your page... e.g. Landing page for a digital marketing agency in Dubai targeting restaurants and cafes"
-          className="w-full bg-white/5 
-            border border-white/10 rounded-xl 
-            px-4 py-3 text-sm text-white/80 
-            placeholder-white/20 resize-none 
-            focus:outline-none 
-            focus:border-green-600/50 mb-3"
-          rows={4}
-          onKeyDown={e => {
-            if (e.key === 'Enter' && 
-                (e.metaKey || e.ctrlKey)) {
-              handleGenerate()
-            }
-          }}
-        />
-
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-3">
           {examples.map(ex => (
             <button
               key={ex}
               onClick={() => setPrompt(ex)}
-              className="text-xs px-2.5 py-1 
+              className="text-[11px] px-2.5 py-1 
                 rounded-full bg-white/5 
                 text-white/40 border border-white/10
                 hover:bg-white/10 
@@ -125,35 +90,40 @@ export default function AIPrompt({
           </div>
         )}
 
-        <button
-          onClick={handleGenerate}
-          disabled={loading || !prompt.trim()}
-          className="w-full py-3 rounded-xl 
-            bg-green-700 text-white font-semibold 
-            text-sm hover:bg-green-600 
-            transition-colors
-            disabled:opacity-40 
-            disabled:cursor-not-allowed"
-        >
-          {loading ? (
-            <span className="flex items-center 
-              justify-center gap-2">
-              <span className="inline-block 
-                w-3 h-3 border-2 
-                border-white/30 border-t-white 
-                rounded-full animate-spin">
+        <div className="flex gap-3 items-stretch">
+          <input
+            type="text"
+            value={prompt}
+            onChange={e => setPrompt(e.target.value)}
+            placeholder="Describe your page... e.g. Landing page for SEO agency in Dubai"
+            className="flex-1 bg-white/5 
+              border border-white/10 rounded-[10px] 
+              px-4 py-2 text-sm text-white focus:outline-none 
+              focus:border-green-600/50"
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                handleGenerate()
+              }
+            }}
+          />
+          <button
+            onClick={handleGenerate}
+            disabled={loading || !prompt.trim()}
+            className="bg-[#166534] text-white px-6 py-2
+              rounded-lg text-sm font-semibold hover:bg-green-600 
+              transition-colors disabled:opacity-40 
+              disabled:cursor-not-allowed whitespace-nowrap"
+          >
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <span className="inline-block w-3 h-3 border-2 
+                  border-white/30 border-t-white rounded-full 
+                  animate-spin" />
+                Generating...
               </span>
-              Generating your page...
-            </span>
-          ) : (
-            'Generate Page ✦'
-          )}
-        </button>
-
-        <p className="text-center text-xs 
-          text-white/20 mt-2">
-          Ctrl+Enter to generate
-        </p>
+            ) : 'Generate ✦'}
+          </button>
+        </div>
       </div>
     </div>
   )

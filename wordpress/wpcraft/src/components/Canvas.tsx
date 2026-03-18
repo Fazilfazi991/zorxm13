@@ -41,27 +41,7 @@ export default function Canvas({
   }, [pageData, selectedId])
 
   return (
-    <div className="flex-1 bg-[#1a1a1a] 
-      flex flex-col overflow-hidden">
-      
-      <div className="flex items-center 
-        justify-center gap-3 py-2 
-        border-b border-white/10 flex-shrink-0">
-        <div className="flex items-center gap-1 
-          bg-white/5 rounded-lg p-1">
-          <button className="px-3 py-1 text-xs 
-            text-white/60 rounded-md 
-            bg-white/10">
-            Desktop
-          </button>
-          <button className="px-3 py-1 text-xs 
-            text-white/30 rounded-md 
-            hover:text-white/60">
-            Mobile
-          </button>
-        </div>
-      </div>
-
+    <div className="flex-1 bg-[#1a1a1a] flex flex-col overflow-hidden">
       <div className="flex-1 overflow-auto p-4">
         <div className="mx-auto bg-white 
           rounded-lg overflow-hidden shadow-2xl"
@@ -86,15 +66,33 @@ function renderPageToHtml(
   selectedId: string | null,
   siteUrl: string
 ): string {
-  if (!pageData) {
-    return `<!DOCTYPE html><html><body>
-      <div style="display:flex;align-items:center;
-        justify-content:center;height:400px;
-        font-family:sans-serif;color:#999;
-        font-size:14px;">
-        Use AI Generate to create your page
-      </div>
-    </body></html>`
+  if (!pageData || !pageData.sections?.length) {
+    return `<!DOCTYPE html><html>
+    <head>
+      <style>
+        body { 
+          font-family: sans-serif;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+          margin: 0;
+          background: #fafafa;
+          flex-direction: column;
+          gap: 12px;
+          color: #999;
+        }
+        .icon { font-size: 32px; opacity: 0.3; }
+        p { font-size: 14px; margin: 0; }
+        small { font-size: 12px; opacity: 0.6; }
+      </style>
+    </head>
+    <body>
+      <div class="icon">✦</div>
+      <p>Your page will appear here</p>
+      <small>Click "Generate with AI" to start</small>
+    </body>
+    </html>`
   }
 
   const sectionsHtml = pageData.sections

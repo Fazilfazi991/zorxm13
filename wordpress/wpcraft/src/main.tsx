@@ -11,6 +11,7 @@ declare global {
       nonce: string
       apiBase: string
       pageData: any
+      hasExistingContent: boolean
       siteUrl: string
       adminUrl: string
     }

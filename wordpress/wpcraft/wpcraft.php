@@ -232,7 +232,44 @@ class WPCraft_V2 {
     $api_base = rest_url('wpcraft/v2/');
     $existing_data = get_post_meta(
       $post_id, '_wpcraft_data', true
-    ) ?: '{}';
+    ) ?: null;
+
+    // If no WPCraft data, try to import 
+    // from Elementor
+    if (!$existing_data) {
+      $elementor_data = get_post_meta(
+        $post_id, '_elementor_data', true
+      );
+      
+      if ($elementor_data) {
+        // Convert Elementor to WPCraft format
+        require_once WPCRAFT_DIR . 'includes/api.php';
+        $decoded = json_decode(
+          $elementor_data, true
+        );
+        if ($decoded) {
+          $converted = wpcraft_convert_from_elementor([
+            'elements' => $decoded
+          ]);
+          if (!empty($converted['sections'])) {
+            $existing_data = json_encode($converted);
+            // Save as WPCraft data immediately
+            update_post_meta(
+              $post_id,
+              '_wpcraft_data',
+              $existing_data
+            );
+          }
+        }
+      }
+    }
+
+    // Also get raw post content as fallback
+    $post_content = $post->post_content;
+
+    // Pass to editor
+    $page_data_json = $existing_data 
+      ? $existing_data : '{}';
     
     // Full screen editor - hide WP chrome
     ?>
@@ -268,7 +305,9 @@ class WPCraft_V2 {
           ); ?>,
           nonce: "<?php echo $nonce; ?>",
           apiBase: "<?php echo $api_base; ?>",
-          pageData: <?php echo $existing_data; ?>,
+          pageData: <?php echo $page_data_json; ?>,
+          hasExistingContent: <?php echo $existing_data 
+            ? 'true' : 'false'; ?>,
           siteUrl: "<?php echo get_site_url(); ?>",
           adminUrl: "<?php echo admin_url(); ?>"
         };

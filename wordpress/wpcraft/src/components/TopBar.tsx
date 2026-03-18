@@ -13,61 +13,70 @@ export default function TopBar({
 }: Props) {
   return (
     <div className="flex items-center 
-      justify-between px-4 h-12 
+      justify-between px-4 h-11
       bg-[#1a1a1a] border-b border-white/10 
       flex-shrink-0">
       
+      {/* Left: Logo + page title */}
       <div className="flex items-center gap-3">
         <span className="text-green-400 
-          font-bold text-sm">✦ WPCraft</span>
-        <span className="text-white/30">|</span>
-        <span className="text-white/70 
-          text-sm truncate max-w-48">
+          font-semibold text-sm">
+          ✦ WPCraft
+        </span>
+        <span className="text-white/20">|</span>
+        <span className="text-white/60 
+          text-sm truncate max-w-xs">
           {title}
         </span>
       </div>
 
+      {/* Right: Actions */}
       <div className="flex items-center gap-2">
+        
+        {/* AI button - always visible */}
         <button
           onClick={onToggleAI}
-          className="px-3 py-1.5 text-xs 
-            font-medium rounded-md
-            bg-green-900/50 text-green-400 
-            border border-green-700/50
-            hover:bg-green-900 transition-colors"
-        >
-          ✦ AI Generate
+          className="flex items-center gap-1.5 
+            px-3 py-1.5 text-xs font-medium 
+            rounded-lg bg-green-900/40 
+            text-green-400 
+            border border-green-800/60
+            hover:bg-green-900/70 
+            transition-colors">
+          ✦ Generate with AI
         </button>
 
+        {/* Save - only when has content */}
         {hasData && (
-          <>
-            <button
-              onClick={onSave}
-              disabled={saving}
-              className="px-3 py-1.5 text-xs 
-                font-medium rounded-md
-                bg-white/10 text-white/80
-                hover:bg-white/20 
-                transition-colors
-                disabled:opacity-50"
-            >
-              {saving ? 'Saving...' : 'Save'}
-            </button>
-
-            <button
-              onClick={onPublish}
-              disabled={saving}
-              className="px-3 py-1.5 text-xs 
-                font-medium rounded-md
-                bg-green-600 text-white
-                hover:bg-green-500
-                transition-colors
-                disabled:opacity-50"
-            >
-              Publish →
-            </button>
-          </>
+          <button
+            onClick={onSave}
+            disabled={saving}
+            className="px-3 py-1.5 text-xs 
+              font-medium rounded-lg
+              bg-white/8 text-white/70
+              border border-white/10
+              hover:bg-white/15 
+              transition-colors
+              disabled:opacity-40">
+            {saving ? 'Saving...' : 'Save draft'}
+          </button>
         )}
+
+        {/* Publish */}
+        {hasData && (
+          <button
+            onClick={onPublish}
+            disabled={saving}
+            className="px-3 py-1.5 text-xs 
+              font-medium rounded-lg
+              bg-green-600 text-white
+              hover:bg-green-500
+              transition-colors
+              disabled:opacity-40">
+            Publish
+          </button>
+        )}
+
       </div>
     </div>
   )
