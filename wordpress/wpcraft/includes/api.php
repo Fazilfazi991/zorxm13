@@ -114,141 +114,239 @@ function wpcraft_ai_generate($request) {
   $prompt = sanitize_text_field(
     $body['prompt'] ?? ''
   );
-  $post_id = intval($body['post_id'] ?? 0);
-  $api_key = get_option('wpcraft_gemini_key', '');
+  
+  $license_key = get_option(
+    'wpcraft_license_key', ''
+  );
+  
+  if (empty($license_key)) {
+    return new WP_Error('no_license',
+      'Please activate WPCraft first. ' .
+      'Go to WPCraft → Settings.',
+      ['status' => 401]);
+  }
   
   if (empty($prompt)) {
     return new WP_Error('invalid',
       'Missing prompt', ['status' => 400]);
   }
   
-  if (empty($api_key)) {
-    return new WP_Error('no_key',
-      'Gemini API key not configured. ' .
-      'Go to WPCraft Settings.',
-      ['status' => 400]);
-  }
-  
-  // Call Gemini API
+  // Call YOUR Vercel API — not Gemini directly
   $response = wp_remote_post(
-    'https://generativelanguage.googleapis.com/' .
-    'v1beta/models/gemini-2.5-flash:generateContent' .
-    '?key=' . $api_key,
+    'https://zorxm13.vercel.app/api/generate',
     [
       'timeout' => 60,
       'headers' => [
         'Content-Type' => 'application/json'
       ],
       'body' => json_encode([
-        'contents' => [[
-          'role' => 'user',
-          'parts' => [[
-            'text' => wpcraft_build_prompt($prompt)
-          ]]
-        ]],
-        'generationConfig' => [
-          'temperature' => 0.7,
-          'maxOutputTokens' => 8192,
-          'thinkingConfig' => [
-            'thinkingBudget' => 0
-          ]
-        ]
+        'source' => 'wpcraft-plugin',
+        'license_key' => $license_key,
+        'pageType' => $body['pageType'] ?? 'landing',
+        'businessName' => sanitize_text_field(
+          $body['businessName'] ?? $prompt
+        ),
+        'description' => sanitize_textarea_field(
+          $body['description'] ?? $prompt
+        ),
+        'tone' => $body['tone'] ?? 'professional',
+        'primaryColor' => sanitize_hex_color(
+          $body['primaryColor'] ?? '#166534'
+        ) ?: '#166534',
+        'ctaText' => sanitize_text_field(
+          $body['ctaText'] ?? 'Get Started'
+        )
       ])
     ]
   );
   
   if (is_wp_error($response)) {
     return new WP_Error('api_error',
+      'Connection failed: ' . 
       $response->get_error_message(),
       ['status' => 500]);
   }
   
-  $body = json_decode(
+  $status = wp_remote_retrieve_response_code(
+    $response
+  );
+  $data = json_decode(
     wp_remote_retrieve_body($response), true
   );
-  $text = $body['candidates'][0]
-    ['content']['parts'][0]['text'] ?? '';
   
-  if (empty($text)) {
-    return new WP_Error('empty_response',
-      'AI returned empty response',
+  // Handle credit errors
+  if ($status === 402) {
+    // Update local credits to 0
+    update_option('wpcraft_credits', 0);
+    return new WP_Error('no_credits',
+      $data['error'] ?? 'No credits remaining.',
+      [
+        'status' => 402,
+        'upgrade_url' => $data['upgrade_url'] ?? 
+          'https://zorxm13.vercel.app/pricing'
+      ]
+    );
+  }
+  
+  if ($status !== 200 || empty($data['success'])) {
+    return new WP_Error('api_error',
+      $data['error'] ?? 'Generation failed.',
       ['status' => 500]);
   }
   
-  // Parse JSON from response
-  $text = trim($text);
-  $text = preg_replace(
-    '/^```json\s*/i', '', $text
+  // Update local credits display
+  if (isset($data['credits_remaining'])) {
+    update_option(
+      'wpcraft_credits', 
+      $data['credits_remaining']
+    );
+  }
+  
+  // Convert Elementor JSON to WPCraft format
+  $wpcraft_data = wpcraft_convert_from_elementor(
+    $data['data'] ?? []
   );
-  $text = preg_replace('/\s*```$/i', '', $text);
-  $text = trim($text);
-  
-  $first = strpos($text, '{');
-  $last = strrpos($text, '}');
-  if ($first !== false && $last !== false) {
-    $text = substr($text, $first, 
-      $last - $first + 1);
-  }
-  
-  $data = json_decode($text, true);
-  
-  if (!$data) {
-    return new WP_Error('parse_error',
-      'Failed to parse AI response',
-      ['status' => 500]);
-  }
   
   return rest_ensure_response([
     'success' => true,
-    'data' => $data
+    'data' => $wpcraft_data,
+    'credits_remaining' => 
+      $data['credits_remaining'] ?? null
   ]);
 }
 
-function wpcraft_build_prompt($user_prompt) {
-  return 'Generate a page for: ' . $user_prompt . '
-
-Return ONLY valid JSON with this structure:
-{
-  "title": "Page Title",
-  "sections": [
-    {
-      "id": "unique_id",
-      "type": "hero|features|about|cta|footer",
-      "settings": {
-        "background": "#color or image url",
-        "backgroundType": "color|image",
-        "backgroundOverlay": "rgba(0,0,0,0.8)",
-        "padding": {"top":80,"bottom":80},
-        "fullHeight": true
-      },
-      "columns": [
-        {
-          "id": "col_id",
-          "width": 100,
-          "elements": [
-            {
-              "id": "el_id",
-              "type": "heading|text|button|image|spacer",
-              "settings": {
-                "text": "Content here",
-                "tag": "h1",
-                "fontSize": 56,
-                "fontWeight": "800",
-                "fontFamily": "DM Sans",
-                "color": "#ffffff",
-                "align": "center",
-                "marginBottom": 24
-              }
-            }
-          ]
-        }
-      ]
+function wpcraft_convert_from_elementor($elementor) {
+  $sections = [];
+  
+  $elements = $elementor['elements'] ?? 
+    $elementor['content'] ?? [];
+  
+  foreach ($elements as $el) {
+    if (($el['elType'] ?? '') !== 'section') {
+      continue;
     }
-  ]
-}
-
-Use real Unsplash image URLs for backgrounds.
-Write real copy for the business.
-Include 5-6 sections.
-Return ONLY the JSON.';
+    
+    $settings = $el['settings'] ?? [];
+    $columns = [];
+    
+    foreach ($el['elements'] ?? [] as $col) {
+      if (($col['elType'] ?? '') !== 'column') {
+        continue;
+      }
+      $width = $col['settings']['_column_size'] 
+        ?? 100;
+      $elements_out = [];
+      
+      foreach ($col['elements'] ?? [] as $widget) {
+        $ws = $widget['settings'] ?? [];
+        $type = $widget['widgetType'] ?? '';
+        
+        switch ($type) {
+          case 'heading':
+            $elements_out[] = [
+              'id' => $widget['id'] ?? 
+                uniqid('el_'),
+              'type' => 'heading',
+              'settings' => [
+                'text' => $ws['title'] ?? '',
+                'tag' => $ws['header_size'] ?? 'h2',
+                'fontSize' => $ws['typography_font_size']['size'] ?? 32,
+                'fontWeight' => $ws['typography_font_weight'] ?? '700',
+                'fontFamily' => $ws['typography_font_family'] ?? 'DM Sans',
+                'color' => $ws['title_color'] ?? '#ffffff',
+                'align' => $ws['align'] ?? 'left',
+                'marginBottom' => intval($ws['_margin']['bottom'] ?? 16)
+              ]
+            ];
+            break;
+          case 'text-editor':
+            $elements_out[] = [
+              'id' => $widget['id'] ?? uniqid('el_'),
+              'type' => 'text',
+              'settings' => [
+                'text' => strip_tags($ws['editor'] ?? $ws['content'] ?? ''),
+                'fontSize' => $ws['typography_font_size']['size'] ?? 16,
+                'color' => $ws['text_color'] ?? '#ffffff',
+                'align' => $ws['align'] ?? 'left',
+                'marginBottom' => 24,
+                'lineHeight' => 1.7
+              ]
+            ];
+            break;
+          case 'button':
+            $elements_out[] = [
+              'id' => $widget['id'] ?? uniqid('el_'),
+              'type' => 'button',
+              'settings' => [
+                'text' => $ws['text'] ?? 'Click Here',
+                'url' => $ws['link']['url'] ?? '#',
+                'backgroundColor' => $ws['background_color'] ?? '#166534',
+                'color' => $ws['button_text_color'] ?? '#ffffff',
+                'borderRadius' => 8,
+                'align' => $ws['align'] ?? 'left',
+                'marginBottom' => 0
+              ]
+            ];
+            break;
+          case 'image':
+            $elements_out[] = [
+              'id' => $widget['id'] ?? uniqid('el_'),
+              'type' => 'image',
+              'settings' => [
+                'url' => $ws['image']['url'] ?? '',
+                'alt' => '',
+                'width' => '100%',
+                'marginBottom' => 16
+              ]
+            ];
+            break;
+          case 'spacer':
+            $elements_out[] = [
+              'id' => $widget['id'] ?? uniqid('el_'),
+              'type' => 'spacer',
+              'settings' => [
+                'height' => $ws['spacer_size']['size'] ?? 40,
+                'backgroundColor' => $ws['background_color'] ?? '',
+                'width' => isset($ws['_width']['size']) ? $ws['_width']['size'] . 'px' : '100%'
+              ]
+            ];
+            break;
+        }
+      }
+      
+      if (!empty($elements_out)) {
+        $columns[] = [
+          'id' => $col['id'] ?? uniqid('col_'),
+          'width' => intval($width),
+          'elements' => $elements_out
+        ];
+      }
+    }
+    
+    // Build section settings
+    $bg_image = $settings['background_image']['url'] ?? '';
+    $bg_color = $settings['background_color'] ?? '#ffffff';
+    $bg_type = !empty($bg_image) ? 'image' : 'color';
+    
+    $sections[] = [
+      'id' => $el['id'] ?? uniqid('sec_'),
+      'type' => 'section',
+      'settings' => [
+        'background' => $bg_type === 'image' ? $bg_image : $bg_color,
+        'backgroundType' => $bg_type,
+        'backgroundOverlay' => $settings['background_overlay_color'] ?? '',
+        'padding' => [
+          'top' => intval($settings['padding']['top'] ?? 80),
+          'bottom' => intval($settings['padding']['bottom'] ?? 80)
+        ],
+        'fullHeight' => ($settings['height'] ?? '') === 'min-height'
+      ],
+      'columns' => $columns
+    ];
+  }
+  
+  return [
+    'title' => 'Generated Page',
+    'sections' => $sections
+  ];
 }

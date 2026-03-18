@@ -35,9 +35,17 @@ export default function AIPrompt({
       )
       if (result.success && result.data) {
         onGenerate(result.data)
+      } else if (result.data?.status === 402) {
+        setError(
+          'No credits remaining. ' +
+          'Upgrade at zorxm13.vercel.app/pricing'
+        )
       } else {
-        setError(result.message || 
-          'Generation failed. Try again.')
+        setError(
+          result.message || 
+          result.data?.message ||
+          'Generation failed. Try again.'
+        )
       }
     } catch (e) {
       setError('Connection error. Try again.')

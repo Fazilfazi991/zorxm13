@@ -111,42 +111,102 @@ class WPCraft_V2 {
   }
 
   public function render_settings() {
-    if (isset($_POST['wpcraft_gemini_key'])) {
+    if (isset($_POST['wpcraft_email'])) {
       check_admin_referer('wpcraft_settings');
-      update_option(
-        'wpcraft_gemini_key',
-        sanitize_text_field(
-          $_POST['wpcraft_gemini_key']
-        )
+      
+      $email = sanitize_email(
+        $_POST['wpcraft_email']
       );
-      echo '<div class="notice notice-success">
-        <p>Settings saved.</p></div>';
+      $site_url = get_site_url();
+      
+      // Call activation endpoint
+      $response = wp_remote_post(
+        'https://zorxm13.vercel.app/api/license',
+        [
+          'timeout' => 15,
+          'headers' => [
+            'Content-Type' => 'application/json'
+          ],
+          'body' => json_encode([
+            'action' => 'activate',
+            'email' => $email,
+            'site_url' => $site_url
+          ])
+        ]
+      );
+      
+      if (!is_wp_error($response)) {
+        $data = json_decode(
+          wp_remote_retrieve_body($response), true
+        );
+        if (!empty($data['license_key'])) {
+          update_option(
+            'wpcraft_license_key', 
+            $data['license_key']
+          );
+          update_option(
+            'wpcraft_email', $email
+          );
+          update_option(
+            'wpcraft_credits', $data['credits']
+          );
+          echo '<div class="notice notice-success">
+            <p>✦ Activated! License key: <strong>' .
+            esc_html($data['license_key']) .
+            '</strong><br>Credits: ' .
+            intval($data['credits']) .
+            ' free generations.</p></div>';
+        }
+      }
     }
-    $key = get_option('wpcraft_gemini_key', '');
+    
+    $license = get_option('wpcraft_license_key', '');
+    $email = get_option('wpcraft_email', '');
+    $credits = get_option('wpcraft_credits', 0);
     ?>
     <div class="wrap">
-      <h1>WPCraft Settings</h1>
+      <h1>✦ WPCraft Settings</h1>
+      
+      <?php if ($license): ?>
+      <div class="notice notice-info">
+        <p>
+          <strong>Status:</strong> Active<br>
+          <strong>License:</strong> 
+            <?php echo esc_html($license); ?><br>
+          <strong>Credits remaining:</strong> 
+            <?php echo intval($credits); ?>
+          <?php if ($credits <= 0): ?>
+            — <a href="https://zorxm13.vercel.app/pricing" 
+                 target="_blank">
+                 Upgrade for more →
+               </a>
+          <?php endif; ?>
+        </p>
+      </div>
+      <?php endif; ?>
+
       <form method="post">
         <?php wp_nonce_field('wpcraft_settings'); ?>
         <table class="form-table">
           <tr>
-            <th>Gemini API Key</th>
+            <th>Email address</th>
             <td>
-              <input type="password" 
-                name="wpcraft_gemini_key"
-                value="<?php echo esc_attr($key); ?>"
-                class="regular-text" />
+              <input type="email"
+                name="wpcraft_email"
+                value="<?php echo esc_attr($email); ?>"
+                class="regular-text"
+                placeholder="your@email.com"
+              />
               <p class="description">
-                Get your key from 
-                <a href="https://aistudio.google.com" 
-                  target="_blank">
-                  Google AI Studio
-                </a>
+                Enter your email to activate WPCraft.
+                You get 3 free AI generations.
               </p>
             </td>
           </tr>
         </table>
-        <?php submit_button(); ?>
+        <?php submit_button(
+          $license ? 'Refresh License' : 'Activate WPCraft'
+        ); ?>
       </form>
     </div>
     <?php
