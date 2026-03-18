@@ -217,8 +217,20 @@ class WPCraft_V2 {
   }
 
   public function intercept_fullscreen_editor() {
-    if (isset($_GET['page']) && $_GET['page'] === 'wpcraft-editor' && !empty($_GET['post_id'])) {
-      $this->render_editor();
+    if (isset($_GET['page']) && strpos($_GET['page'], 'wpcraft') === 0) {
+      if ($_GET['page'] === 'wpcraft-editor' && !empty($_GET['post_id'])) {
+        $this->render_editor();
+      } else {
+        // Inject CSS to hide WP Admin menu for settings and page selector
+        add_action('admin_head', function() {
+          echo '<style>
+            #adminmenumain, #wpadminbar, #wpfooter { display: none !important; }
+            #wpcontent { margin-left: 0 !important; padding: 40px !important; background: #fff !important; min-height: 100vh; }
+            html.wp-toolbar { padding-top: 0 !important; }
+            body { background: #fff !important; }
+          </style>';
+        });
+      }
     }
   }
 
@@ -363,8 +375,11 @@ class WPCraft_V2 {
       'order' => 'DESC'
     ]);
     ?>
-    <div class="wrap">
-      <h1>✦ WPCraft Editor</h1>
+    <div class="wrap" style="max-width: 1000px; margin: 0 auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h1>✦ WPCraft Editor</h1>
+        <a href="<?php echo admin_url(); ?>" class="button">← Exit to WP Dashboard</a>
+      </div>
       <p>Select a page to edit:</p>
       <table class="wp-list-table widefat">
         <thead>

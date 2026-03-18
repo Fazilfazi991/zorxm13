@@ -184,6 +184,11 @@ export default function App() {
         onSave={handleSave}
         onPublish={handlePublish}
         onToggleAI={() => setShowAI(!showAI)}
+        onExit={() => {
+          if (confirm('Exit to WordPress? Any unsaved changes will be lost.')) {
+            window.location.href = config.adminUrl + 'admin.php?page=wpcraft-editor'
+          }
+        }}
       />
 
       {/* MAIN AREA */}

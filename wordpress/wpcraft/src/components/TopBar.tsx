@@ -5,11 +5,12 @@ interface Props {
   onSave: () => void
   onPublish: () => void
   onToggleAI: () => void
+  onExit: () => void
 }
 
 export default function TopBar({
   title, saving, hasData,
-  onSave, onPublish, onToggleAI
+  onSave, onPublish, onToggleAI, onExit
 }: Props) {
   return (
     <div className="flex items-center 
@@ -19,6 +20,18 @@ export default function TopBar({
       
       {/* Left: Logo + page title */}
       <div className="flex items-center gap-3">
+        <button
+          onClick={onExit}
+          className="text-white/40 hover:text-white 
+            transition-colors p-1"
+          title="Exit to WordPress"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" 
+            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <span className="text-white/20">|</span>
         <span className="text-green-400 
           font-semibold text-sm">
           ✦ WPCraft
