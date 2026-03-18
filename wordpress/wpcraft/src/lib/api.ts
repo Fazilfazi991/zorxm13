@@ -44,7 +44,8 @@ export async function generatePage(
   postId: number,
   prompt: string,
   nonce: string,
-  apiBase: string
+  apiBase: string,
+  generationType: 'page' | 'section' = 'page'
 ) {
   const res = await fetch(
     `${apiBase}generate`,
@@ -56,22 +57,21 @@ export async function generatePage(
       },
       credentials: 'include',
       body: JSON.stringify({ 
-        prompt, 
-        post_id: postId 
+        prompt,
+        post_id: postId,
+        generation_type: generationType
       })
     }
   )
-  
   if (!res.ok) {
-    const error = await res.json().catch(
+    const err = await res.json().catch(
       () => ({ message: 'Request failed' })
     )
     throw new Error(
-      error.message || 
-      error.data?.message ||
+      err.message || 
+      err.data?.message ||
       `HTTP ${res.status}`
     )
   }
-  
   return res.json()
 }

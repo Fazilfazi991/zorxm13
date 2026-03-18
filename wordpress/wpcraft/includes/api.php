@@ -171,6 +171,10 @@ function wpcraft_ai_generate($request) {
       'Missing prompt', ['status' => 400]);
   }
   
+  $generation_type = sanitize_text_field(
+    $body['generation_type'] ?? 'page'
+  );
+
   // Call YOUR Vercel API — not Gemini directly
   $response = wp_remote_post(
     'https://zorxm13.vercel.app/api/generate',
@@ -182,12 +186,16 @@ function wpcraft_ai_generate($request) {
       'body' => json_encode([
         'source' => 'wpcraft-plugin',
         'license_key' => $license_key,
-        'pageType' => $body['pageType'] ?? 'landing',
+        'generation_type' => $generation_type,
+        'pageType' => 
+          $generation_type === 'section' 
+            ? 'section' 
+            : ($body['pageType'] ?? 'landing'),
         'businessName' => sanitize_text_field(
           $body['businessName'] ?? $prompt
         ),
         'description' => sanitize_textarea_field(
-          $body['description'] ?? $prompt
+          $prompt
         ),
         'tone' => $body['tone'] ?? 'professional',
         'primaryColor' => sanitize_hex_color(

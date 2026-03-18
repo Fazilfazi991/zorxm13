@@ -234,12 +234,27 @@ export default function App() {
           postId={config.postId}
           nonce={config.nonce}
           apiBase={config.apiBase}
-          onGenerate={(data) => {
-            setPageData(data)
+          hasExistingContent={!!pageData?.sections?.length}
+          onGenerate={(data, mode) => {
+            if (mode === 'replace' || !pageData) {
+              // Replace entire page
+              setPageData(data)
+            } else {
+              // Append new sections to existing
+              setPageData(prev => prev ? {
+                ...prev,
+                sections: [
+                  ...prev.sections,
+                  ...data.sections
+                ]
+              } : data)
+            }
             setShowAI(false)
           }}
           onClose={() => {
-            if (pageData) setShowAI(false)
+            if (pageData?.sections?.length) {
+              setShowAI(false)
+            }
           }}
         />
       )}
