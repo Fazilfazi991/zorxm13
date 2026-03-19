@@ -337,7 +337,7 @@ async function tryKimiModel(prompt, systemPrompt, useThinking = false) {
     : 'moonshot-v1-8k'
   
   const response = await fetch(
-    'https://api.moonshot.cn/v1/chat/completions',
+    'https://api.moonshot.ai/v1/chat/completions',
     {
       method: 'POST',
       headers: {
@@ -366,7 +366,7 @@ async function tryKimiModel(prompt, systemPrompt, useThinking = false) {
   return data.choices?.[0]?.message?.content
 }
 
-async function tryClaudeModel(prompt, systemPrompt, model = 'claude-sonnet-4-5-20251022') {
+async function tryClaudeModel(prompt, systemPrompt, model = 'claude-sonnet-4-6') {
   console.log('[claude] attempting call...')
   console.log('[claude] API key present:', !!process.env.ANTHROPIC_API_KEY)
   console.log('[claude] API key prefix:', process.env.ANTHROPIC_API_KEY?.substring(0, 8))
@@ -633,7 +633,7 @@ export default async function handler(req, res) {
             'anthropic-version': '2023-06-01'
           },
           body: JSON.stringify({
-            model: 'claude-3-5-sonnet-20241022',
+            model: 'claude-sonnet-4-6',
             max_tokens: 10,
             messages: [{ role: 'user', content: 'say hi' }]
           })
@@ -643,7 +643,7 @@ export default async function handler(req, res) {
       
       try {
         const r = await fetch(
-          'https://api.moonshot.cn/v1/chat/completions', {
+          'https://api.moonshot.ai/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
