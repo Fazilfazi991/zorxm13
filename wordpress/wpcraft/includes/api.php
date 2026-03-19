@@ -98,6 +98,32 @@ add_action('rest_api_init', function() {
     }
   ]);
 
+  // Generate SEO Meta
+  register_rest_route('wpcraft/v2', '/seo', [
+    'methods' => 'POST',
+    'callback' => 'wpcraft_ai_seo',
+    'permission_callback' => function($request) {
+      $nonce = $request->get_header('X-WP-Nonce');
+      if (!$nonce) $nonce = $request->get_param('_wpnonce');
+      if ($nonce && wp_verify_nonce($nonce, 'wp_rest')) return current_user_can('edit_posts');
+      if (is_user_logged_in()) return current_user_can('edit_posts');
+      return new WP_Error('rest_forbidden', 'Authentication required.', ['status' => 401]);
+    }
+  ]);
+
+  // Generate Color Palette
+  register_rest_route('wpcraft/v2', '/palette', [
+    'methods' => 'POST',
+    'callback' => 'wpcraft_ai_palette',
+    'permission_callback' => function($request) {
+      $nonce = $request->get_header('X-WP-Nonce');
+      if (!$nonce) $nonce = $request->get_param('_wpnonce');
+      if ($nonce && wp_verify_nonce($nonce, 'wp_rest')) return current_user_can('edit_posts');
+      if (is_user_logged_in()) return current_user_can('edit_posts');
+      return new WP_Error('rest_forbidden', 'Authentication required.', ['status' => 401]);
+    }
+  ]);
+
 });
 
 function wpcraft_get_credits($request) {
@@ -463,4 +489,113 @@ function wpcraft_convert_from_elementor($elementor) {
     'title' => 'Imported Page',
     'sections' => $sections
   ];
+}
+
+function wpcraft_ai_seo($request) {
+  $body = $request->get_json_params();
+  $post_id = intval($body['post_id'] ?? 0);
+  
+  if (!$post_id) {
+    return new WP_Error('invalid', 'Missing post_id', ['status' => 400]);
+  }
+
+  $data = get_post_meta($post_id, '_wpcraft_data', true);
+  if (empty($data)) {
+    return new WP_Error('no_content', 'No WPCraft data found on page', ['status' => 404]);
+  }
+
+  $license_key = get_option('wpcraft_license_key', '');
+  $payload = [
+    'source' => 'wpcraft-plugin',
+    'license_key' => $license_key,
+    'generation_type' => 'seo',
+    'prompt' => wp_strip_all_tags(is_string($data) ? $data : wp_json_encode($data))
+  ];
+
+  if (defined('WPCRAFT_DEV_MODE') && WPCRAFT_DEV_MODE === true) {
+    $payload['license_key'] = 'dev_bypass_2024';
+    $payload['dev_mode'] = true;
+  }
+
+  $response = wp_remote_post(
+    'https://zorxm13.vercel.app/api/generate',
+    [
+      'timeout' => 60,
+      'headers' => ['Content-Type' => 'application/json'],
+      'body' => wp_json_encode($payload)
+    ]
+  );
+
+  if (is_wp_error($response)) {
+    return new WP_Error('api_error', $response->get_error_message(), ['status' => 500]);
+  }
+
+  $status = wp_remote_retrieve_response_code($response);
+  $res_data = json_decode(wp_remote_retrieve_body($response), true);
+
+  if ($status !== 200 || empty($res_data['success'])) {
+    return new WP_Error('api_error', wp_remote_retrieve_body($response), ['status' => 500]);
+  }
+
+  $seo_data = $res_data['data'] ?? [];
+  
+  if (!empty($seo_data['title'])) {
+    update_post_meta($post_id, '_yoast_wpseo_title', sanitize_text_field($seo_data['title']));
+    update_post_meta($post_id, '_wpcraft_seo_title', sanitize_text_field($seo_data['title']));
+  }
+  if (!empty($seo_data['description'])) {
+    update_post_meta($post_id, '_yoast_wpseo_metadesc', sanitize_textarea_field($seo_data['description']));
+  }
+  if (!empty($seo_data['keywords'])) {
+    $kw = is_array($seo_data['keywords']) ? implode(', ', $seo_data['keywords']) : $seo_data['keywords'];
+    update_post_meta($post_id, '_yoast_wpseo_focuskw', sanitize_text_field($kw));
+  }
+  
+  return rest_ensure_response([
+    'success' => true,
+    'data' => $seo_data
+  ]);
+}
+
+function wpcraft_ai_palette($request) {
+  $body = $request->get_json_params();
+  $primary_color = sanitize_hex_color($body['primary_color'] ?? '#000000');
+  
+  $license_key = get_option('wpcraft_license_key', '');
+  $payload = [
+    'source' => 'wpcraft-plugin',
+    'license_key' => $license_key,
+    'generation_type' => 'palette',
+    'prompt' => "Generate a color palette for primary color: " . $primary_color
+  ];
+
+  if (defined('WPCRAFT_DEV_MODE') && WPCRAFT_DEV_MODE === true) {
+    $payload['license_key'] = 'dev_bypass_2024';
+    $payload['dev_mode'] = true;
+  }
+
+  $response = wp_remote_post(
+    'https://zorxm13.vercel.app/api/generate',
+    [
+      'timeout' => 45,
+      'headers' => ['Content-Type' => 'application/json'],
+      'body' => wp_json_encode($payload)
+    ]
+  );
+
+  if (is_wp_error($response)) {
+    return new WP_Error('api_error', $response->get_error_message(), ['status' => 500]);
+  }
+
+  $status = wp_remote_retrieve_response_code($response);
+  $res_data = json_decode(wp_remote_retrieve_body($response), true);
+
+  if ($status !== 200 || empty($res_data['success'])) {
+    return new WP_Error('api_error', wp_remote_retrieve_body($response), ['status' => 500]);
+  }
+
+  return rest_ensure_response([
+    'success' => true,
+    'data' => $res_data['data'] ?? []
+  ]);
 }

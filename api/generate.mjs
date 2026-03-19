@@ -50,191 +50,69 @@ async function checkAndDeductCredit(licenseKey) {
   }
 }
 
-function buildSystemPrompt(tone, pageType, data = {}) {
-  const SYSTEM_PROMPT_BASE = `You are a professional
-Elementor page designer. Generate pages using ONLY
-free Elementor widgets — NO html widgetType ever.
-
-Return ONLY valid JSON:
-{
-  "type": "elementor", 
-  "elements": [ ...sections... ]
-}
-
-No markdown. No fences. Start { end }.
-Use readable string IDs like "hero_section".
-
-WPCRAFT JSON SCHEMA — follow this exactly, no deviations:
-
-Section settings must include:
-  background, backgroundType, backgroundOverlay, 
-  padding:{top,bottom}, fullHeight, maxWidth, contentAlign
-
-Valid element types: 
-  heading, text, button, buttonGroup, image, 
-  spacer, divider, icon
-
-For multiple buttons side by side, ALWAYS use buttonGroup:
-{
-  type: 'buttonGroup',
-  settings: { align: 'center', gap: 16, marginBottom: 32, direction: 'row' },
-  buttons: [ ...button elements here... ]
-}
-
-NEVER stack button elements directly in a column — always wrap 
-in buttonGroup when there are 2+ buttons.
-
-Button variant options: 'solid' (filled) or 'outline' (transparent bg)
-Button size options: 'sm', 'md', 'lg'
-
-For dividers use:
-{ type: 'divider', settings: { style: 'wave'|'line'|'angle', 
-  color: '#hex', height: 60, marginBottom: 0 } }
-
-DESIGN RULES:
-- Hero sections: align left, fontSize h1=80, text=18
-- CTA sections: align center, fullHeight false
-- Dark sections (#0a0a1a bg): use white/rgba text
-- Light sections (#ffffff bg): use dark text #0a0a1a
-- Always include at least one spacer between section end and content
-- Padding top/bottom minimum 80px for content sections
-- Button primary: backgroundColor=#0a0a1a, color=#ffffff
-- Button accent: backgroundColor=#e60000, color=#ffffff
-
-=== FREE WIDGETS ONLY ===
-Allowed widgetType values:
-- heading
-- text-editor  
-- button
-- image
-- spacer
-- icon-box
-- divider
-
-NEVER use widgetType: "html"
-NEVER use widgetType: "html-editor"
-NEVER use widgetType: "shortcode"
-
-=== HOW TO BUILD RICH CARDS WITHOUT HTML WIDGET ===
-
-For service cards or grid items, use inner sections with columns.
-Each card = one column containing:
-1. image widget (with _custom_css for height/fit)
-2. heading widget (card title)
-3. text-editor widget (description)
-...
-
-Style the COLUMN with _custom_css:
-"_css_classes": "content-card stagger-1 animate-fade-in-up"
-
-And add to the SECTION _custom_css:
-"selector .content-card { 
-  background: #111827; 
-  border-radius: 8px; 
-  overflow: hidden;
-  border-top: 4px solid PRIMARY_COLOR;
-  transition: transform 0.3s ease;
-}"
-
-=== ANIMATIONS ===
-
-Every SECTION must have _custom_css with:
-"@keyframes fadeInUp { 
-  from { opacity:0; transform:translateY(30px); } 
-  to { opacity:1; transform:translateY(0); } 
-}
-selector .animate-fade-in-up { 
-  animation: fadeInUp 0.8s ease-out forwards; 
-  opacity: 0; 
-}
-selector .stagger-1 { animation-delay: 0.1s; }
-selector .stagger-2 { animation-delay: 0.2s; }"
-
-Every widget must have in settings:
-"_css_classes": "animate-fade-in-up stagger-N"
-
-=== FONTS ===
-
-Every heading widget must have:
-"typography_typography": "custom",
-"typography_font_family": "Barlow",
-"typography_font_weight": "800",
-"typography_font_size": {"unit":"px","size":N}
-
-Every text-editor widget must have:
-"typography_typography": "custom",
-"typography_font_family": "Inter",
-"typography_font_size": {"unit":"px","size":16}
-
-=== IMAGES ===
-Use real Unsplash URLs.
-Tech: https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=1600&h=900&fit=crop
-Team: https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=900&fit=crop
-
-=== REPLACE PLACEHOLDER ===
-In ALL settings, replace:
-- PRIMARY_COLOR → actual primaryColor hex`
-
-  if (pageType === 'refine') {
-    let isSection = false;
-    try {
-      const parsedContext = JSON.parse(data.contextJson || '{}');
-      if (parsedContext.columns) isSection = true;
-    } catch(e) {}
-    
-    if (isSection) {
-      return `You are a JSON page builder assistant. The user will give you a complete section JSON object containing columns and elements. Follow the user's instruction and return the COMPLETE updated section JSON with all columns and elements intact. You may modify existing elements, add new elements to columns, or change section settings. Return ONLY raw JSON. No markdown, no explanation.`
-    }
-    return `You are a JSON page builder assistant. The user will give you a single section or element JSON object and a text instruction. Return ONLY the updated JSON object. No markdown, no explanation, raw JSON only.`
-  }
-
-  if (pageType === 'section') {
-    return SYSTEM_PROMPT_BASE + `
-    
-=== CRITICAL REMINDER FOR SECTION GENERATION ===
-- You are adding a SINGLE section to an existing page.
-- Produce EXACTLY ONE section object inside the "elements" array.
-- DO NOT generate a hero or footer unless specifically requested.
-- Focus exclusively on fulfilling the user's specific section description (e.g. pricing, testimonials, features).
-- Ensure this section has dark/light contrast that matches a modern aesthetic and utilizes the PRIMARY_COLOR.`
-  }
-
-  // Full page layout templates
-  return SYSTEM_PROMPT_BASE + `
+function getSystemPrompt(generationType) {
   
-=== HERO SECTION ===
-ALWAYS structure the hero like this:
-{
-  "id": "hero_section",
-  "elType": "section",
-  "isInner": false,
-  "settings": {
-    "structure": "10",
-    "background_background": "classic",
-    "background_image": {
-      "url": "UNSPLASH_URL_1600x900",
-      "id": ""
-    },
-    ...
+  const schemaRules = `
+WPCRAFT JSON SCHEMA RULES:
+- Valid element types: heading, text, button, buttonGroup, 
+  image, spacer, divider, icon
+- For 2+ buttons side by side ALWAYS use buttonGroup with 
+  direction:'row' — never stack buttons in a column directly
+- Button variant: 'solid' or 'outline'
+- All colors: valid hex (#000000) or rgba(r,g,b,a)
+- Padding minimum 80px top/bottom for content sections
+- Dark bg (#0a0a1a): use white text
+- Light bg (#ffffff): use dark text #0a0a1a
+- Return ONLY raw JSON, no markdown, no explanation
+`
+
+  const prompts = {
+    
+    'page': `You are an expert UI/UX designer and frontend 
+engineer specializing in high-converting landing pages. 
+You create complete WordPress page JSON structures that 
+render beautifully. Think like a senior designer — consider 
+visual hierarchy, whitespace, contrast, and conversion flow.
+${schemaRules}
+Return a complete JSON object with "type": "elementor" and an "elements" array containing sections.`,
+
+    'refine': `You are an expert UI/UX designer. You receive 
+a single WPCraft section or element JSON and a user instruction.
+Apply the instruction with design intelligence:
+- Buttons should always be in flex-row using buttonGroup
+- New elements go where they make visual sense
+- Preserve ALL existing content unless told to change it
+- Match the section's existing color scheme
+${schemaRules}
+Return ONLY the updated section or element JSON. Raw JSON only.`,
+
+    'section': `You are an expert web designer. Create a single 
+beautiful, conversion-optimized page section in WPCraft JSON.
+Think about visual hierarchy, spacing, and impact.
+${schemaRules}
+Return a single Section JSON object ONLY with columns and elements arrays.`,
+
+    'copywriting': `You are an expert copywriter specializing 
+in high-converting landing page copy. Write compelling, 
+concise, professional copy that drives action. 
+Return the updated element JSON with improved text only.
+${schemaRules}`,
+
+    'seo': `You are an SEO expert. Generate optimal meta title, 
+description, and keywords for a WordPress page.
+Return JSON: { "title": "string", "description": "string", 
+"keywords": ["string"], "ogTitle": "string", "ogDescription": "string" }
+Raw JSON only, no markdown.`,
+
+    'palette': `You are a professional brand designer. 
+Generate a cohesive color palette based on the primary color.
+Return JSON: { "primary": "string", "secondary": "string", 
+"accent": "string", "background": "string", "text": "string", 
+"muted": "string", "dark": "string" }
+All values as hex codes. Raw JSON only.`
   }
-}
-
-=== ABOUT SECTION ===
-2-column section, white background...
-
-=== SERVICES SECTION ===
-Dark background section (#0a0a1a) with 4 inner columns...
-
-=== REVIEWS / WHY CHOOSE US ===
-White background section with columns for reviews or features...
-
-=== CTA SECTION ===
-Dark overlay section at bottom...
-
-=== CRITICAL REMINDER ===
-- Provide a FULL LANDING PAGE with Hero, About, Services, Why Us, and CTA section.
-- Write REAL copy for the actual business
-- Return ONLY the JSON`
+  
+  return prompts[generationType] || prompts['page']
 }
 
 function buildUserPrompt(data) {
@@ -399,44 +277,119 @@ function deepCleanElements(obj) {
   return obj;
 }
 
-async function tryKimi(userPrompt, systemPrompt) {
-  try {
-    const key = process.env.KIMI_API_KEY ||
-                process.env.MOONSHOT_API_KEY
-    if (!key) throw new Error('No Kimi key')
-    const response = await fetch(
-      'https://api.moonshot.ai/v1/chat/completions',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${key}`
-        },
-        body: JSON.stringify({
-          model: 'moonshot-v1-8k',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt }
-          ],
-          temperature: 0.6,
-          max_tokens: 4000
-        })
-      }
-    )
-    console.log('[kimi] Status:', response.status)
-    const rawText = await response.text()
-    if (!response.ok) {
-      throw new Error(`Kimi ${response.status}: ${rawText}`)
+async function tryKimiModel(prompt, systemPrompt, useThinking = false) {
+  const model = useThinking 
+    ? 'moonshot-v1-8k-thinking' 
+    : 'moonshot-v1-8k'
+  
+  const response = await fetch(
+    'https://api.moonshot.cn/v1/chat/completions',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.KIMI_API_KEY || process.env.MOONSHOT_API_KEY}`
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 8000
+      })
     }
-    const data = JSON.parse(rawText)
-    const text = data.choices?.[0]?.message?.content
-    if (!text) throw new Error('Empty Kimi response')
-    console.log('[kimi] Succeeded, length:', text.length)
-    return text
-  } catch (e) {
-    console.error('[kimi] Failed:', e.message)
-    return null
+  )
+  
+  if (!response.ok) throw new Error(`Kimi ${response.status}`)
+  const data = await response.json()
+  return data.choices?.[0]?.message?.content
+}
+
+async function tryClaudeModel(prompt, systemPrompt, model = 'claude-sonnet-4-6') {
+  // Using user supplied model ID exactly as requested
+  const response = await fetch(
+    'https://api.anthropic.com/v1/messages',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 4096,
+        system: systemPrompt,
+        messages: [
+          { role: 'user', content: prompt }
+        ]
+      })
+    }
+  )
+  
+  if (!response.ok) throw new Error(`Claude ${response.status}`)
+  const data = await response.json()
+  return data.content?.[0]?.text
+}
+
+async function routeToModel(generationType, prompt, systemPrompt, contextJson) {
+  
+  // Note: userPrompt already incorporates contextJson dynamically from generic payload builder,
+  // but we enforce the user's precise object mapping algorithm for the models.
+  
+  const chains = {
+    'page': [
+      () => tryKimiModel(prompt, systemPrompt),
+      () => tryClaudeModel(prompt, systemPrompt),
+      () => tryGeminiModel('gemini-2.5-flash', prompt, 0, systemPrompt)
+    ],
+    'refine': [
+      () => tryClaudeModel(prompt, systemPrompt),
+      () => tryKimiModel(prompt, systemPrompt),
+      () => tryGeminiModel('gemini-2.5-flash', prompt, 0, systemPrompt)
+    ],
+    'section': [
+      () => tryKimiModel(prompt, systemPrompt),
+      () => tryClaudeModel(prompt, systemPrompt),
+      () => tryGeminiModel('gemini-2.5-flash', prompt, 0, systemPrompt)
+    ],
+    'copywriting': [
+      () => tryClaudeModel(prompt, systemPrompt),
+      () => tryKimiModel(prompt, systemPrompt),
+      () => tryGeminiModel('gemini-2.5-flash', prompt, 0, systemPrompt)
+    ],
+    'seo': [
+      () => tryClaudeModel(prompt, systemPrompt, 'claude-haiku-4-5-20251001'),
+      () => tryKimiModel(prompt, systemPrompt),
+      () => tryGeminiModel('gemini-2.5-flash', prompt, 0, systemPrompt)
+    ],
+    'palette': [
+      () => tryClaudeModel(prompt, systemPrompt, 'claude-haiku-4-5-20251001'),
+      () => tryKimiModel(prompt, systemPrompt),
+      () => tryGeminiModel('gemini-2.5-flash', prompt, 0, systemPrompt)
+    ]
   }
+  
+  const chain = chains[generationType] || chains['page']
+  
+  let lastError
+  for (let i = 0; i < chain.length; i++) {
+    try {
+      console.log(`[router] trying model ${i+1}/${chain.length} for task: ${generationType}`)
+      const result = await chain[i]()
+      if (result) {
+        console.log(`[router] success on attempt ${i+1}`)
+        return result
+      }
+    } catch (err) {
+      console.log(`[router] model ${i+1} failed: ${err.message}`)
+      lastError = err
+    }
+  }
+  
+  throw new Error(`All models failed for ${generationType}: ${lastError?.message}`)
 }
 
 async function tryGeminiModel(
@@ -573,29 +526,14 @@ export default async function handler(req, res) {
     }
 
     const userPrompt = buildUserPrompt(body)
-    const systemPrompt = buildSystemPrompt(body.tone, body.pageType, body)
+    const systemPrompt = getSystemPrompt(body.pageType)
 
-    let rawResponse = await tryGeminiModel(
-      userPrompt, 'gemini-2.5-flash', 0, systemPrompt
+    const rawResponse = await routeToModel(
+      body.pageType, 
+      userPrompt, // using the highly formatted generic WPCraft prompt generator
+      systemPrompt,
+      body.contextJson || ''
     )
-
-    if (!rawResponse) {
-      console.log('[generate] Trying gemini-2.5-pro')
-      rawResponse = await tryGeminiModel(
-        userPrompt, 'gemini-2.5-pro', 1024, systemPrompt
-      )
-    }
-
-    if (!rawResponse) {
-      console.log('[generate] Trying Kimi')
-      rawResponse = await tryKimi(userPrompt, systemPrompt)
-    }
-
-    if (!rawResponse) {
-      return res.status(500).json({
-        error: 'Generation failed. Please try again.'
-      })
-    }
 
     console.log('[parse] Raw first 300:', 
       rawResponse.substring(0, 300))
@@ -608,19 +546,11 @@ export default async function handler(req, res) {
       deepCleanElements(parsed)
     }
 
-    // Normalize root array key
-    // Gemini sometimes returns "elements" instead of "content"
-    if (!parsed?.content && parsed?.elements) {
-      if (parsed.type === 'elementor') {
-        parsed.content = parsed.elements
-        delete parsed.elements
-      }
-    }
-
-    // If pageType is refine, we might return a raw object directly rather than `{ content: [...] }`.
-    if (body?.pageType === 'refine') {
-      // Return the specific object immediately without worrying about 'content' arrays
-      console.log('[generate] Refine Success')
+    if (body?.pageType === 'refine' || 
+        body?.pageType === 'section' ||
+        body?.pageType === 'seo' ||
+        body?.pageType === 'palette') {
+      console.log(`[generate] ${body.pageType} Success`)
       return res.status(200).json({
         success: true,
         data: parsed,
@@ -628,7 +558,7 @@ export default async function handler(req, res) {
       })
     }
 
-    if (!parsed?.content?.length) {
+    if (!parsed?.elements?.length) {
       console.error('[generate] No content array found.')
       console.error('[generate] Keys:', 
         Object.keys(parsed || {}))
@@ -638,7 +568,7 @@ export default async function handler(req, res) {
     }
 
     console.log('[generate] Success, sections:',
-      parsed.content.length)
+      parsed.elements.length)
 
     return res.status(200).json({
       success: true,
