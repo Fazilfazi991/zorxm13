@@ -371,7 +371,7 @@ async function tryKimiModel(prompt, systemPrompt, useThinking = false) {
   console.log('[kimi] API key present:', !!(process.env.KIMI_API_KEY || process.env.MOONSHOT_API_KEY))
   console.log('[kimi] API key prefix:', (process.env.KIMI_API_KEY || process.env.MOONSHOT_API_KEY)?.substring(0, 8))
 
-  const model = 'kimi-k2-instruct'
+  const model = 'kimi-k2-turbo-preview'
   
   const response = await fetch(
     'https://api.moonshot.ai/v1/chat/completions',
@@ -687,7 +687,7 @@ export default async function handler(req, res) {
             'Authorization': `Bearer ${process.env.KIMI_API_KEY || process.env.MOONSHOT_API_KEY}`
           },
           body: JSON.stringify({
-            model: 'kimi-k2-instruct',
+            model: 'kimi-k2-turbo-preview',
             messages: [{ role: 'user', content: 'say hi' }],
             max_tokens: 10,
             temperature: 0.6
