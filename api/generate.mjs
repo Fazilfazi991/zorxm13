@@ -366,7 +366,7 @@ async function tryKimiModel(prompt, systemPrompt, useThinking = false) {
   return data.choices?.[0]?.message?.content
 }
 
-async function tryClaudeModel(prompt, systemPrompt, model = 'claude-sonnet-4-6') {
+async function tryClaudeModel(prompt, systemPrompt, model = 'claude-sonnet-4-5-20251022') {
   console.log('[claude] attempting call...')
   console.log('[claude] API key present:', !!process.env.ANTHROPIC_API_KEY)
   console.log('[claude] API key prefix:', process.env.ANTHROPIC_API_KEY?.substring(0, 8))
@@ -392,7 +392,11 @@ async function tryClaudeModel(prompt, systemPrompt, model = 'claude-sonnet-4-6')
   )
   
   console.log('[claude] response status:', response.status)
-  if (!response.ok) throw new Error(`Claude ${response.status}`)
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}))
+    console.log('[claude] error body:', JSON.stringify(errorBody))
+    throw new Error(`Claude ${response.status}: ${errorBody?.error?.message || 'unknown'}`)
+  }
   const data = await response.json()
   return data.content?.[0]?.text
 }
@@ -615,6 +619,48 @@ export default async function handler(req, res) {
           })
         }
       }
+    }
+
+    if (body?.generation_type === 'test') {
+      const results = {}
+      
+      try {
+        const r = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': process.env.ANTHROPIC_API_KEY,
+            'anthropic-version': '2023-06-01'
+          },
+          body: JSON.stringify({
+            model: 'claude-3-5-sonnet-20241022',
+            max_tokens: 10,
+            messages: [{ role: 'user', content: 'say hi' }]
+          })
+        })
+        results.claude = r.status
+      } catch(e) { results.claude = e.message }
+      
+      try {
+        const r = await fetch(
+          'https://api.moonshot.cn/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.KIMI_API_KEY || process.env.MOONSHOT_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: 'moonshot-v1-8k',
+            messages: [{ role: 'user', content: 'say hi' }],
+            max_tokens: 10
+          })
+        })
+        results.kimi = r.status
+        const b = await r.json()
+        results.kimi_body = JSON.stringify(b).substring(0, 100)
+      } catch(e) { results.kimi = e.message }
+      
+      return res.status(200).json(results)
     }
 
     if (body?.generation_type === 'template') {
