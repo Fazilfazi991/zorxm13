@@ -374,7 +374,7 @@ async function tryKimiModel(prompt, systemPrompt, useThinking = false) {
   const model = 'kimi-k2-turbo-preview'
   
   const response = await fetch(
-    'https://api.moonshot.ai/v1/chat/completions',
+    'https://api.moonshot.cn/v1/chat/completions',
     {
       method: 'POST',
       headers: {
@@ -680,7 +680,7 @@ export default async function handler(req, res) {
       
       try {
         const r = await fetch(
-          'https://api.moonshot.ai/v1/chat/completions', {
+          'https://api.moonshot.cn/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
