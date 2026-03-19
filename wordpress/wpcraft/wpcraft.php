@@ -65,20 +65,52 @@ class WPCraft_V2 {
   }
 
   public function admin_bar_button($wp_admin_bar) {
-    if (!is_singular()) return;
     if (!current_user_can('edit_posts')) return;
     
-    $post_id = get_the_ID();
-    $url = admin_url(
-      'admin.php?page=wpcraft-editor&post_id=' . 
-      $post_id
-    );
-    
+    // Add main WPCraft menu item
     $wp_admin_bar->add_node([
-      'id' => 'wpcraft-edit',
-      'title' => '✦ Edit with WPCraft',
-      'href' => $url,
-      'meta' => ['target' => '_blank']
+      'id' => 'wpcraft',
+      'title' => '✦ WPCraft',
+      'href' => admin_url(
+        'admin.php?page=wpcraft-editor'
+      ),
+    ]);
+    
+    // If on a singular page/post, 
+    // add "Edit this page" option
+    if (is_singular()) {
+      $post_id = get_the_ID();
+      $edit_url = admin_url(
+        'admin.php?page=wpcraft-editor&post_id=' 
+        . $post_id
+      );
+      $wp_admin_bar->add_node([
+        'id' => 'wpcraft-edit-current',
+        'parent' => 'wpcraft',
+        'title' => '✦ Edit with WPCraft',
+        'href' => $edit_url,
+        'meta' => ['target' => '_blank']
+      ]);
+    }
+    
+    // Always show "All pages" option
+    $wp_admin_bar->add_node([
+      'id' => 'wpcraft-all-pages',
+      'parent' => 'wpcraft',
+      'title' => 'All Pages',
+      'href' => admin_url(
+        'admin.php?page=wpcraft-editor'
+      ),
+    ]);
+    
+    // Create new page option
+    $wp_admin_bar->add_node([
+      'id' => 'wpcraft-new',
+      'parent' => 'wpcraft',
+      'title' => '+ New Page',
+      'href' => admin_url(
+        'admin.php?page=wpcraft-editor&action=new'
+      ),
     ]);
   }
 
@@ -237,6 +269,23 @@ class WPCraft_V2 {
   }
 
   public function render_editor() {
+    // Handle "new page" action
+    if (($_GET['action'] ?? '') === 'new') {
+      $post_id = wp_insert_post([
+        'post_title' => 'New Page',
+        'post_status' => 'draft',
+        'post_type' => 'page',
+        'post_content' => ''
+      ]);
+      if ($post_id && !is_wp_error($post_id)) {
+        wp_redirect(admin_url(
+          'admin.php?page=wpcraft-editor&post_id=' 
+          . $post_id
+        ));
+        exit;
+      }
+    }
+
     $post_id = intval($_GET['post_id'] ?? 0);
     
     if (!$post_id) {
@@ -385,53 +434,179 @@ class WPCraft_V2 {
   private function render_page_selector() {
     $pages = get_posts([
       'post_type' => ['page', 'post'],
-      'posts_per_page' => 20,
-      'post_status' => 'any',
+      'posts_per_page' => 30,
+      'post_status' => ['publish', 'draft'],
       'orderby' => 'modified',
       'order' => 'DESC'
     ]);
+    
+    $nonce = wp_create_nonce('wpcraft_new_page');
     ?>
-    <div class="wrap" style="max-width: 1000px; margin: 0 auto;">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h1>✦ WPCraft Editor</h1>
-        <a href="<?php echo admin_url(); ?>" class="button">← Exit to WP Dashboard</a>
+    <div class="wrap" style="max-width:800px;">
+      
+      <div style="display:flex;align-items:center;
+        justify-content:space-between;
+        margin:24px 0 16px;">
+        <h1 style="margin:0;">
+          ✦ WPCraft Editor
+        </h1>
+        <form method="post" style="margin:0;">
+          <?php wp_nonce_field(
+            'wpcraft_new_page', 
+            'wpcraft_nonce'
+          ); ?>
+          <input type="hidden" 
+            name="wpcraft_action" 
+            value="create_page">
+          <input type="text" 
+            name="page_title"
+            placeholder="New page title..."
+            style="padding:6px 12px;
+              border:1px solid #ddd;
+              border-radius:4px;
+              margin-right:8px;
+              font-size:14px;
+              width:220px;">
+          <button type="submit" 
+            class="button button-primary"
+            style="height:34px;">
+            + Create New Page
+          </button>
+        </form>
       </div>
-      <p>Select a page to edit:</p>
-      <table class="wp-list-table widefat">
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php foreach ($pages as $page): ?>
-          <tr>
-            <td><?php echo esc_html(
-              $page->post_title
-            ); ?></td>
-            <td><?php echo esc_html(
-              $page->post_status
-            ); ?></td>
-            <td>
-              <a href="<?php echo admin_url(
+
+      <?php
+      // Handle new page creation
+      if (isset($_POST['wpcraft_action']) && 
+          $_POST['wpcraft_action'] === 'create_page' &&
+          wp_verify_nonce(
+            $_POST['wpcraft_nonce'], 
+            'wpcraft_new_page'
+          )) {
+        
+        $title = sanitize_text_field(
+          $_POST['page_title'] ?? 'Untitled Page'
+        );
+        if (empty($title)) $title = 'Untitled Page';
+        
+        $post_id = wp_insert_post([
+          'post_title' => $title,
+          'post_status' => 'draft',
+          'post_type' => 'page',
+          'post_content' => ''
+        ]);
+        
+        if ($post_id && !is_wp_error($post_id)) {
+          $editor_url = admin_url(
+            'admin.php?page=wpcraft-editor&post_id=' 
+            . $post_id
+          );
+          wp_redirect($editor_url);
+          exit;
+        }
+      }
+      ?>
+
+      <?php if (empty($pages)): ?>
+        <div style="text-align:center;
+          padding:60px 20px;
+          background:#f9f9f9;
+          border-radius:8px;
+          border:1px solid #e0e0e0;">
+          <div style="font-size:32px;
+            margin-bottom:12px;opacity:0.3;">
+            ✦
+          </div>
+          <p style="color:#666;margin:0 0 16px;">
+            No pages yet. Create your first page.
+          </p>
+        </div>
+      <?php else: ?>
+        <table class="wp-list-table widefat 
+          fixed striped">
+          <thead>
+            <tr>
+              <th style="width:40%">Page title</th>
+              <th style="width:15%">Status</th>
+              <th style="width:25%">
+                Last modified
+              </th>
+              <th style="width:20%">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php foreach ($pages as $page): 
+              $editor_url = admin_url(
                 'admin.php?page=wpcraft-editor&post_id=' 
                 . $page->ID
-              ); ?>" target="_blank">
-                Edit with WPCraft →
-              </a>
-            </td>
-          </tr>
-          <?php endforeach; ?>
-        </tbody>
-      </table>
-      <br>
-      <a href="<?php echo admin_url(
-        'post-new.php?post_type=page'
-      ); ?>" class="button button-primary">
-        Create New Page
-      </a>
+              );
+              $has_wpcraft = get_post_meta(
+                $page->ID, '_wpcraft_data', true
+              );
+              $has_elementor = get_post_meta(
+                $page->ID, '_elementor_data', true
+              );
+              $badge = '';
+              if ($has_wpcraft) {
+                $badge = '<span style="background:#d4edda;color:#155724;font-size:10px;padding:1px 6px;border-radius:10px;margin-left:6px;">WPCraft</span>';
+              } elseif ($has_elementor) {
+                $badge = '<span style="background:#cce5ff;color:#004085;font-size:10px;padding:1px 6px;border-radius:10px;margin-left:6px;">Elementor</span>';
+              }
+            ?>
+            <tr>
+              <td>
+                <strong>
+                  <?php echo esc_html(
+                    $page->post_title ?: 
+                    '(No title)'
+                  ); ?>
+                </strong>
+                <?php echo $badge; ?>
+              </td>
+              <td>
+                <span style="text-transform:capitalize;">
+                  <?php echo esc_html(
+                    $page->post_status
+                  ); ?>
+                </span>
+              </td>
+              <td style="color:#666;font-size:13px;">
+                <?php echo human_time_diff(
+                  strtotime($page->post_modified),
+                  current_time('timestamp')
+                ) . ' ago'; ?>
+              </td>
+              <td>
+                <a href="<?php echo esc_url(
+                  $editor_url
+                ); ?>"
+                  class="button button-primary"
+                  style="font-size:12px;
+                    padding:2px 10px;
+                    height:26px;
+                    line-height:24px;">
+                  ✦ Edit with WPCraft
+                </a>
+              </td>
+            </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      <?php endif; ?>
+
+      <div style="margin-top:20px;padding:16px;
+        background:#f0f7ff;border-radius:8px;
+        border-left:4px solid #166534;">
+        <p style="margin:0;font-size:13px;
+          color:#444;">
+          <strong>✦ WPCraft</strong> — 
+          Pages marked "WPCraft" are fully 
+          managed by WPCraft. Pages marked 
+          "Elementor" will be automatically 
+          converted when you open them.
+        </p>
+      </div>
+      
     </div>
     <?php
   }
