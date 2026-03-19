@@ -201,8 +201,8 @@ export default function App() {
                   ...e,
                   ...updates,
                   settings: {
-                    ...e.settings,
-                    ...(updates.settings || {})
+                    ...(e.settings as any),
+                    ...((updates as any).settings || {})
                   }
                 }
               )

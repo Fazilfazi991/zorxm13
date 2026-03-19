@@ -191,6 +191,56 @@ const ALLOWED_KEYS = {
   icon: ['name', 'size', 'color', 'align', 'marginBottom']
 }
 
+const TEMPLATE_PROMPTS = {
+  'saas': `Generate a complete SaaS landing page for a 
+    modern software product. Include these sections in order:
+    1. Hero — bold headline, subtext, two CTA buttons 
+       (primary solid + secondary outline), dark background 
+       with image overlay
+    2. Logo cloud — "Trusted by" strip with 5 company name 
+       placeholders, light gray background
+    3. Features — 3-column grid, each with an icon, heading, 
+       and description. Dark background (#0a0a1a)
+    4. Pricing — 3 tiers (Starter/Pro/Enterprise), white background,
+       highlight the middle Pro tier with accent color
+    5. Testimonials — 3 cards with quote, name, role. 
+       Light gray background
+    6. CTA footer — centered headline, single CTA button, 
+       dark background with overlay image
+    Brand: modern, minimal, professional. 
+    Primary color: #6366f1 (indigo).`,
+
+  'agency': `Generate a complete agency/business landing page 
+    for a professional services company. Include these sections:
+    1. Hero — split layout (text left, image right), 
+       headline + subtext + CTA button, white background
+    2. About — two column, image left, text right with 
+       WHO WE ARE label, heading, 2 paragraphs, button
+    3. Services — 3-column grid with icon, title, description.
+       Dark background
+    4. Projects/Portfolio — 2x2 image grid with overlay labels.
+       White background  
+    5. Team — 3 team member cards with image placeholder, 
+       name, role. Light background
+    6. Contact footer — centered, email + phone + address, 
+       dark background
+    Brand: professional, trustworthy, clean.
+    Primary color: #e60000 (red).`,
+
+  'portfolio': `Generate a complete creative portfolio page 
+    for a photographer or designer. Include these sections:
+    1. Hero — minimal, full height, large name as h1, 
+       tagline as subtitle, scroll indicator. Dark background
+    2. Work/Gallery — 3-column masonry-style image grid. 
+       White background
+    3. About — minimal single column, centered, short bio, 
+       white background
+    4. Client logos — simple strip of 6 client name placeholders
+    5. Contact — minimal centered section with email CTA button
+    Brand: minimal, elegant, creative.
+    Primary color: #000000 (black).`
+}
+
 const isValidColor = (col) => /^#([0-9A-F]{3}){1,2}$/i.test(col) || /^rgba?\(/i.test(col) || col === 'transparent';
 
 function convertBareButtons(elements) {
@@ -517,6 +567,97 @@ export default async function handler(req, res) {
           })
         }
       }
+    }
+
+    if (body?.generation_type === 'template') {
+      const templateKey = body.template || 'saas'
+      const templatePrompt = TEMPLATE_PROMPTS[templateKey]
+      
+      if (!templatePrompt) {
+        return res.status(400).json({ error: 'Invalid template key' })
+      }
+
+      const systemPrompt = `You are an expert UI/UX designer and frontend engineer. Generate a complete WPCraft page JSON.
+      
+STRICT SCHEMA — follow exactly:
+Return a PageData object:
+{
+  "title": "Page Title",
+  "sections": [ ...Section objects... ]
+}
+
+Each Section:
+{
+  "id": "unique_id",
+  "type": "section",
+  "settings": {
+    "background": "#hex or image URL",
+    "backgroundType": "color" | "image",
+    "backgroundOverlay": "rgba(0,0,0,0.7)",
+    "padding": { "top": 100, "bottom": 100 },
+    "fullHeight": false
+  },
+  "columns": [ ...Column objects... ]
+}
+
+Each Column:
+{
+  "id": "unique_id",
+  "width": 100,
+  "elements": [ ...Element objects... ]
+}
+
+Valid element types and their settings:
+
+heading: { text, tag(h1/h2/h3/p), fontSize, fontWeight, fontFamily, color, align(left/center/right), marginBottom }
+text: { text, fontSize, color, align, marginBottom, lineHeight }
+button: { text, url, backgroundColor, color, borderRadius, align, marginBottom }
+buttonGroup: { align, gap, marginBottom, direction(row/column), buttons: [ ...button settings objects... ] }
+image: { url, alt, width, marginBottom }
+spacer: { height, backgroundColor, width }
+
+DESIGN RULES:
+- For 2+ buttons always use buttonGroup with direction:row
+- Dark sections use white/rgba(255,255,255,x) text
+- Light sections use #0a0a1a or #555555 text
+- Hero sections: fontSize h1=72-80, fullHeight:true
+- Minimum padding 80px top/bottom on all sections
+- Use real Unsplash image URLs for backgrounds:
+  https://images.unsplash.com/photo-[id]?w=1600&q=80
+- Generate unique IDs for every section, column, element
+
+Return ONLY raw JSON. No markdown. No explanation.`
+
+      let rawText
+      let modelUsed = 'kimi'
+      try {
+        console.log('[template] trying Kimi K2.5')
+        rawText = await tryKimiModel(templatePrompt, systemPrompt)
+      } catch(e) {
+        console.log('[template] Kimi failed, trying Claude:', e.message)
+        modelUsed = 'claude'
+        try {
+          rawText = await tryClaudeModel(templatePrompt, systemPrompt)
+        } catch(e2) {
+          console.log('[template] Claude failed, trying Gemini:', e2.message)
+          modelUsed = 'gemini'
+          rawText = await tryGeminiModel(templatePrompt, 'gemini-2.5-flash', 0, systemPrompt)
+        }
+      }
+
+      const parsed = extractJSON(rawText)
+      if (!parsed) {
+        return res.status(500).json({ error: 'Failed to parse template JSON' })
+      }
+      
+      deepCleanElements(parsed)
+
+      return res.status(200).json({ 
+        success: true, 
+        data: parsed,
+        model_used: modelUsed,
+        json: JSON.stringify(parsed)
+      })
     }
 
     if (!body?.businessName && body?.pageType !== 'refine' && !isPluginRequest) {

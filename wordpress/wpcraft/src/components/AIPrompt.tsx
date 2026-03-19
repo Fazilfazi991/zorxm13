@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { PageData } from '../types/schema'
-import { generatePage } from '../lib/api'
+import { generatePage, generateTemplate } from '../lib/api'
 
-type AIMode = 'full-page' | 'add-section'
+type AIMode = 'full-page' | 'add-section' | 'template'
 
 interface Props {
   postId: number
@@ -100,6 +100,36 @@ export default function AIPrompt({
       setError(
         e.message || 'Connection error.'
       )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleGenerateTemplate = async (template: 'saas' | 'agency' | 'portfolio') => {
+    if (loading) return
+    
+    // Templates always replace content
+    if (hasExistingContent && !showConfirm) {
+      setShowConfirm(true)
+      return
+    }
+
+    setLoading(true)
+    setError('')
+    setShowConfirm(false)
+
+    try {
+      const result = await generateTemplate(
+        postId, template, nonce, apiBase
+      )
+
+      if (result.success && result.data) {
+        onGenerate(result.data, 'replace')
+      } else {
+        setError(result.error || 'Failed to generate template')
+      }
+    } catch (e: any) {
+      setError(e.message || 'Connection error.')
     } finally {
       setLoading(false)
     }
@@ -263,7 +293,23 @@ export default function AIPrompt({
                 ? 'bg-red-800 text-red-200'
                 : 'text-white/40 hover:text-white/60'
               }`}>
-            ⚠ Regenerate page
+            ⚠ Regenerate
+          </button>
+          <button
+            onClick={() => {
+              setMode('template')
+              setPrompt('')
+              setError('')
+              setShowConfirm(false)
+            }}
+            className={`px-3 py-1.5 text-xs 
+              font-medium rounded-md 
+              transition-colors
+              ${mode === 'template'
+                ? 'bg-blue-700 text-white'
+                : 'text-white/40 hover:text-white/60'
+              }`}>
+            ☆ Templates
           </button>
         </div>
 
@@ -283,28 +329,82 @@ export default function AIPrompt({
           mb-3">
           {mode === 'add-section'
             ? 'Describe the section you want to add — it will be appended to the bottom of your page.'
+            : mode === 'template'
+            ? 'Pick a curated layout below. This will replace all existing content with a professional template.'
             : '⚠ This will replace ALL existing content on this page with a new AI-generated page.'
           }
         </p>
 
-        {/* Example chips */}
-        <div className="flex flex-wrap gap-1.5 
-          mb-3">
-          {examples.slice(0, 4).map(ex => (
+        {error && (
+          <div className="mb-3 px-3 py-2 
+            bg-red-900/30 
+            border border-red-700/30 
+            rounded-lg text-xs text-red-400">
+            {error}
+          </div>
+        )}
+
+        {/* Template Grid */}
+        {mode === 'template' && !showConfirm && (
+          <div className="grid grid-cols-3 gap-3 mb-2">
             <button
-              key={ex}
-              onClick={() => setPrompt(ex)}
-              className="text-xs px-2.5 py-1 
-                rounded-full bg-white/5 
-                text-white/40 
-                border border-white/10
-                hover:bg-white/10 
-                hover:text-white/60 
-                transition-colors">
-              {ex}
+              onClick={() => handleGenerateTemplate('saas')}
+              disabled={loading}
+              className="group p-4 bg-[#1e1e1e] border border-white/10 rounded-xl hover:border-green-500 transition-all text-left flex flex-col gap-2 disabled:opacity-50"
+            >
+              <div className="text-xl group-hover:scale-110 transition-transform">🚀</div>
+              <div>
+                <div className="text-xs font-bold text-white mb-0.5">SaaS Landing</div>
+                <div className="text-[10px] text-white/40 leading-tight">Hero, Features, Pricing, Testimonials</div>
+              </div>
             </button>
-          ))}
-        </div>
+
+            <button
+              onClick={() => handleGenerateTemplate('agency')}
+              disabled={loading}
+              className="group p-4 bg-[#1e1e1e] border border-white/10 rounded-xl hover:border-green-500 transition-all text-left flex flex-col gap-2 disabled:opacity-50"
+            >
+              <div className="text-xl group-hover:scale-110 transition-transform">🏢</div>
+              <div>
+                <div className="text-xs font-bold text-white mb-0.5">Agency</div>
+                <div className="text-[10px] text-white/40 leading-tight">Hero, About, Services, Contact</div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => handleGenerateTemplate('portfolio')}
+              disabled={loading}
+              className="group p-4 bg-[#1e1e1e] border border-white/10 rounded-xl hover:border-green-500 transition-all text-left flex flex-col gap-2 disabled:opacity-50"
+            >
+              <div className="text-xl group-hover:scale-110 transition-transform">🎨</div>
+              <div>
+                <div className="text-xs font-bold text-white mb-0.5">Portfolio</div>
+                <div className="text-[10px] text-white/40 leading-tight">Hero, Gallery, Bio, Contact</div>
+              </div>
+            </button>
+          </div>
+        )}
+
+        {/* Example chips */}
+        {mode !== 'template' && (
+          <div className="flex flex-wrap gap-1.5 
+            mb-3">
+            {examples.slice(0, 4).map(ex => (
+              <button
+                key={ex}
+                onClick={() => setPrompt(ex)}
+                className="text-xs px-2.5 py-1 
+                  rounded-full bg-white/5 
+                  text-white/40 
+                  border border-white/10
+                  hover:bg-white/10 
+                  hover:text-white/60 
+                  transition-colors">
+                {ex}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Confirm warning */}
         {showConfirm && (
@@ -348,8 +448,7 @@ export default function AIPrompt({
           </div>
         )}
 
-        {/* Input + button row */}
-        {!showConfirm && (
+        {!showConfirm && mode !== 'template' && (
           <div className="flex gap-2">
             <input
               type="text"

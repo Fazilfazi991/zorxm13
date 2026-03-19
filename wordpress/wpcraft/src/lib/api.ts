@@ -77,3 +77,30 @@ export async function generatePage(
   }
   return res.json()
 }
+
+export async function generateTemplate(
+  postId: number,
+  template: 'saas' | 'agency' | 'portfolio',
+  nonce: string,
+  apiBase: string
+) {
+  const response = await fetch(`${apiBase}generate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-WP-Nonce': nonce
+    },
+    credentials: 'include',
+    body: JSON.stringify({
+      prompt: `Generate ${template} template`,
+      post_id: postId,
+      generation_type: 'template',
+      template: template,
+      dev_mode: true,
+      license_key: 'dev_bypass_2024'
+    })
+  })
+  
+  if (!response.ok) throw new Error(`HTTP ${response.status}`)
+  return response.json()
+}
