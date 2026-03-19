@@ -277,7 +277,7 @@ function wpcraft_ai_generate($request) {
   
   if ($status !== 200 || empty($data['success'])) {
     return new WP_Error('api_error',
-      $data['error'] ?? 'Generation failed.',
+      'Vercel said: ' . wp_remote_retrieve_body($response),
       ['status' => 500]);
   }
   
