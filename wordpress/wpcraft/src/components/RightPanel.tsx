@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Section, Element, Selection } from '../types/schema'
 import ElementSettings from './ElementSettings'
 import SectionSettings from './SectionSettings'
@@ -10,8 +10,9 @@ interface Props {
   onUpdateSection: (updates: Partial<Section>) => void
   onUpdateElement: (updates: Partial<Element>) => void
   onRefine: (prompt: string) => Promise<any>
-  onPreviewChange: (hasPreview: boolean) => void
+  onPreviewChange: (hasPreview: boolean, pendingData?: any) => void
   onApplyAI: () => void
+  onDiscardAI: () => void
 }
 
 export default function RightPanel({
@@ -22,11 +23,13 @@ export default function RightPanel({
   onUpdateElement,
   onRefine,
   onPreviewChange,
-  onApplyAI
+  onApplyAI,
+  onDiscardAI
 }: Props) {
 
   const [activeTab, setActiveTab] = useState<'ai' | 'manual'>('ai')
   const [prompt, setPrompt] = useState('')
+  const promptRef = useRef('')
   const [refining, setRefining] = useState(false)
   const [error, setError] = useState('')
   
@@ -62,9 +65,10 @@ export default function RightPanel({
       if (result !== null && result !== undefined) {
         setPendingResult(result)
         console.log('REFINE FLOW: pendingResult set to:', result)
-        onPreviewChange(true)
-        if (textToRefine === prompt) {
+        onPreviewChange(true, result)
+        if (textToRefine === prompt || textToRefine === promptRef.current) {
           setPrompt('')
+          promptRef.current = ''
         }
       } else {
         console.log('REFINE FLOW: result was falsy:', result)
@@ -194,11 +198,6 @@ export default function RightPanel({
                   <button 
                     onClick={() => {
                       onApplyAI()
-                      if (selection?.type === 'element') {
-                        onUpdateElement(pendingResult)
-                      } else {
-                        onUpdateSection(pendingResult)
-                      }
                       setPendingResult(null)
                       onPreviewChange(false)
                     }}
@@ -208,6 +207,7 @@ export default function RightPanel({
                   </button>
                   <button 
                     onClick={() => {
+                      onDiscardAI()
                       setPendingResult(null)
                       onPreviewChange(false)
                     }}
@@ -225,6 +225,7 @@ export default function RightPanel({
                     value={prompt}
                     onChange={e => {
                       setPrompt(e.target.value)
+                      promptRef.current = e.target.value
                       if (error) setError('')
                     }}
                     placeholder="Describe what you want... e.g. Add a wave divider at the bottom"
@@ -244,7 +245,7 @@ export default function RightPanel({
                        )}
                     </span>
                     <button
-                      onClick={() => handleRefine(prompt)}
+                      onClick={() => handleRefine(promptRef.current)}
                       disabled={!prompt.trim() || refining}
                       className="px-4 py-1.5 bg-white/10 border border-white/10 rounded-lg text-xs font-medium text-white hover:bg-white/20 disabled:opacity-30 transition-all flex items-center gap-2"
                     >

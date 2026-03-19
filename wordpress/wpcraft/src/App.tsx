@@ -33,6 +33,7 @@ export default function App() {
   
   const [undoStack, setUndoStack] = useState<PageData[]>([])
   const [hasPreview, setHasPreview] = useState(false)
+  const [previewSnapshot, setPreviewSnapshot] = useState<PageData | null>(null)
 
   const pushUndoSnapshot = () => {
     if (pageData) {
@@ -41,6 +42,38 @@ export default function App() {
         if (next.length > 20) return next.slice(next.length - 20)
         return next
       })
+    }
+  }
+
+  const handlePreviewChange = (previewActive: boolean, pendingData?: any) => {
+    setHasPreview(previewActive)
+    if (previewActive && pendingData) {
+      setPreviewSnapshot(pageData)
+      if (selection?.type === 'element' && selection.sectionId && selection.columnId && selection.elementId) {
+        updateElement(selection.sectionId, selection.columnId, selection.elementId, pendingData)
+      } else if (selection?.type === 'section' && selection.sectionId) {
+        updateSection(selection.sectionId, pendingData)
+      }
+    }
+  }
+
+  const handleApplyAI = () => {
+    if (previewSnapshot) {
+      setUndoStack(prev => {
+        const next = [...prev, previewSnapshot]
+        if (next.length > 20) return next.slice(next.length - 20)
+        return next
+      })
+      setPreviewSnapshot(null)
+    } else {
+      pushUndoSnapshot()
+    }
+  }
+
+  const handleDiscardAI = () => {
+    if (previewSnapshot) {
+      setPageData(previewSnapshot)
+      setPreviewSnapshot(null)
     }
   }
 
@@ -309,8 +342,9 @@ export default function App() {
             }
           }}
           onRefine={handleRefine}
-          onPreviewChange={setHasPreview}
-          onApplyAI={pushUndoSnapshot}
+          onPreviewChange={handlePreviewChange}
+          onApplyAI={handleApplyAI}
+          onDiscardAI={handleDiscardAI}
         />
 
       </div>
