@@ -116,6 +116,47 @@ function wpcraft_render_element($el) {
         $text . "</p>";
       break;
       
+    case 'buttonGroup':
+      $direction = esc_attr($settings['direction'] ?? 'row');
+      $gap = intval($settings['gap'] ?? 16);
+      $align = esc_attr($settings['align'] ?? 'center');
+      $mb = intval($settings['marginBottom'] ?? 0);
+      $justify = $align === 'left' ? 'flex-start' : ($align === 'right' ? 'flex-end' : 'center');
+      
+      echo "<div style=\"display:flex;flex-direction:{$direction};gap:{$gap}px;justify-content:{$justify};margin-bottom:{$mb}px;\">";
+      foreach ($el['buttons'] ?? [] as $btn) {
+        wpcraft_render_element($btn);
+      }
+      echo "</div>";
+      break;
+
+    case 'divider':
+      $divStyle = $settings['style'] ?? 'line';
+      $divColor = esc_attr($settings['color'] ?? '#e2e8f0');
+      $divHeight = intval($settings['height'] ?? 0);
+      $divMb = intval($settings['marginBottom'] ?? 0);
+      
+      if ($divStyle === 'wave') {
+        $divHeight = $divHeight ?: 60; // fallback depth
+        echo "<svg viewBox=\"0 0 1200 120\" preserveAspectRatio=\"none\" style=\"display:block;width:100%;height:{$divHeight}px;margin-bottom:{$divMb}px;\">
+          <path d=\"M321.4,56.4c58-10.8,114.2-30.1,172-41.9,82.4-16.7,168.2-17.7,250.5-.4,242.9,50.8,325.8,91.8,404.7,112.7,70.1,18.5,146.5,26.1,214.3,3V0H0v27.4A600.2,600.2,0,0,0,321.4,56.4Z\" fill=\"{$divColor}\"></path>
+        </svg>";
+      } else {
+        echo "<hr style=\"border:none;border-top:1px solid {$divColor};margin:{$divMb}px 0;\">";
+      }
+      break;
+
+    case 'icon':
+      $name = esc_attr($settings['name'] ?? 'mdi:check');
+      $size = intval($settings['size'] ?? 24);
+      $iconColor = rawurlencode($settings['color'] ?? '#000000');
+      $align = esc_attr($settings['align'] ?? 'left');
+      
+      $alignStyle = $align === 'center' ? 'margin:0 auto;' : ($align === 'right' ? 'margin-left:auto;' : '');
+      $url = "https://api.iconify.design/{$name}.svg?color={$iconColor}";
+      echo "<img src=\"{$url}\" width=\"{$size}\" height=\"{$size}\" style=\"display:block;{$alignStyle}{$style}\">";
+      break;
+
     case 'button':
       $text = esc_html(
         $settings['text'] ?? 'Click Here'
@@ -132,17 +173,30 @@ function wpcraft_render_element($el) {
       $radius = intval(
         $settings['borderRadius'] ?? 8
       );
+      $variant = $settings['variant'] ?? 'solid';
+      $btnSize = $settings['size'] ?? 'md';
+
+      $pad = '12px 28px';
+      $fs = '16px';
+      if ($btnSize === 'sm') { $pad = '8px 20px'; $fs = '14px'; }
+      if ($btnSize === 'lg') { $pad = '16px 36px'; $fs = '18px'; }
+
+      $btn_bg = $variant === 'outline' ? 'transparent' : $bg;
+      $btn_border = $variant === 'outline' ? "2px solid {$bg}" : 'none';
+      if ($variant === 'outline') $color = $bg;
+
       echo "<a href=\"{$url}\" style=\"" .
         "display:inline-block;" .
-        "background:{$bg};" .
+        "background:{$btn_bg};" .
         "color:{$color};" .
-        "padding:14px 32px;" .
+        "padding:{$pad};" .
+        "border:{$btn_border};" .
         "border-radius:{$radius}px;" .
         "font-weight:600;" .
-        "font-size:15px;" .
+        "font-size:{$fs};" .
         "text-decoration:none;" .
         "transition:all 0.3s ease;" .
-        "\">{$text}</a>";
+        "{$style}\">{$text}</a>";
       break;
       
     case 'image':

@@ -1,31 +1,117 @@
-export type SelectionType = 'section' | 'element'
+export type ElementType = 
+  'heading' | 'text' | 'button' | 'image' | 
+  'spacer' | 'divider' | 'icon' | 'buttonGroup'
 
-export interface Selection {
-  type: SelectionType
-  sectionId: string
-  columnId?: string
-  elementId?: string
-}
+export type SectionType =
+  'hero' | 'about' | 'services' | 'cta' | 
+  'testimonials' | 'features' | 'contact' | 'custom'
 
-export interface PageData {
-  title: string
-  sections: Section[]
-}
-
-export interface Section {
+export interface HeadingElement {
   id: string
-  type: string
-  settings: SectionSettings
-  columns: Column[]
+  type: 'heading'
+  settings: {
+    text: string
+    tag: 'h1'|'h2'|'h3'|'h4'|'p'
+    fontSize: number
+    fontWeight: '400'|'500'|'600'|'700'|'800'
+    fontFamily: string
+    color: string
+    align: 'left'|'center'|'right'
+    marginBottom: number
+  }
 }
 
-export interface SectionSettings {
-  background?: string
-  backgroundType?: 'color' | 'image'
-  backgroundOverlay?: string
-  padding?: { top: number; bottom: number }
-  fullHeight?: boolean
+export interface TextElement {
+  id: string
+  type: 'text'
+  settings: {
+    text: string
+    fontSize: number
+    color: string
+    align: 'left'|'center'|'right'
+    marginBottom: number
+    lineHeight: number
+  }
 }
+
+export interface ButtonElement {
+  id: string
+  type: 'button'
+  settings: {
+    text: string
+    url: string
+    backgroundColor: string
+    color: string
+    borderRadius: number
+    align: 'left'|'center'|'right'
+    marginBottom: number
+    variant: 'solid'|'outline'
+    size: 'sm'|'md'|'lg'
+  }
+}
+
+export interface ButtonGroupElement {
+  id: string
+  type: 'buttonGroup'
+  settings: {
+    align: 'left'|'center'|'right'
+    gap: number
+    marginBottom: number
+    direction: 'row'|'column'
+  }
+  buttons: ButtonElement[]
+}
+
+export interface ImageElement {
+  id: string
+  type: 'image'
+  settings: {
+    url: string
+    alt: string
+    width: string
+    borderRadius: number
+    marginBottom: number
+    objectFit: 'cover'|'contain'|'fill'
+  }
+}
+
+export interface SpacerElement {
+  id: string
+  type: 'spacer'
+  settings: {
+    height: number
+    backgroundColor: string
+    width: string
+  }
+}
+
+export interface DividerElement {
+  id: string
+  type: 'divider'
+  settings: {
+    style: 'line'|'wave'|'angle'
+    color: string
+    height: number
+    marginBottom: number
+  }
+}
+
+export interface IconElement {
+  id: string
+  type: 'icon'
+  settings: {
+    name: string
+    size: number
+    color: string
+    align: 'left'|'center'|'right'
+    marginBottom: number
+  }
+}
+
+export type Element = 
+  HeadingElement | TextElement | ButtonElement | 
+  ButtonGroupElement | ImageElement | SpacerElement |
+  DividerElement | IconElement
 
 export interface Column {
   id: string
@@ -33,27 +119,34 @@ export interface Column {
   elements: Element[]
 }
 
-export interface Element {
+export interface Section {
   id: string
-  type: 'heading' | 'text' | 'button' | 
-        'image' | 'spacer'
-  settings: ElementSettings
+  type: SectionType
+  settings: {
+    background: string
+    backgroundType: 'color'|'image'|'gradient'
+    backgroundOverlay: string
+    padding: {
+      top: number
+      bottom: number
+    }
+    fullHeight: boolean
+    maxWidth: number
+    contentAlign: 'left'|'center'|'right'
+  }
+  columns: Column[]
 }
 
-export interface ElementSettings {
-  text?: string
-  tag?: string
-  fontSize?: number
-  fontWeight?: string
-  fontFamily?: string
-  color?: string
-  align?: string
-  marginBottom?: number
-  lineHeight?: number
-  url?: string
-  alt?: string
-  backgroundColor?: string
-  borderRadius?: number
-  height?: number
-  width?: string
+export interface PageData {
+  title: string
+  sections: Section[]
+}
+
+export type SelectionType = 'section' | 'element'
+
+export interface Selection {
+  type: SelectionType
+  sectionId: string
+  columnId?: string
+  elementId?: string
 }

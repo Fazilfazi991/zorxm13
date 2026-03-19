@@ -64,6 +64,43 @@ Return ONLY valid JSON:
 No markdown. No fences. Start { end }.
 Use readable string IDs like "hero_section".
 
+WPCRAFT JSON SCHEMA — follow this exactly, no deviations:
+
+Section settings must include:
+  background, backgroundType, backgroundOverlay, 
+  padding:{top,bottom}, fullHeight, maxWidth, contentAlign
+
+Valid element types: 
+  heading, text, button, buttonGroup, image, 
+  spacer, divider, icon
+
+For multiple buttons side by side, ALWAYS use buttonGroup:
+{
+  type: 'buttonGroup',
+  settings: { align: 'center', gap: 16, marginBottom: 32, direction: 'row' },
+  buttons: [ ...button elements here... ]
+}
+
+NEVER stack button elements directly in a column — always wrap 
+in buttonGroup when there are 2+ buttons.
+
+Button variant options: 'solid' (filled) or 'outline' (transparent bg)
+Button size options: 'sm', 'md', 'lg'
+
+For dividers use:
+{ type: 'divider', settings: { style: 'wave'|'line'|'angle', 
+  color: '#hex', height: 60, marginBottom: 0 } }
+
+DESIGN RULES:
+- Hero sections: align left, fontSize h1=80, text=18
+- CTA sections: align center, fullHeight false
+- Dark sections (#0a0a1a bg): use white/rgba text
+- Light sections (#ffffff bg): use dark text #0a0a1a
+- Always include at least one spacer between section end and content
+- Padding top/bottom minimum 80px for content sections
+- Button primary: backgroundColor=#0a0a1a, color=#ffffff
+- Button accent: backgroundColor=#e60000, color=#ffffff
+
 === FREE WIDGETS ONLY ===
 Allowed widgetType values:
 - heading
@@ -266,11 +303,54 @@ function extractJSON(raw) {
 }
 
 const ALLOWED_KEYS = {
-  text: ['text', 'fontSize', 'color', 'align', 'marginBottom', 'lineHeight'],
   heading: ['text', 'tag', 'fontSize', 'fontWeight', 'fontFamily', 'color', 'align', 'marginBottom'],
-  button: ['text', 'url', 'backgroundColor', 'color', 'borderRadius', 'align', 'marginBottom'],
-  image: ['url', 'alt', 'height', 'borderRadius', 'marginBottom'],
-  spacer: ['height', 'backgroundColor', 'width']
+  text: ['text', 'fontSize', 'color', 'align', 'marginBottom', 'lineHeight'],
+  button: ['text', 'url', 'backgroundColor', 'color', 'borderRadius', 'align', 'marginBottom', 'variant', 'size'],
+  buttonGroup: ['align', 'gap', 'marginBottom', 'direction'],
+  image: ['url', 'alt', 'width', 'borderRadius', 'marginBottom', 'objectFit'],
+  spacer: ['height', 'backgroundColor', 'width'],
+  divider: ['style', 'color', 'height', 'marginBottom'],
+  icon: ['name', 'size', 'color', 'align', 'marginBottom']
+}
+
+const isValidColor = (col) => /^#([0-9A-F]{3}){1,2}$/i.test(col) || /^rgba?\(/i.test(col) || col === 'transparent';
+
+function convertBareButtons(elements) {
+  if (!Array.isArray(elements)) return elements;
+  const newElements = [];
+  let buttonBuffer = [];
+
+  const flushButtons = () => {
+    if (buttonBuffer.length === 1) {
+      newElements.push(buttonBuffer[0]);
+    } else if (buttonBuffer.length > 1) {
+      newElements.push({
+        id: 'group_' + Math.random().toString(36).substring(2, 9),
+        type: 'buttonGroup',
+        settings: {
+          align: buttonBuffer[0].settings?.align || 'center',
+          gap: 16,
+          marginBottom: buttonBuffer[buttonBuffer.length - 1].settings?.marginBottom || 0,
+          direction: 'row'
+        },
+        buttons: buttonBuffer
+      });
+    }
+    buttonBuffer = [];
+  };
+
+  for (const el of elements) {
+    if (!el || !ALLOWED_KEYS[el.type]) continue; // strip unknown types entirely
+    if (el.type === 'button') {
+      buttonBuffer.push(el);
+    } else {
+      flushButtons();
+      newElements.push(el);
+    }
+  }
+  flushButtons();
+
+  return newElements;
 }
 
 function cleanElementSettings(el) {
@@ -280,7 +360,11 @@ function cleanElementSettings(el) {
     const cleanedSettings = {};
     for (const key of Object.keys(el.settings)) {
       if (allowed.includes(key)) {
-        cleanedSettings[key] = el.settings[key];
+        let val = el.settings[key];
+        if (key.toLowerCase().includes('color') && typeof val === 'string') {
+          if (!isValidColor(val)) val = '#000000';
+        }
+        cleanedSettings[key] = val;
       }
     }
     el.settings = cleanedSettings;
@@ -292,10 +376,20 @@ function deepCleanElements(obj) {
   if (Array.isArray(obj)) {
     obj.forEach(item => deepCleanElements(item));
   } else if (obj && typeof obj === 'object') {
-    if (obj.elType === 'section' && obj.columns) {
+    if (obj.columns && Array.isArray(obj.columns)) {
+      // It's a section object
+      // Validate section settings
+      if (!obj.settings) obj.settings = {};
+      
       obj.columns.forEach(col => {
         if (col.elements) {
-          col.elements = col.elements.map(el => cleanElementSettings(el));
+          col.elements = convertBareButtons(col.elements);
+          col.elements.forEach(el => {
+            if (el.type === 'buttonGroup' && el.buttons) {
+              el.buttons.forEach(btn => cleanElementSettings(btn));
+            }
+            cleanElementSettings(el);
+          });
         }
       });
     } else if (obj.type && obj.settings && !obj.columns) {
