@@ -404,24 +404,29 @@ export default async function handler(req, res) {
     const licenseKey = body?.license_key || null
 
     if (isPluginRequest) {
-      if (!licenseKey) {
-        return res.status(401).json({
-          error: 'License key required. ' +
-            'Get yours at zorxm13.vercel.app'
-        })
-      }
-      
-      // Check + deduct credits via Supabase
-      const creditResult = await checkAndDeductCredit(
-        licenseKey
-      )
-      
-      if (!creditResult.success) {
-        return res.status(402).json({
-          error: creditResult.error,
-          credits_remaining: 0,
-          upgrade_url: 'https://zorxm13.vercel.app/pricing'
-        })
+      // Accept dev_bypass key during development
+      if (body.dev_mode === true && licenseKey === 'dev_bypass') {
+        // Skip license validation, proceed with generation
+      } else {
+        if (!licenseKey) {
+          return res.status(401).json({
+            error: 'License key required. ' +
+              'Get yours at zorxm13.vercel.app'
+          })
+        }
+        
+        // Check + deduct credits via Supabase
+        const creditResult = await checkAndDeductCredit(
+          licenseKey
+        )
+        
+        if (!creditResult.success) {
+          return res.status(402).json({
+            error: creditResult.error,
+            credits_remaining: 0,
+            upgrade_url: 'https://zorxm13.vercel.app/pricing'
+          })
+        }
       }
     }
 

@@ -217,6 +217,12 @@ function wpcraft_ai_generate($request) {
     'generation_type' => $generation_type
   ];
   
+  // When in DEV_MODE, send a dev bypass key to Vercel
+  if (defined('WPCRAFT_DEV_MODE') && WPCRAFT_DEV_MODE === true) {
+    $payload['license_key'] = 'dev_bypass';
+    $payload['dev_mode'] = true;
+  }
+  
   if ($generation_type === 'refine') {
     $payload['systemPrompt'] = "You are a JSON page builder assistant. The user will give you a single section or element JSON object and a text instruction. Return ONLY the updated JSON object for that section or element. Do not wrap it in markdown. Do not explain anything. Return raw JSON only.";
     $payload['prompt'] = $prompt;
