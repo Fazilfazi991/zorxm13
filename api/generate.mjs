@@ -371,12 +371,10 @@ async function tryKimiModel(prompt, systemPrompt, useThinking = false) {
   console.log('[kimi] API key present:', !!(process.env.KIMI_API_KEY || process.env.MOONSHOT_API_KEY))
   console.log('[kimi] API key prefix:', (process.env.KIMI_API_KEY || process.env.MOONSHOT_API_KEY)?.substring(0, 8))
 
-  const model = useThinking 
-    ? 'moonshot-v1-8k-thinking' 
-    : 'moonshot-v1-8k'
+  const model = 'kimi-k2-instruct'
   
   const response = await fetch(
-    'https://api.moonshot.cn/v1/chat/completions',
+    'https://api.moonshot.ai/v1/chat/completions',
     {
       method: 'POST',
       headers: {
@@ -389,7 +387,7 @@ async function tryKimiModel(prompt, systemPrompt, useThinking = false) {
           { role: 'system', content: systemPrompt },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.7,
+        temperature: 0.6,
         max_tokens: 8000
       })
     }
@@ -448,12 +446,12 @@ async function routeToModel(generationType, prompt, systemPrompt, contextJson) {
   const chains = {
     'page': [
       () => tryKimiModel(prompt, systemPrompt),
-      () => tryClaudeModel(prompt, systemPrompt, 'claude-sonnet-4-5-20250929', 8192),
+      () => tryClaudeModel(prompt, systemPrompt, 'claude-haiku-4-5-20251001', 8192),
       () => tryGeminiModel(prompt, 'gemini-2.5-flash', 0, systemPrompt)
     ],
     'template': [
       () => tryKimiModel(prompt, systemPrompt),
-      () => tryClaudeModel(prompt, systemPrompt, 'claude-sonnet-4-5-20250929', 8192),
+      () => tryClaudeModel(prompt, systemPrompt, 'claude-haiku-4-5-20251001', 8192),
       () => tryGeminiModel(prompt, 'gemini-2.5-flash', 0, systemPrompt)
     ],
     'refine': [
@@ -682,16 +680,17 @@ export default async function handler(req, res) {
       
       try {
         const r = await fetch(
-          'https://api.moonshot.cn/v1/chat/completions', {
+          'https://api.moonshot.ai/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${process.env.KIMI_API_KEY || process.env.MOONSHOT_API_KEY}`
           },
           body: JSON.stringify({
-            model: 'moonshot-v1-8k',
+            model: 'kimi-k2-instruct',
             messages: [{ role: 'user', content: 'say hi' }],
-            max_tokens: 10
+            max_tokens: 10,
+            temperature: 0.6
           })
         })
         results.kimi = r.status
