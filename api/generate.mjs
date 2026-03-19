@@ -139,15 +139,7 @@ In ALL settings, replace:
 - PRIMARY_COLOR → actual primaryColor hex`
 
   if (pageType === 'refine') {
-    return `You are an expert Elementor designer refining a specific existing section or element.
-You will be provided with the CURRENT JSON structure of the user's selection and their revision request.
-CRITICAL RULES:
-1. ONLY return the updated JSON structure.
-2. DO NOT change element IDs, as they map to existing React state.
-3. Modify settings, typography, content, or CSS classes exactly as requested.
-4. Return ONLY valid JSON starting with { and ending with }, without markdown formatting.
-5. If the context represents a single widget (like an image or heading), return just the updated widget object.
-6. If the context represents a full section, return the updated section object.`
+    return `You are a JSON page builder assistant. The user will give you a single section or element JSON object and a text instruction. Return ONLY the updated JSON object. No markdown, no explanation, raw JSON only.`
   }
 
   if (pageType === 'section') {
@@ -201,13 +193,10 @@ Dark overlay section at bottom...
 
 function buildUserPrompt(data) {
   if (data.pageType === 'refine') {
-    return `Refine this Elementor component based on the request: "${data.description}"
-Primary Action Color Context: ${data.primaryColor || '#166534'}
+    return `Instruction: ${data.prompt || data.description}
 
-CURRENT COMPONENT JSON:
-${data.contextJson || '{}'}
-
-Return EXACTLY the modified JSON object. No explanations. Return ONLY valid JSON.`
+Input JSON:
+${data.contextJson || '{}'}`
   }
 
   if (data.pageType === 'section') {
@@ -403,9 +392,13 @@ export default async function handler(req, res) {
     const isPluginRequest = body?.source === 'wpcraft-plugin'
     const licenseKey = body?.license_key || null
 
+    if (body.generation_type) {
+      body.pageType = body.generation_type
+    }
+
     if (isPluginRequest) {
       // Accept dev_bypass key during development
-      if (body.dev_mode === true && licenseKey === 'dev_bypass') {
+      if (body.dev_mode === true && licenseKey === 'dev_bypass_2024') {
         // Skip license validation, proceed with generation
       } else {
         if (!licenseKey) {

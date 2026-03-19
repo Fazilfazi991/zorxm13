@@ -219,7 +219,7 @@ function wpcraft_ai_generate($request) {
   
   // When in DEV_MODE, send a dev bypass key to Vercel
   if (defined('WPCRAFT_DEV_MODE') && WPCRAFT_DEV_MODE === true) {
-    $payload['license_key'] = 'dev_bypass';
+    $payload['license_key'] = 'dev_bypass_2024';
     $payload['dev_mode'] = true;
   }
   
