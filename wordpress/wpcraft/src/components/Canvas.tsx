@@ -15,11 +15,19 @@ export default function Canvas({
 }: Props) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
+  const scrollYRef = useRef(0)
+  const prevSelectionRef = useRef<Selection | null>(null)
+
   useEffect(() => {
     if (!iframeRef.current) return
     const iframe = iframeRef.current
+    const win = iframe.contentWindow
     const doc = iframe.contentDocument
     if (!doc) return
+
+    if (win) {
+      scrollYRef.current = win.scrollY
+    }
 
     const html = renderPageToHtml(
       pageData, selection, hasPreview, siteUrl
@@ -27,6 +35,25 @@ export default function Canvas({
     doc.open()
     doc.write(html)
     doc.close()
+
+    setTimeout(() => {
+      const newWin = iframe.contentWindow
+      const newDoc = iframe.contentDocument
+      if (!newWin || !newDoc) return
+      
+      const prevSectionId = prevSelectionRef.current?.sectionId
+      const curSectionId = selection?.sectionId
+      
+      if (curSectionId && curSectionId !== prevSectionId) {
+        const el = newDoc.querySelector(`[data-id="${curSectionId}"]`)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+      } else {
+        newWin.scrollTo(0, scrollYRef.current)
+      }
+      prevSelectionRef.current = selection
+    }, 50)
 
     const handleMessage = (e: MessageEvent) => {
       if (e.data?.type === 'wpcraft-select') {
@@ -38,6 +65,9 @@ export default function Canvas({
           e.data.columnId,
           e.data.elementId
         )
+      }
+      if (e.data?.type === 'wpcraft-deselect') {
+        onSelectSection('')
       }
     }
     window.addEventListener('message', handleMessage)
@@ -107,6 +137,7 @@ function renderPageToHtml(
   const sectionsHtml = pageData.sections
     .map(section => {
       const isSelected = selection?.type === 'section' && selection.sectionId === section.id
+      const isSectionActive = selection?.sectionId === section.id
       const settings = section.settings
       
       let bgStyle = ''
@@ -132,7 +163,7 @@ function renderPageToHtml(
           const elementsHtml = col.elements
             .map(el => {
               const isElSelected = selection?.type === 'element' && selection.elementId === el.id
-              return renderElement(el, section.id, col.id, isElSelected, hasPreview)
+              return renderElement(el, section.id, col.id, isElSelected, hasPreview, isSectionActive)
             })
             .join('')
           
@@ -146,11 +177,14 @@ function renderPageToHtml(
       const overlay = settings.backgroundOverlay ?
         `<div style="position:absolute;inset:0;
           background:${settings.backgroundOverlay};
-          "></div>` : ''
+          pointer-events:none;"></div>` : ''
       
+      const sectionClass = `wpcraft-section ${isSelected ? 'is-active' : ''} ${selection?.type === 'element' && isSectionActive ? 'has-element-active' : ''}`;
+          
       return `<section 
         data-id="${section.id}"
-        onclick="window.parent.postMessage(
+        class="${sectionClass}"
+        onclick="event.stopPropagation(); window.parent.postMessage(
           {type:'wpcraft-select',id:'${section.id}'},
           '*'
         )"
@@ -161,14 +195,17 @@ function renderPageToHtml(
           padding:${pt}px 40px ${pb}px;
           ${minH}
           ${isSelected ? 
-            `outline:2px ${hasPreview ? 'dashed' : 'solid'} ${hasPreview ? '#eab308' : '#166534'};` : 
-            'outline:none;'}
+            `outline:2px ${hasPreview ? 'dashed' : 'solid'} ${hasPreview ? '#eab308' : '#166534'} !important; outline-offset: -2px;` : 
+            (selection?.type === 'element' && isSectionActive ? 
+              `outline:2px solid rgba(22,101,52,0.3) !important; outline-offset: -2px;` : 'outline:none;')}
           transition:outline 0.15s;">
         ${overlay}
         <div style="position:relative;z-index:1;
           max-width:1200px;margin:0 auto;
-          display:flex;flex-wrap:wrap;">
-          ${columnsHtml}
+          display:flex;flex-wrap:wrap;pointer-events:none;">
+          <div style="width:100%;display:flex;flex-wrap:wrap;pointer-events:auto;">
+            ${columnsHtml}
+          </div>
         </div>
       </section>`
     }).join('')
@@ -198,8 +235,31 @@ section:hover { outline: 1px solid rgba(22,101,52,0.3) !important; }
   animation: fadeInUp 0.6s ease forwards; 
 }
 </style>
+<style>
+.wpcraft-section::before {
+  content: "Click to select section";
+  position: absolute;
+  top: 0; left: 0;
+  background: rgba(22,101,52,0.9);
+  color: white;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-bottom-right-radius: 6px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 10;
+  pointer-events: none;
+  font-weight: 500;
+}
+.wpcraft-section:hover::before { opacity: 1; }
+.wpcraft-section.is-active::before { 
+  opacity: 1; 
+  content: "Section selected — click element to edit individually"; 
+}
+.wpcraft-section.has-element-active::before { opacity: 0 !important; }
+</style>
 </head>
-<body>
+<body onclick="window.parent.postMessage({type:'wpcraft-deselect'}, '*')">
 ${sectionsHtml}
 </body>
 </html>`
@@ -222,7 +282,8 @@ function renderElement(
   sectionId: string,
   columnId: string,
   isSelected: boolean,
-  hasPreview: boolean
+  hasPreview: boolean,
+  isSectionActive: boolean
 ): string {
   const s = el.settings
   const dataAttrs = 
@@ -232,7 +293,11 @@ function renderElement(
      data-el-type="${el.type}"`
   
   const clickHandler = 
-    `onclick="event.stopPropagation();
+    `onclick="
+      if (!${isSectionActive}) {
+        return; 
+      }
+      event.stopPropagation();
       window.parent.postMessage({
         type:'wpcraft-select-element',
         sectionId:'${sectionId}',

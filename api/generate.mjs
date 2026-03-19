@@ -139,6 +139,15 @@ In ALL settings, replace:
 - PRIMARY_COLOR → actual primaryColor hex`
 
   if (pageType === 'refine') {
+    let isSection = false;
+    try {
+      const parsedContext = JSON.parse(data.contextJson || '{}');
+      if (parsedContext.columns) isSection = true;
+    } catch(e) {}
+    
+    if (isSection) {
+      return `You are a JSON page builder assistant. The user will give you a complete section JSON object containing columns and elements. Follow the user's instruction and return the COMPLETE updated section JSON with all columns and elements intact. You may modify existing elements, add new elements to columns, or change section settings. Return ONLY raw JSON. No markdown, no explanation.`
+    }
     return `You are a JSON page builder assistant. The user will give you a single section or element JSON object and a text instruction. Return ONLY the updated JSON object. No markdown, no explanation, raw JSON only.`
   }
 
@@ -252,8 +261,47 @@ function extractJSON(raw) {
       console.error('[parse] Fixed also failed:', 
         e2.message)
       return null
+  }
+}
+
+const ALLOWED_KEYS = {
+  text: ['text', 'fontSize', 'color', 'align', 'marginBottom', 'lineHeight'],
+  heading: ['text', 'tag', 'fontSize', 'fontWeight', 'fontFamily', 'color', 'align', 'marginBottom'],
+  button: ['text', 'url', 'backgroundColor', 'color', 'borderRadius', 'align', 'marginBottom'],
+  image: ['url', 'alt', 'height', 'borderRadius', 'marginBottom'],
+  spacer: ['height', 'backgroundColor', 'width']
+}
+
+function cleanElementSettings(el) {
+  if (!el || !el.type || !el.settings) return el;
+  const allowed = ALLOWED_KEYS[el.type];
+  if (allowed) {
+    const cleanedSettings = {};
+    for (const key of Object.keys(el.settings)) {
+      if (allowed.includes(key)) {
+        cleanedSettings[key] = el.settings[key];
+      }
+    }
+    el.settings = cleanedSettings;
+  }
+  return el;
+}
+
+function deepCleanElements(obj) {
+  if (Array.isArray(obj)) {
+    obj.forEach(item => deepCleanElements(item));
+  } else if (obj && typeof obj === 'object') {
+    if (obj.elType === 'section' && obj.columns) {
+      obj.columns.forEach(col => {
+        if (col.elements) {
+          col.elements = col.elements.map(el => cleanElementSettings(el));
+        }
+      });
+    } else if (obj.type && obj.settings && !obj.columns) {
+      cleanElementSettings(obj);
     }
   }
+  return obj;
 }
 
 async function tryKimi(userPrompt, systemPrompt) {
@@ -460,6 +508,10 @@ export default async function handler(req, res) {
       rawResponse.substring(rawResponse.length - 200))
 
     const parsed = extractJSON(rawResponse)
+    
+    if (parsed) {
+      deepCleanElements(parsed)
+    }
 
     // Normalize root array key
     // Gemini sometimes returns "elements" instead of "content"

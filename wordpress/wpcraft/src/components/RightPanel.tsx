@@ -55,15 +55,22 @@ export default function RightPanel({
     setRefining(true)
     setError('')
     try {
+      console.log('REFINE FLOW: starting onRefine with prompt:', textToRefine)
       const result = await onRefine(textToRefine)
-      if (result) {
+      console.log('REFINE FLOW: raw result from onRefine:', result)
+      
+      if (result !== null && result !== undefined) {
         setPendingResult(result)
+        console.log('REFINE FLOW: pendingResult set to:', result)
         onPreviewChange(true)
         if (textToRefine === prompt) {
           setPrompt('')
         }
+      } else {
+        console.log('REFINE FLOW: result was falsy:', result)
       }
     } catch (err: any) {
+      console.error('REFINE FLOW: Error caught:', err)
       if (err.message === '402') {
         setError('No credits remaining. Upgrade at zorxm13.vercel.app/pricing')
       } else {
@@ -105,10 +112,12 @@ export default function RightPanel({
     }
     
     return [
-      "Add a wave divider at the bottom",
-      "Make this section darker and more dramatic",
-      "Add a CTA button below the subtitle",
-      "Convert layout to two columns"
+      "Change the background color and overlay",
+      "Add a new CTA button in the center",
+      "Change all text colors in this section",
+      "Restructure this section layout",
+      "Make this section more visually impactful",
+      "Add a divider at the bottom of this section"
     ]
   }
 
