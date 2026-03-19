@@ -21,6 +21,9 @@ const PageGenerator = () => {
   } | null>(null);
   const [lastInput, setLastInput] = React.useState<any>(null);
   const [showSignupPrompt, setShowSignupPrompt] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const [loadingStep, setLoadingStep] = React.useState(0);
   const { user, profile, refreshProfile } = useAuth();
 
   const loadingMessages = [
