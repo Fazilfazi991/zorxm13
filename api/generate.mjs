@@ -152,29 +152,68 @@ function extractJSON(raw) {
     .replace(/^```\s*/i, '')
     .replace(/\s*```$/i, '')
     .trim()
-  const first = cleaned.indexOf('{')
-  const last = cleaned.lastIndexOf('}')
-  if (first === -1 || last === -1) return null
-  cleaned = cleaned.substring(first, last + 1)
+  
+  const firstBrace = cleaned.indexOf('{')
+  const firstBracket = cleaned.indexOf('[')
+  const start = (firstBrace !== -1 && firstBracket !== -1) 
+    ? Math.min(firstBrace, firstBracket) 
+    : Math.max(firstBrace, firstBracket)
+  
+  if (start === -1) return null
+  let jsonStr = cleaned.substring(start)
+
+  function repairTruncated(str) {
+    let depth = 0
+    let inString = false
+    let escaped = false
+    
+    for (let i = 0; i < str.length; i++) {
+      const c = str[i]
+      if (escaped) { escaped = false; continue }
+      if (c === '\\' && inString) { escaped = true; continue }
+      if (c === '"') inString = !inString
+      if (!inString) {
+        if (c === '{' || c === '[') depth++
+        if (c === '}' || c === ']') depth--
+      }
+    }
+    
+    let repaired = str
+    if (inString) repaired += '"'
+    
+    let braceDepth = 0
+    let bracketDepth = 0
+    inString = false
+    for (let i = 0; i < repaired.length; i++) {
+      const c = repaired[i]
+      if (c === '"') inString = !inString
+      if (!inString) {
+        if (c === '{') braceDepth++
+        if (c === '}') braceDepth--
+        if (c === '[') bracketDepth++
+        if (c === ']') bracketDepth--
+      }
+    }
+    
+    while (bracketDepth > 0) { repaired += ']'; bracketDepth-- }
+    while (braceDepth > 0) { repaired += '}'; braceDepth-- }
+    
+    return repaired
+  }
+
   try {
-    return JSON.parse(cleaned)
+    const lastBrace = jsonStr.lastIndexOf('}')
+    const lastBracket = jsonStr.lastIndexOf(']')
+    const end = Math.max(lastBrace, lastBracket)
+    if (end !== -1) {
+      return JSON.parse(jsonStr.substring(0, end + 1))
+    }
+    return JSON.parse(jsonStr)
   } catch (e1) {
-    const match = e1.message.match(/position (\d+)/)
-    const pos = match ? parseInt(match[1]) : 0
-    console.error('[parse] Error:', e1.message)
-    console.error('[parse] At position:', pos)
-    console.error('[parse] Context:', 
-      cleaned.substring(
-        Math.max(0, pos - 80), pos + 80
-      )
-    )
     try {
-      return JSON.parse(
-        cleaned.replace(/,(\s*[}\]])/g, '$1')
-      )
+      return JSON.parse(repairTruncated(jsonStr))
     } catch (e2) {
-      console.error('[parse] Fixed also failed:', 
-        e2.message)
+      console.error('[parse] repair also failed:', e2.message)
       return null
     }
   }
@@ -366,7 +405,7 @@ async function tryKimiModel(prompt, systemPrompt, useThinking = false) {
   return data.choices?.[0]?.message?.content
 }
 
-async function tryClaudeModel(prompt, systemPrompt, model = 'claude-sonnet-4-5-20250929') {
+async function tryClaudeModel(prompt, systemPrompt, model = 'claude-sonnet-4-5-20250929', maxTokens = 4096) {
   console.log('[claude] attempting call...')
   console.log('[claude] API key present:', !!process.env.ANTHROPIC_API_KEY)
   console.log('[claude] API key prefix:', process.env.ANTHROPIC_API_KEY?.substring(0, 8))
@@ -382,7 +421,7 @@ async function tryClaudeModel(prompt, systemPrompt, model = 'claude-sonnet-4-5-2
       },
       body: JSON.stringify({
         model,
-        max_tokens: 4096,
+        max_tokens: maxTokens,
         system: systemPrompt,
         messages: [
           { role: 'user', content: prompt }
@@ -409,12 +448,12 @@ async function routeToModel(generationType, prompt, systemPrompt, contextJson) {
   const chains = {
     'page': [
       () => tryKimiModel(prompt, systemPrompt),
-      () => tryClaudeModel(prompt, systemPrompt),
+      () => tryClaudeModel(prompt, systemPrompt, 'claude-sonnet-4-5-20250929', 8192),
       () => tryGeminiModel(prompt, 'gemini-2.5-flash', 0, systemPrompt)
     ],
     'template': [
       () => tryKimiModel(prompt, systemPrompt),
-      () => tryClaudeModel(prompt, systemPrompt),
+      () => tryClaudeModel(prompt, systemPrompt, 'claude-sonnet-4-5-20250929', 8192),
       () => tryGeminiModel(prompt, 'gemini-2.5-flash', 0, systemPrompt)
     ],
     'refine': [
