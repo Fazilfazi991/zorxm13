@@ -261,6 +261,7 @@ function extractJSON(raw) {
       console.error('[parse] Fixed also failed:', 
         e2.message)
       return null
+    }
   }
 }
 
