@@ -328,6 +328,10 @@ function deepCleanElements(obj) {
 }
 
 async function tryKimiModel(prompt, systemPrompt, useThinking = false) {
+  console.log('[kimi] attempting call...')
+  console.log('[kimi] API key present:', !!(process.env.KIMI_API_KEY || process.env.MOONSHOT_API_KEY))
+  console.log('[kimi] API key prefix:', (process.env.KIMI_API_KEY || process.env.MOONSHOT_API_KEY)?.substring(0, 8))
+
   const model = useThinking 
     ? 'moonshot-v1-8k-thinking' 
     : 'moonshot-v1-8k'
@@ -352,13 +356,21 @@ async function tryKimiModel(prompt, systemPrompt, useThinking = false) {
     }
   )
   
+  console.log('[kimi] response status:', response.status)
+  const responseText = await response.text()
+  console.log('[kimi] raw response first 200:', responseText.substring(0, 200))
+
   if (!response.ok) throw new Error(`Kimi ${response.status}`)
-  const data = await response.json()
+  
+  const data = JSON.parse(responseText)
   return data.choices?.[0]?.message?.content
 }
 
 async function tryClaudeModel(prompt, systemPrompt, model = 'claude-sonnet-4-6') {
-  // Using user supplied model ID exactly as requested
+  console.log('[claude] attempting call...')
+  console.log('[claude] API key present:', !!process.env.ANTHROPIC_API_KEY)
+  console.log('[claude] API key prefix:', process.env.ANTHROPIC_API_KEY?.substring(0, 8))
+
   const response = await fetch(
     'https://api.anthropic.com/v1/messages',
     {
@@ -379,6 +391,7 @@ async function tryClaudeModel(prompt, systemPrompt, model = 'claude-sonnet-4-6')
     }
   )
   
+  console.log('[claude] response status:', response.status)
   if (!response.ok) throw new Error(`Claude ${response.status}`)
   const data = await response.json()
   return data.content?.[0]?.text
@@ -393,32 +406,37 @@ async function routeToModel(generationType, prompt, systemPrompt, contextJson) {
     'page': [
       () => tryKimiModel(prompt, systemPrompt),
       () => tryClaudeModel(prompt, systemPrompt),
-      () => tryGeminiModel('gemini-2.5-flash', prompt, 0, systemPrompt)
+      () => tryGeminiModel(prompt, 'gemini-2.5-flash', 0, systemPrompt)
+    ],
+    'template': [
+      () => tryKimiModel(prompt, systemPrompt),
+      () => tryClaudeModel(prompt, systemPrompt),
+      () => tryGeminiModel(prompt, 'gemini-2.5-flash', 0, systemPrompt)
     ],
     'refine': [
       () => tryClaudeModel(prompt, systemPrompt),
       () => tryKimiModel(prompt, systemPrompt),
-      () => tryGeminiModel('gemini-2.5-flash', prompt, 0, systemPrompt)
+      () => tryGeminiModel(prompt, 'gemini-2.5-flash', 0, systemPrompt)
     ],
     'section': [
       () => tryKimiModel(prompt, systemPrompt),
       () => tryClaudeModel(prompt, systemPrompt),
-      () => tryGeminiModel('gemini-2.5-flash', prompt, 0, systemPrompt)
+      () => tryGeminiModel(prompt, 'gemini-2.5-flash', 0, systemPrompt)
     ],
     'copywriting': [
       () => tryClaudeModel(prompt, systemPrompt),
       () => tryKimiModel(prompt, systemPrompt),
-      () => tryGeminiModel('gemini-2.5-flash', prompt, 0, systemPrompt)
+      () => tryGeminiModel(prompt, 'gemini-2.5-flash', 0, systemPrompt)
     ],
     'seo': [
       () => tryClaudeModel(prompt, systemPrompt, 'claude-haiku-4-5-20251001'),
       () => tryKimiModel(prompt, systemPrompt),
-      () => tryGeminiModel('gemini-2.5-flash', prompt, 0, systemPrompt)
+      () => tryGeminiModel(prompt, 'gemini-2.5-flash', 0, systemPrompt)
     ],
     'palette': [
       () => tryClaudeModel(prompt, systemPrompt, 'claude-haiku-4-5-20251001'),
       () => tryKimiModel(prompt, systemPrompt),
-      () => tryGeminiModel('gemini-2.5-flash', prompt, 0, systemPrompt)
+      () => tryGeminiModel(prompt, 'gemini-2.5-flash', 0, systemPrompt)
     ]
   }
   
@@ -434,7 +452,8 @@ async function routeToModel(generationType, prompt, systemPrompt, contextJson) {
         return result
       }
     } catch (err) {
-      console.log(`[router] model ${i+1} failed: ${err.message}`)
+      console.log(`[router] model ${i+1} failed:`, err.message)
+      console.log(`[router] full error:`, err)
       lastError = err
     }
   }
@@ -469,7 +488,7 @@ async function tryGeminiModel(
             }]
           }],
           generationConfig: {
-            temperature: 0.3,
+            temperature: 0.7,
             maxOutputTokens: 8192,
             thinkingConfig: {
               thinkingBudget: thinkingBudget
@@ -512,6 +531,35 @@ async function tryGeminiModel(
     console.error(`[gemini] ${modelName} failed:`, 
       e.message)
     return null
+  }
+}
+
+async function generatePageInChunks(prompt, systemPrompt, generationType) {
+  const part1 = await routeToModel(generationType,
+    prompt + '\n\n====\nGenerate ONLY the first 3 sections. Return a JSON array of 3 Section objects only.',
+    systemPrompt, '')
+  
+  const part2 = await routeToModel(generationType,
+    prompt + '\n\n====\nGenerate ONLY the last 3 sections (features/pricing/cta/footer type sections). Return a JSON array of 3 Section objects only.',
+    systemPrompt, '')
+
+  let sections1 = extractJSON(part1)
+  let sections2 = extractJSON(part2)
+
+  // sometimes it returns an object, sometimes array
+  const group1 = Array.isArray(sections1) ? sections1 : (sections1?.sections || sections1?.elements || sections1?.content || [])
+  const group2 = Array.isArray(sections2) ? sections2 : (sections2?.sections || sections2?.elements || sections2?.content || [])
+  
+  if (generationType === 'template') {
+    return {
+      title: 'Generated Page',
+      sections: [...group1, ...group2]
+    }
+  } else {
+    return {
+      type: 'elementor',
+      elements: [...group1, ...group2]
+    }
   }
 }
 
@@ -628,24 +676,8 @@ DESIGN RULES:
 
 Return ONLY raw JSON. No markdown. No explanation.`
 
-      let rawText
-      let modelUsed = 'kimi'
-      try {
-        console.log('[template] trying Kimi K2.5')
-        rawText = await tryKimiModel(templatePrompt, systemPrompt)
-      } catch(e) {
-        console.log('[template] Kimi failed, trying Claude:', e.message)
-        modelUsed = 'claude'
-        try {
-          rawText = await tryClaudeModel(templatePrompt, systemPrompt)
-        } catch(e2) {
-          console.log('[template] Claude failed, trying Gemini:', e2.message)
-          modelUsed = 'gemini'
-          rawText = await tryGeminiModel(templatePrompt, 'gemini-2.5-flash', 0, systemPrompt)
-        }
-      }
+      const parsed = await generatePageInChunks(templatePrompt, systemPrompt, 'template')
 
-      const parsed = extractJSON(rawText)
       if (!parsed) {
         return res.status(500).json({ error: 'Failed to parse template JSON' })
       }
@@ -655,7 +687,7 @@ Return ONLY raw JSON. No markdown. No explanation.`
       return res.status(200).json({ 
         success: true, 
         data: parsed,
-        model_used: modelUsed,
+        model_used: 'kimi',
         json: JSON.stringify(parsed)
       })
     }
@@ -669,19 +701,25 @@ Return ONLY raw JSON. No markdown. No explanation.`
     const userPrompt = buildUserPrompt(body)
     const systemPrompt = getSystemPrompt(body.pageType)
 
-    const rawResponse = await routeToModel(
-      body.pageType, 
-      userPrompt, // using the highly formatted generic WPCraft prompt generator
-      systemPrompt,
-      body.contextJson || ''
-    )
-
-    console.log('[parse] Raw first 300:', 
-      rawResponse.substring(0, 300))
-    console.log('[parse] Raw last 200:', 
-      rawResponse.substring(rawResponse.length - 200))
-
-    const parsed = extractJSON(rawResponse)
+    let rawResponse
+    let parsed
+    
+    if (body.pageType === 'page') {
+      parsed = await generatePageInChunks(userPrompt, systemPrompt, 'page')
+      if (parsed) {
+        rawResponse = JSON.stringify(parsed)
+      } else {
+        throw new Error('All models failed to chunk compile page layout')
+      }
+    } else {
+      rawResponse = await routeToModel(
+        body.pageType, 
+        userPrompt,
+        systemPrompt,
+        body.contextJson || ''
+      )
+      parsed = extractJSON(rawResponse)
+    }
     
     if (parsed) {
       deepCleanElements(parsed)
