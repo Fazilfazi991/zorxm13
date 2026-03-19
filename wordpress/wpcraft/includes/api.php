@@ -175,6 +175,11 @@ function wpcraft_publish_page($request) {
 }
 
 function wpcraft_ai_generate($request) {
+  // TEMP DEBUG - remove after fix
+  error_reporting(E_ALL);
+  ini_set('display_errors', 0);
+  ini_set('log_errors', 1);
+
   $body = $request->get_json_params();
   $prompt = sanitize_text_field(
     $body['prompt'] ?? ''
