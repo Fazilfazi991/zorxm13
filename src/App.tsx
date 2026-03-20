@@ -18,6 +18,7 @@ import WebDesign from "./pages/services/WebDesign";
 import BrandIdentity from "./pages/services/BrandIdentity";
 import FreeTools from "./pages/FreeTools";
 import PageGenerator from "./pages/tools/PageGenerator";
+import StreamingDemo from "./pages/tools/StreamingDemo";
 import Blogs from "./pages/Blogs";
 import WhatsAppButton from "./components/WhatsAppButton";
 import { ErrorBoundary } from "./components/ErrorBoundary";
@@ -53,6 +54,7 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/seo-tools" element={<SEOCopilotTools />} />
           <Route path="/ai-generator" element={<ErrorBoundary><PageGenerator /></ErrorBoundary>} />
+          <Route path="/streaming" element={<StreamingDemo />} />
           
           {/* Auth Routes */}
           <Route path="/login" element={<Login />} />

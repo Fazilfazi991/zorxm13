@@ -265,7 +265,7 @@ function wpcraft_ai_generate($request) {
   $response = wp_remote_post(
     'https://zorxm13.vercel.app/api/generate',
     [
-      'timeout' => 60,
+      'timeout' => 180,
       'headers' => [
         'Content-Type' => 'application/json'
       ],
@@ -367,7 +367,7 @@ function wpcraft_ai_seo($request) {
   $response = wp_remote_post(
     'https://zorxm13.vercel.app/api/generate',
     [
-      'timeout' => 60,
+      'timeout' => 180,
       'headers' => ['Content-Type' => 'application/json'],
       'body' => wp_json_encode($payload)
     ]
@@ -424,7 +424,7 @@ function wpcraft_ai_palette($request) {
   $response = wp_remote_post(
     'https://zorxm13.vercel.app/api/generate',
     [
-      'timeout' => 45,
+      'timeout' => 180,
       'headers' => ['Content-Type' => 'application/json'],
       'body' => wp_json_encode($payload)
     ]
