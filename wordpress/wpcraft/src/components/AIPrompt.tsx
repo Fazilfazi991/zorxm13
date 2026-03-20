@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { PageData } from '../types/schema'
-import { generatePage, generateTemplate } from '../lib/api'
+import { generateTemplate } from '../lib/api'
+import { useStreamingGeneration } from '../hooks/useStreamingGeneration'
 
 type AIMode = 'full-page' | 'add-section' | 'template'
 
@@ -22,7 +23,7 @@ export default function AIPrompt({
   onGenerate, onClose
 }: Props) {
   const [prompt, setPrompt] = useState('')
-  const [loading, setLoading] = useState(false)
+  const { generate, loading } = useStreamingGeneration()
   const [error, setError] = useState('')
   const [mode, setMode] = 
     useState<AIMode>(
@@ -32,6 +33,28 @@ export default function AIPrompt({
     )
   const [showConfirm, setShowConfirm] = 
     useState(false)
+
+  const [loadingTextIdx, setLoadingTextIdx] = useState(0)
+  const loadingTexts = [
+    "Analyzing your business...",
+    "Designing your layout...",
+    "Writing your copy...",
+    "Building your sections...",
+    "Almost ready..."
+  ]
+
+  useEffect(() => {
+    if (!loading) {
+      setLoadingTextIdx(0)
+      return
+    }
+    const interval = setInterval(() => {
+      setLoadingTextIdx(prev => 
+        prev < loadingTexts.length - 1 ? prev + 1 : prev
+      )
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [loading])
 
   const fullPageExamples = [
     'Landing page for an SEO agency in Dubai',
@@ -65,16 +88,19 @@ export default function AIPrompt({
       return
     }
 
-    setLoading(true)
     setError('')
     setShowConfirm(false)
 
     try {
-      const result = await generatePage(
-        postId, prompt, nonce, apiBase,
-        mode === 'add-section' 
-          ? 'section' 
-          : 'page'
+      const result = await generate(
+        `${apiBase}generate`,
+        {
+          post_id: postId,
+          prompt,
+          nonce,
+          generation_type: mode === 'add-section' ? 'section' : 'page',
+          source: 'wpcraft-plugin'
+        }
       )
 
       if (result.success && result.data) {
@@ -225,7 +251,7 @@ export default function AIPrompt({
                   border-t-white rounded-full 
                   animate-spin inline-block">
                 </span>
-                Generating your page...
+                {loadingTexts[loadingTextIdx]}
               </span>
             ) : 'Generate Full Page ✦'}
           </button>
@@ -488,10 +514,13 @@ export default function AIPrompt({
                 text-white-[#166534] hover:bg-[#145228]'
                 }`}>
               {loading ? (
-                <span className="w-4 h-4 
-                  border-2 border-white/30 
-                  border-t-white rounded-full 
-                  animate-spin inline-block">
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 
+                    border-2 border-white/30 
+                    border-t-white rounded-full 
+                    animate-spin inline-block">
+                  </span>
+                  <span>{loadingTexts[loadingTextIdx]}</span>
                 </span>
               ) : mode === 'full-page' 
                 ? 'Regenerate' 

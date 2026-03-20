@@ -262,6 +262,25 @@ function wpcraft_ai_generate($request) {
     $payload['ctaText'] = sanitize_text_field($body['ctaText'] ?? 'Get Started');
   }
 
+  // FIX #1 & #4: Early Streaming Response
+  if ($generation_type === 'page' || $generation_type === 'section') {
+      header('Access-Control-Allow-Origin: *');
+      header('Content-Type: application/json; charset=utf-8');
+      header('Transfer-Encoding: chunked');
+      header('Cache-Control: no-cache');
+      if (extension_loaded('zlib')) ob_start('ob_gzhandler');
+
+      // Send immediate response with skeleton
+      echo json_encode([
+          'type' => 'skeleton',
+          'sections' => 6,
+          'message' => 'Analyzing your request...'
+      ]) . "\n";
+      if (ob_get_level() > 0) ob_end_flush();
+      flush();
+  }
+
+  set_time_limit(200);
   $response = wp_remote_post(
     'https://zorxm13.vercel.app/api/generate',
     [
@@ -327,11 +346,38 @@ function wpcraft_ai_generate($request) {
     $wpcraft_data['sections'] = $vercel_payload['sections'] ?? $vercel_payload['elements'] ?? [];
   }
 
-  error_log('WPCRAFT DATA KEYS: ' . implode(',', array_keys($wpcraft_data ?? [])));
+  // error_log('WPCRAFT DATA KEYS: ' . implode(',', array_keys($wpcraft_data ?? []))); // Removed as part of streaming logic
+  
+  // Handle streaming response for 'page' and 'section' generation types
+  if ($generation_type === 'page' || $generation_type === 'section') {
+      if (!$data['success'] || empty($data['data'])) {
+          echo json_encode(['type' => 'error', 'data' => ['message' => $data['error'] ?? 'Generation failed']]) . "\n";
+          flush();
+          exit;
+      }
+      
+      $sections = isset($data['data']['elements']) ? $data['data']['elements'] : $data['data']['sections']; // Assuming 'sections' is the key for page/section data
+      foreach ($sections as $index => $section) {
+          echo json_encode([
+              'type' => 'section',
+              'index' => $index + 1,
+              'total' => count($sections),
+              'data' => $section
+          ]) . "\n";
+          usleep(100000); // 0.1s delay
+          flush();
+      }
+      
+      echo json_encode(['type' => 'complete', 'timestamp' => time()]) . "\n";
+      flush();
+      exit;
+  }
 
+  // Fallback for non-streaming endpoints (e.g., 'refine')
   return rest_ensure_response([
-    'success' => true,
-    'data' => $wpcraft_data,
+    'success' => $data['success'] ?? false,
+    'data' => $wpcraft_data, // Use $wpcraft_data for non-streaming, already formatted
+    'error' => $data['error'] ?? null,
     'credits_remaining' => $data['credits_remaining'] ?? null
   ]);
 }
@@ -364,6 +410,7 @@ function wpcraft_ai_seo($request) {
     $payload['dev_mode'] = true;
   }
 
+  set_time_limit(200);
   $response = wp_remote_post(
     'https://zorxm13.vercel.app/api/generate',
     [
@@ -421,6 +468,7 @@ function wpcraft_ai_palette($request) {
     $payload['dev_mode'] = true;
   }
 
+  set_time_limit(200);
   $response = wp_remote_post(
     'https://zorxm13.vercel.app/api/generate',
     [
