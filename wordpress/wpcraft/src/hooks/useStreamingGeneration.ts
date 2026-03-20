@@ -103,7 +103,7 @@ export function useStreamingGeneration() {
       }
 
       setLoading(false);
-      return { success: true, data: { type: 'elementor', elements: localSections } };
+      return { success: true, data: { type: 'wpcraft', sections: localSections } };
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       setError(message);

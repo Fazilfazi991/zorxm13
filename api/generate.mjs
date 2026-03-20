@@ -56,8 +56,16 @@ function getRelevantExamples(userPrompt, generationType) {
   // Sort by relevance score descending
   scored.sort((a, b) => b.score - a.score)
 
-  // Take top 2 most relevant
-  let topExamples = scored.slice(0, 2).map(s => s.skill.example)
+  // If no examples scored > 0, inject 10 default high-quality examples to force templates!
+  if (scored.length === 0) {
+    const defaultKeys = Object.keys(ALL_SKILLS).slice(0, 10);
+    defaultKeys.forEach(k => {
+      scored.push({ key: k, skill: ALL_SKILLS[k], score: 1 });
+    });
+  }
+
+  // Take top 15 most relevant instead of 2 mapping full design systems
+  let topExamples = scored.slice(0, 15).map(s => s.skill.example)
 
   // If no keyword matches found, use smart defaults
   if (topExamples.length === 0) {

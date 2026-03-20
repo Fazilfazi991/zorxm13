@@ -256,10 +256,27 @@ export default function AIPrompt({
             ) : 'Generate Full Page ✦'}
           </button>
 
-          <p className="text-center text-xs 
-            text-[#94A3B8] mt-2">
-            Ctrl+Enter to generate
-          </p>
+          {!loading && (
+            <p className="text-center text-xs 
+              text-[#94A3B8] mt-2">
+              Ctrl+Enter to generate
+            </p>
+          )}
+
+          {loading && (
+            <div className="w-full mt-6 space-y-3 max-h-[30vh] overflow-y-auto pr-2">
+               <div className="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wide">
+                 {loadingTexts[loadingTextIdx]}
+               </div>
+               {Array.from({ length: 4 }).map((_, i) => (
+                 <div key={i} className="w-full bg-slate-50 rounded-xl p-4 border border-slate-100 animate-pulse">
+                   <div className="w-1/4 h-3 bg-slate-200 rounded mb-3" />
+                   <div className="w-full h-2 bg-slate-200 rounded mb-1.5" />
+                   <div className="w-5/6 h-2 bg-slate-200 rounded" />
+                 </div>
+               ))}
+            </div>
+          )}
         </div>
       </div>
     )
