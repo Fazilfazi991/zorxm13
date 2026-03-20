@@ -16,7 +16,7 @@ function updateSettings(
       ...element.settings,
       [key]: value
     }
-  })
+  } as Partial<Element>)
 }
 
 export default function ElementSettings({ 
@@ -35,14 +35,14 @@ export default function ElementSettings({
       ) && (
         <Field label="Text">
           <textarea
-            value={s.text || ''}
-            onChange={e => upd('text', e.target.value)}
+            value={(s as any).text || ''}
+            onChange={(e: any) => upd('text', e.target.value)}
             rows={element.type === 'text' ? 4 : 2}
-            className="w-full bg-white/5 
-              border border-white/10 rounded-lg
-              px-2.5 py-2 text-xs text-white/80
+            className="w-full bg-[#F8F9FA] 
+              border border-[#E2E8F0] rounded-lg
+              px-2.5 py-2 text-xs text-[#1A1A1A]
               resize-none focus:outline-none
-              focus:border-green-600/50"
+              focus:border-[#166534]"
           />
         </Field>
       )}
@@ -51,11 +51,11 @@ export default function ElementSettings({
       {element.type === 'heading' && (
         <Field label="Tag">
           <select
-            value={s.tag || 'h2'}
-            onChange={e => upd('tag', e.target.value)}
-            className="w-full bg-white/5 
-              border border-white/10 rounded-lg
-              px-2.5 py-1.5 text-xs text-white/80
+            value={(s as any).tag || 'h2'}
+            onChange={(e: any) => upd('tag', e.target.value)}
+            className="w-full bg-[#F8F9FA] 
+              border border-[#E2E8F0] rounded-lg
+              px-2.5 py-1.5 text-xs text-[#64748B]
               focus:outline-none">
             {['h1','h2','h3','h4','h5','p']
               .map(t => (
@@ -76,14 +76,14 @@ export default function ElementSettings({
             <input
               type="range"
               min={10} max={120}
-              value={s.fontSize || 16}
-              onChange={e => upd('fontSize', 
+              value={(s as any).fontSize || 16}
+              onChange={(e: any) => upd('fontSize', 
                 parseInt(e.target.value))}
-              className="flex-1"
+              className="flex-1 accent-[#166534]"
             />
             <span className="text-xs 
-              text-white/50 w-8 text-right">
-              {s.fontSize || 16}
+              text-[#64748B] w-8 text-right">
+              {(s as Record<string, any>).fontSize || 16}
             </span>
           </div>
         </Field>
@@ -95,12 +95,12 @@ export default function ElementSettings({
       ) && (
         <Field label="Weight">
           <select
-            value={s.fontWeight || '400'}
-            onChange={e => upd('fontWeight', 
+            value={(s as any).fontWeight || '400'}
+            onChange={(e: any) => upd('fontWeight', 
               e.target.value)}
-            className="w-full bg-white/5 
-              border border-white/10 rounded-lg
-              px-2.5 py-1.5 text-xs text-white/80
+            className="w-full bg-[#F8F9FA] 
+              border border-[#E2E8F0] rounded-lg
+              px-2.5 py-1.5 text-xs text-[#64748B]
               focus:outline-none">
             <option value="300">Light</option>
             <option value="400">Regular</option>
@@ -118,12 +118,12 @@ export default function ElementSettings({
       ) && (
         <Field label="Font">
           <select
-            value={s.fontFamily || 'Inter'}
-            onChange={e => upd('fontFamily', 
+            value={(s as any).fontFamily || 'Inter'}
+            onChange={(e: any) => upd('fontFamily', 
               e.target.value)}
-            className="w-full bg-white/5 
-              border border-white/10 rounded-lg
-              px-2.5 py-1.5 text-xs text-white/80
+            className="w-full bg-[#F8F9FA] 
+              border border-[#E2E8F0] rounded-lg
+              px-2.5 py-1.5 text-xs text-[#64748B]
               focus:outline-none">
             {['Inter','DM Sans','Barlow',
               'Roboto','Poppins','Montserrat',
@@ -141,8 +141,8 @@ export default function ElementSettings({
       ) && (
         <Field label="Text color">
           <ColorInput
-            value={s.color || '#ffffff'}
-            onChange={v => upd('color', v)}
+            value={(s as any).color || '#ffffff'}
+            onChange={(v: any) => upd('color', v)}
           />
         </Field>
       )}
@@ -159,9 +159,9 @@ export default function ElementSettings({
                 onClick={() => upd('align', a)}
                 className={`flex-1 py-1 text-xs 
                   rounded-md transition-colors
-                  ${s.align === a
-                    ? 'bg-green-700 text-white'
-                    : 'bg-white/5 text-white/50 hover:bg-white/10'
+                  ${(s as Record<string, any>).align === a
+                    ? 'bg-[#166534] text-white'
+                    : 'bg-[#F8F9FA] text-[#64748B] hover:bg-[#E2E8F0]'
                   }`}>
                 {a === 'left' ? '⬤' : 
                  a === 'center' ? '⬤' : '⬤'}
@@ -177,8 +177,8 @@ export default function ElementSettings({
         <>
           <Field label="Button color">
             <ColorInput
-              value={s.backgroundColor || '#166534'}
-              onChange={v => upd(
+              value={(s as any).backgroundColor || '#166534'}
+              onChange={(v: any) => upd(
                 'backgroundColor', v
               )}
             />
@@ -186,14 +186,14 @@ export default function ElementSettings({
           <Field label="URL">
             <input
               type="text"
-              value={s.url || ''}
-              onChange={e => upd('url', 
+              value={(s as any).url || ''}
+              onChange={(e: any) => upd('url', 
                 e.target.value)}
               placeholder="https://"
-              className="w-full bg-white/5 
-                border border-white/10 rounded-lg
+              className="w-full bg-[#F8F9FA] 
+                border border-[#E2E8F0] rounded-lg
                 px-2.5 py-1.5 text-xs 
-                text-white/80 focus:outline-none"
+                text-[#64748B] focus:outline-none"
             />
           </Field>
           <Field label="Border radius">
@@ -202,14 +202,14 @@ export default function ElementSettings({
               <input
                 type="range"
                 min={0} max={50}
-                value={s.borderRadius || 8}
-                onChange={e => upd('borderRadius',
+                value={(s as any).borderRadius || 8}
+                onChange={(e: any) => upd('borderRadius',
                   parseInt(e.target.value))}
-                className="flex-1"
+                className="flex-1 accent-[#166534]"
               />
               <span className="text-xs 
-                text-white/50 w-8 text-right">
-                {s.borderRadius || 8}px
+                text-[#64748B] w-8 text-right">
+                {(s as Record<string, any>).borderRadius || 8}px
               </span>
             </div>
           </Field>
@@ -222,19 +222,19 @@ export default function ElementSettings({
           <Field label="Image URL">
             <input
               type="text"
-              value={s.url || ''}
-              onChange={e => upd('url', 
+              value={(s as any).url || ''}
+              onChange={(e: any) => upd('url', 
                 e.target.value)}
               placeholder="https://..."
-              className="w-full bg-white/5 
-                border border-white/10 rounded-lg
+              className="w-full bg-[#F8F9FA] 
+                border border-[#E2E8F0] rounded-lg
                 px-2.5 py-2 text-xs 
-                text-white/80 focus:outline-none"
+                text-[#64748B] focus:outline-none"
             />
           </Field>
-          {s.url && (
+          {(s as any).url && (
             <img 
-              src={s.url} 
+              src={(s as any).url} 
               alt="" 
               className="w-full rounded-lg 
                 object-cover"
@@ -244,27 +244,27 @@ export default function ElementSettings({
           <Field label="Alt text">
             <input
               type="text"
-              value={s.alt || ''}
-              onChange={e => upd('alt', 
+              value={(s as any).alt || ''}
+              onChange={(e: any) => upd('alt', 
                 e.target.value)}
-              className="w-full bg-white/5 
-                border border-white/10 rounded-lg
+              className="w-full bg-[#F8F9FA] 
+                border border-[#E2E8F0] rounded-lg
                 px-2.5 py-1.5 text-xs 
-                text-white/80 focus:outline-none"
+                text-[#64748B] focus:outline-none"
             />
           </Field>
           <Field label="Height (px)">
             <input
               type="number"
-              value={s.height || ''}
-              onChange={e => upd('height',
+              value={(s as any).height || ''}
+              onChange={(e: any) => upd('height',
                 parseInt(e.target.value) || undefined
               )}
               placeholder="Auto"
-              className="w-full bg-white/5 
-                border border-white/10 rounded-lg
+              className="w-full bg-[#F8F9FA] 
+                border border-[#E2E8F0] rounded-lg
                 px-2.5 py-1.5 text-xs 
-                text-white/80 focus:outline-none"
+                text-[#64748B] focus:outline-none"
             />
           </Field>
         </>
@@ -279,21 +279,21 @@ export default function ElementSettings({
               <input
                 type="range"
                 min={4} max={200}
-                value={s.height || 40}
-                onChange={e => upd('height',
+                value={(s as Record<string, any>).height || 40}
+                onChange={(e: any) => upd('height',
                   parseInt(e.target.value))}
-                className="flex-1"
+                className="flex-1 accent-[#166534]"
               />
               <span className="text-xs 
-                text-white/50 w-10 text-right">
-                {s.height || 40}px
+                text-[#64748B] w-10 text-right">
+                {(s as Record<string, any>).height || 40}px
               </span>
             </div>
           </Field>
           <Field label="Color">
             <ColorInput
-              value={s.backgroundColor || ''}
-              onChange={v => upd(
+              value={(s as any).backgroundColor || ''}
+              onChange={(v: any) => upd(
                 'backgroundColor', v
               )}
               placeholder="transparent"
@@ -308,14 +308,14 @@ export default function ElementSettings({
           <input
             type="range"
             min={0} max={100}
-            value={s.marginBottom || 0}
-            onChange={e => upd('marginBottom',
+            value={(s as any).marginBottom || 0}
+            onChange={(e: any) => upd('marginBottom',
               parseInt(e.target.value))}
             className="flex-1"
           />
           <span className="text-xs 
-            text-white/50 w-8 text-right">
-            {s.marginBottom || 0}
+            text-[#94A3B8] w-8 text-right">
+            {(s as any).marginBottom || 0}
           </span>
         </div>
       </Field>
@@ -334,7 +334,7 @@ function Field({
   return (
     <div>
       <label className="text-xs 
-        text-white/30 block mb-1.5 
+        text-[#94A3B8] block mb-1.5 
         font-medium">
         {label}
       </label>
@@ -366,7 +366,7 @@ function ColorInput({
         />
         <div
           className="w-7 h-7 rounded-md 
-            border border-white/20 flex-shrink-0"
+            border border-[#E2E8F0] flex-shrink-0"
           style={{ 
             background: value || '#ffffff' 
           }}
@@ -377,11 +377,11 @@ function ColorInput({
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder || '#000000'}
-        className="flex-1 bg-white/5 
-          border border-white/10 rounded-lg
-          px-2 py-1.5 text-xs text-white/80
+        className="flex-1 bg-[#F8F9FA] 
+          border border-[#E2E8F0] rounded-lg
+          px-2 py-1.5 text-xs text-[#1A1A1A]
           font-mono focus:outline-none
-          focus:border-green-600/50"
+          focus:border-[#166534]"
       />
     </div>
   )

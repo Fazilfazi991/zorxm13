@@ -318,32 +318,7 @@ class WPCraft_V2 {
       }
     }
     
-    if (empty($existing_data)) {
-      $elementor_data = get_post_meta(
-        $post_id, '_elementor_data', true
-      );
-      if ($elementor_data) {
-        $decoded = is_string($elementor_data) 
-          ? json_decode($elementor_data, true) 
-          : (is_array($elementor_data) ? $elementor_data : null);
-          
-        if ($decoded) {
-          require_once WPCRAFT_DIR . 
-            'includes/api.php';
-          $converted = wpcraft_convert_from_elementor([
-            'elements' => $decoded
-          ]);
-          if (!empty($converted['sections'])) {
-            $existing_data = wp_json_encode($converted);
-            // Critical: wp_slash prevents WordPress from breaking JSON strings
-            update_post_meta(
-              $post_id, '_wpcraft_data', 
-              wp_slash($existing_data)
-            );
-          }
-        }
-      }
-    }
+    // Legacy Elementor conversion removed. WPCraft is now strictly standalone.
     
     // Parse it back to array to ensure validity and allow safe JSON printing
     $page_data_obj = is_string($existing_data) 
@@ -543,14 +518,9 @@ class WPCraft_V2 {
               $has_wpcraft = get_post_meta(
                 $page->ID, '_wpcraft_data', true
               );
-              $has_elementor = get_post_meta(
-                $page->ID, '_elementor_data', true
-              );
               $badge = '';
               if ($has_wpcraft) {
                 $badge = '<span style="background:#d4edda;color:#155724;font-size:10px;padding:1px 6px;border-radius:10px;margin-left:6px;">WPCraft</span>';
-              } elseif ($has_elementor) {
-                $badge = '<span style="background:#cce5ff;color:#004085;font-size:10px;padding:1px 6px;border-radius:10px;margin-left:6px;">Elementor</span>';
               }
             ?>
             <tr>
@@ -601,9 +571,7 @@ class WPCraft_V2 {
           color:#444;">
           <strong>✦ WPCraft</strong> — 
           Pages marked "WPCraft" are fully 
-          managed by WPCraft. Pages marked 
-          "Elementor" will be automatically 
-          converted when you open them.
+          managed by WPCraft.
         </p>
       </div>
       

@@ -140,18 +140,18 @@ export default function AIPrompt({
     return (
       <div className="absolute inset-0 
         z-50 flex items-center 
-        justify-center bg-black/90">
+        justify-center bg-[rgba(15,23,42,0.7)]">
         <div className="w-full max-w-lg 
-          mx-4 bg-[#1a1a1a] rounded-2xl 
-          border border-white/10 p-6">
+          mx-4 bg-white rounded-[16px] 
+          border border-[#E2E8F0] p-6">
           
           <div className="text-center mb-5">
-            <div className="text-2xl mb-2">✦</div>
-            <h2 className="text-white 
+            <div className="text-2xl mb-2 text-[#166534]">✦</div>
+            <h2 className="text-[#1A1A1A] 
               font-semibold text-lg">
               Generate your page
             </h2>
-            <p className="text-white/40 
+            <p className="text-[#64748B] 
               text-xs mt-1">
               Describe your business and 
               AI will build the full page
@@ -163,13 +163,13 @@ export default function AIPrompt({
             onChange={e => 
               setPrompt(e.target.value)}
             placeholder="e.g. Landing page for a digital marketing agency in Dubai targeting restaurants and cafes. Professional tone, green color scheme."
-            className="w-full bg-white/5 
-              border border-white/10 
+            className="w-full bg-[#F8F9FA] 
+              border border-[#E2E8F0] 
               rounded-xl px-4 py-3 text-sm 
-              text-white/80 
-              placeholder-white/20 
+              text-[#1A1A1A] 
+              placeholder-[#94A3B8] 
               resize-none focus:outline-none 
-              focus:border-green-600/50 mb-3"
+              focus:border-[#166534] mb-3"
             rows={3}
             autoFocus
             onKeyDown={e => {
@@ -187,10 +187,10 @@ export default function AIPrompt({
                 key={ex}
                 onClick={() => setPrompt(ex)}
                 className="text-xs px-2.5 py-1 
-                  rounded-full bg-white/5 
+                  rounded-full bg-[#F8F9FA] 
                   text-white/40 
-                  border border-white/10
-                  hover:bg-white/10 
+                  border border-[#E2E8F0]
+                  hover:bg-[#F1F5F9] 
                   hover:text-white/60 
                   transition-colors">
                 {ex}
@@ -200,9 +200,9 @@ export default function AIPrompt({
 
           {error && (
             <div className="mb-3 px-3 py-2 
-              bg-red-900/30 
-              border border-red-700/30 
-              rounded-lg text-xs text-red-400">
+              bg-[#FEF2F2] 
+              border border-[#FECACA] 
+              rounded-lg text-xs text-[#DC2626]">
               {error}
             </div>
           )}
@@ -211,9 +211,9 @@ export default function AIPrompt({
             onClick={handleGenerate}
             disabled={loading || !prompt.trim()}
             className="w-full py-3 rounded-xl 
-              bg-green-700 text-white 
+              bg-[#166534]-white 
               font-semibold text-sm 
-              hover:bg-green-600 
+              hover:bg-[#145228] 
               transition-colors
               disabled:opacity-40 
               disabled:cursor-not-allowed">
@@ -231,7 +231,7 @@ export default function AIPrompt({
           </button>
 
           <p className="text-center text-xs 
-            text-white/20 mt-2">
+            text-[#94A3B8] mt-2">
             Ctrl+Enter to generate
           </p>
         </div>
@@ -243,8 +243,8 @@ export default function AIPrompt({
   return (
     <div className="absolute bottom-0 
       left-0 right-0 z-50
-      bg-[#1a1a1a] border-t 
-      border-white/10"
+      bg-white border-t 
+      border-[#E2E8F0]"
       style={{
         animation: 'slideUp 0.25s ease'
       }}>
@@ -259,10 +259,10 @@ export default function AIPrompt({
       {/* Mode tabs */}
       <div className="flex items-center 
         justify-between px-4 pt-3 pb-2 
-        border-b border-white/10">
+        border-b border-[#E2E8F0]">
         
         <div className="flex gap-1 
-          bg-white/5 rounded-lg p-0.5">
+          bg-[#F8F9FA] rounded-lg p-0.5">
           <button
             onClick={() => {
               setMode('add-section')
@@ -274,8 +274,8 @@ export default function AIPrompt({
               font-medium rounded-md 
               transition-colors
               ${mode === 'add-section'
-                ? 'bg-green-700 text-white'
-                : 'text-white/40 hover:text-white/60'
+                ? 'bg-[#166534] text-white shadow-sm'
+                : 'text-[#64748B] hover:text-[#1A1A1A] hover:bg-[#F8F9FA]'
               }`}>
             ✦ Add section
           </button>
@@ -288,10 +288,10 @@ export default function AIPrompt({
             }}
             className={`px-3 py-1.5 text-xs 
               font-medium rounded-md 
-              transition-colors
+              transition-colors border
               ${mode === 'full-page'
-                ? 'bg-red-800 text-red-200'
-                : 'text-white/40 hover:text-white/60'
+                ? 'bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]'
+                : 'border-transparent text-[#64748B] hover:text-[#1A1A1A]'
               }`}>
             ⚠ Regenerate
           </button>
@@ -304,10 +304,10 @@ export default function AIPrompt({
             }}
             className={`px-3 py-1.5 text-xs 
               font-medium rounded-md 
-              transition-colors
+              transition-colors border
               ${mode === 'template'
-                ? 'bg-blue-700 text-white'
-                : 'text-white/40 hover:text-white/60'
+                ? 'bg-[#166534] text-white shadow-sm'
+                : 'border-transparent text-[#64748B] hover:text-[#1A1A1A]'
               }`}>
             ☆ Templates
           </button>
@@ -315,8 +315,8 @@ export default function AIPrompt({
 
         <button
           onClick={onClose}
-          className="text-white/30 
-            hover:text-white/60 
+          className="text-[#94A3B8] 
+            hover:text-[#1A1A1A] 
             text-lg leading-none px-2">
           ×
         </button>
@@ -325,7 +325,7 @@ export default function AIPrompt({
       <div className="p-4">
 
         {/* Mode description */}
-        <p className="text-xs text-white/30 
+        <p className="text-xs text-[#94A3B8] 
           mb-3">
           {mode === 'add-section'
             ? 'Describe the section you want to add — it will be appended to the bottom of your page.'
@@ -337,9 +337,9 @@ export default function AIPrompt({
 
         {error && (
           <div className="mb-3 px-3 py-2 
-            bg-red-900/30 
-            border border-red-700/30 
-            rounded-lg text-xs text-red-400">
+            bg-[#FEF2F2] 
+            border border-[#FECACA] 
+            rounded-lg text-xs text-[#DC2626]">
             {error}
           </div>
         )}
@@ -350,36 +350,36 @@ export default function AIPrompt({
             <button
               onClick={() => handleGenerateTemplate('saas')}
               disabled={loading}
-              className="group p-4 bg-[#1e1e1e] border border-white/10 rounded-xl hover:border-green-500 transition-all text-left flex flex-col gap-2 disabled:opacity-50"
+              className="group p-4 bg-[#F8F9FA] border border-[#E2E8F0] rounded-xl hover:border-[#166534] transition-all text-left flex flex-col gap-2 disabled:opacity-50"
             >
               <div className="text-xl group-hover:scale-110 transition-transform">🚀</div>
               <div>
-                <div className="text-xs font-bold text-white mb-0.5">SaaS Landing</div>
-                <div className="text-[10px] text-white/40 leading-tight">Hero, Features, Pricing, Testimonials</div>
+                <div className="text-xs font-bold text-[#1A1A1A] mb-0.5">SaaS Landing</div>
+                <div className="text-[10px] text-[#64748B] leading-tight">Hero, Features, Pricing, Testimonials</div>
               </div>
             </button>
 
             <button
               onClick={() => handleGenerateTemplate('agency')}
               disabled={loading}
-              className="group p-4 bg-[#1e1e1e] border border-white/10 rounded-xl hover:border-green-500 transition-all text-left flex flex-col gap-2 disabled:opacity-50"
+              className="group p-4 bg-[#F8F9FA] border border-[#E2E8F0] rounded-xl hover:border-[#166534] transition-all text-left flex flex-col gap-2 disabled:opacity-50"
             >
               <div className="text-xl group-hover:scale-110 transition-transform">🏢</div>
               <div>
-                <div className="text-xs font-bold text-white mb-0.5">Agency</div>
-                <div className="text-[10px] text-white/40 leading-tight">Hero, About, Services, Contact</div>
+                <div className="text-xs font-bold text-[#1A1A1A] mb-0.5">Agency</div>
+                <div className="text-[10px] text-[#64748B] leading-tight">Hero, About, Services, Contact</div>
               </div>
             </button>
 
             <button
               onClick={() => handleGenerateTemplate('portfolio')}
               disabled={loading}
-              className="group p-4 bg-[#1e1e1e] border border-white/10 rounded-xl hover:border-green-500 transition-all text-left flex flex-col gap-2 disabled:opacity-50"
+              className="group p-4 bg-[#F8F9FA] border border-[#E2E8F0] rounded-xl hover:border-[#166534] transition-all text-left flex flex-col gap-2 disabled:opacity-50"
             >
               <div className="text-xl group-hover:scale-110 transition-transform">🎨</div>
               <div>
-                <div className="text-xs font-bold text-white mb-0.5">Portfolio</div>
-                <div className="text-[10px] text-white/40 leading-tight">Hero, Gallery, Bio, Contact</div>
+                <div className="text-xs font-bold text-[#1A1A1A] mb-0.5">Portfolio</div>
+                <div className="text-[10px] text-[#64748B] leading-tight">Hero, Gallery, Bio, Contact</div>
               </div>
             </button>
           </div>
@@ -394,11 +394,11 @@ export default function AIPrompt({
                 key={ex}
                 onClick={() => setPrompt(ex)}
                 className="text-xs px-2.5 py-1 
-                  rounded-full bg-white/5 
-                  text-white/40 
-                  border border-white/10
-                  hover:bg-white/10 
-                  hover:text-white/60 
+                  rounded-full bg-[#F8F9FA] 
+                  text-[#64748B] 
+                  border border-[#E2E8F0]
+                  hover:bg-[#F0FDF4] 
+                  hover:text-[#166534] 
                   transition-colors">
                 {ex}
               </button>
@@ -409,11 +409,11 @@ export default function AIPrompt({
         {/* Confirm warning */}
         {showConfirm && (
           <div className="mb-3 px-3 py-2.5 
-            bg-red-900/30 
-            border border-red-700/40 
+            bg-[#FEF2F2] 
+            border border-[#FECACA] 
             rounded-lg">
             <p className="text-xs 
-              text-red-300 mb-2 font-medium">
+              text-[#DC2626] mb-2 font-medium">
               ⚠ This will delete all existing 
               sections. Are you sure?
             </p>
@@ -421,18 +421,19 @@ export default function AIPrompt({
               <button
                 onClick={() => handleGenerate()}
                 className="flex-1 py-1.5 text-xs 
-                  bg-red-700 text-white 
+                  bg-[#DC2626] text-[#1A1A1A] 
                   rounded-md font-medium
-                  hover:bg-red-600">
+                  hover:bg-red-700">
                 Yes, regenerate
               </button>
               <button
                 onClick={() => 
                   setShowConfirm(false)}
                 className="flex-1 py-1.5 text-xs 
-                  bg-white/10 text-white/60 
+                  bg-[#F8F9FA] text-[#64748B] 
+                  border border-[#E2E8F0]
                   rounded-md
-                  hover:bg-white/15">
+                  hover:bg-[#E2E8F0] hover:text-[#1A1A1A]">
                 Cancel
               </button>
             </div>
@@ -441,9 +442,9 @@ export default function AIPrompt({
 
         {error && (
           <div className="mb-3 px-3 py-2 
-            bg-red-900/30 
-            border border-red-700/30 
-            rounded-lg text-xs text-red-400">
+            bg-[#FEF2F2] 
+            border border-[#FECACA] 
+            rounded-lg text-xs text-[#DC2626]">
             {error}
           </div>
         )}
@@ -460,13 +461,13 @@ export default function AIPrompt({
                   ? 'Add a testimonials section with 3 reviews...'
                   : 'Landing page for my business...'
               }
-              className="flex-1 bg-white/5 
-                border border-white/10 
+              className="flex-1 bg-[#F8F9FA] 
+                border border-[#E2E8F0] 
                 rounded-xl px-3 py-2.5 
-                text-sm text-white/80
-                placeholder-white/20
+                text-sm text-[#1A1A1A]
+                placeholder-[#94A3B8]
                 focus:outline-none
-                focus:border-green-600/50"
+                focus:border-[#166534]"
               autoFocus
               onKeyDown={e => {
                 if (e.key === 'Enter') {
@@ -484,12 +485,7 @@ export default function AIPrompt({
               }
               className={`px-4 py-2 rounded-xl 
                 text-sm font-semibold 
-                text-white transition-colors
-                disabled:opacity-40
-                disabled:cursor-not-allowed
-                ${mode === 'full-page'
-                  ? 'bg-red-700 hover:bg-red-600'
-                  : 'bg-green-700 hover:bg-green-600'
+                text-white-[#166534] hover:bg-[#145228]'
                 }`}>
               {loading ? (
                 <span className="w-4 h-4 

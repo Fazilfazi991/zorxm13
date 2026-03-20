@@ -128,11 +128,11 @@ export default function RightPanel({
   // Nothing selected
   if (!selection) {
     return (
-      <div className="w-[300px] bg-[#141414] 
-        border-l border-white/10 
+      <div className="w-[300px] bg-white 
+        border-l border-[#E2E8F0] 
         flex items-center justify-center 
         flex-shrink-0">
-        <p className="text-xs text-white/30 
+        <p className="text-xs text-[#94A3B8] 
           text-center px-6 leading-relaxed">
           Click any section or element
           to open AI Assistant
@@ -146,27 +146,27 @@ export default function RightPanel({
   const nameLabel = isEl ? selectedElement?.type : selectedSection?.type
 
   return (
-    <div className="w-[300px] bg-[#141414] 
-      border-l border-white/10 
+    <div className="w-[300px] bg-white 
+      border-l border-[#E2E8F0] 
       flex flex-col flex-shrink-0">
       
       {/* Header Context Bar */}
-      <div className="px-4 py-3 border-b border-white/10 flex items-center gap-2 bg-white/[0.02]">
-        <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-        <span className="text-xs font-medium text-white/50">
-          {typeLabel} — <span className="capitalize text-white/90">{nameLabel}</span>
+      <div className="px-4 py-3 border-b border-[#E2E8F0] flex items-center gap-2 bg-[#F8F9FA]">
+        <div className="w-1.5 h-1.5 rounded-full bg-[#166534]"></div>
+        <span className="text-xs font-medium text-[#94A3B8]">
+          {typeLabel} — <span className="capitalize text-[#1A1A1A]">{nameLabel}</span>
         </span>
       </div>
 
       {/* Tabs */}
-      <div className="p-3 border-b border-white/10 bg-black/20">
-        <div className="flex bg-white/5 rounded-lg p-1 gap-1 border border-white/5">
+      <div className="p-3 border-b border-[#E2E8F0] bg-[#F8F9FA]">
+        <div className="flex bg-white rounded-lg p-1 gap-1 border border-[#E2E8F0]">
           <button
             onClick={() => setActiveTab('ai')}
             className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${
               activeTab === 'ai' 
-                ? 'bg-[#2a2a2a] text-white shadow-sm border border-white/10' 
-                : 'text-white/50 hover:text-white hover:bg-white/5'
+                ? 'bg-[#166534] text-white shadow-sm' 
+                : 'text-[#64748B] hover:text-[#1A1A1A] hover:bg-[#F8F9FA]'
             }`}
           >
             ✦ AI Assistant
@@ -175,8 +175,8 @@ export default function RightPanel({
             onClick={() => setActiveTab('manual')}
             className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${
               activeTab === 'manual' 
-                ? 'bg-[#2a2a2a] text-white shadow-sm border border-white/10' 
-                : 'text-white/50 hover:text-white hover:bg-white/5'
+                ? 'bg-[#166534] text-white shadow-sm' 
+                : 'text-[#64748B] hover:text-[#1A1A1A] hover:bg-[#F8F9FA]'
             }`}
           >
             Manual
@@ -190,8 +190,8 @@ export default function RightPanel({
           <div className="p-4 flex flex-col gap-6">
             
             {pendingResult ? (
-              <div className="bg-orange-900/20 border border-orange-500/30 rounded-xl p-4 flex flex-col gap-4">
-                <p className="text-xs text-orange-200 leading-relaxed">
+              <div className="bg-[#FFFBEB] border border-[#FCD34D] rounded-xl p-4 flex flex-col gap-4">
+                <p className="text-xs text-[#D97706] leading-relaxed">
                   ✨ AI generated a new style. Check the canvas to preview the changes.
                 </p>
                 <div className="flex gap-2 mt-1">
@@ -201,7 +201,7 @@ export default function RightPanel({
                       setPendingResult(null)
                       onPreviewChange(false)
                     }}
-                    className="flex-1 bg-green-600 hover:bg-green-500 text-white text-xs font-semibold py-2 rounded-lg transition-colors border border-green-500"
+                    className="flex-1 bg-[#166534]-white text-xs font-semibold py-2 rounded-lg transition-colors border border-[#166534]"
                   >
                     Apply
                   </button>
@@ -211,7 +211,7 @@ export default function RightPanel({
                       setPendingResult(null)
                       onPreviewChange(false)
                     }}
-                    className="flex-1 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold py-2 rounded-lg transition-colors border border-white/10"
+                    className="flex-1 bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#1A1A1A] text-xs font-semibold py-2 rounded-lg transition-colors border border-[#E2E8F0]"
                   >
                     Discard
                   </button>
@@ -220,7 +220,7 @@ export default function RightPanel({
             ) : (
               <>
                 {/* Prompt Box */}
-                <div className="bg-black/40 border border-white/10 rounded-xl overflow-hidden focus-within:border-white/20 transition-all">
+                <div className="bg-[#F8F9FA] border border-[#E2E8F0] rounded-xl overflow-hidden focus-within:border-[#166534] transition-all">
                   <textarea
                     value={prompt}
                     onChange={e => {
@@ -229,15 +229,15 @@ export default function RightPanel({
                       if (error) setError('')
                     }}
                     placeholder="Describe what you want... e.g. Add a wave divider at the bottom"
-                    className="w-full h-24 p-3 text-sm resize-none bg-transparent text-white focus:outline-none placeholder:text-white/30"
+                    className="w-full h-24 p-3 text-sm resize-none bg-transparent text-[#1A1A1A] focus:outline-none placeholder:text-[#94A3B8]"
                     disabled={refining}
                   />
                   
-                  <div className="p-2 pt-0 flex justify-between items-center bg-black/20">
-                    <span className="text-[10px] text-white/40 pl-1">
+                  <div className="p-2 pt-0 flex justify-between items-center bg-[#F8F9FA]">
+                    <span className="text-[10px] text-[#94A3B8] pl-1">
                       {credits === null ? '' : 
                        credits === 0 ? (
-                         <a href="https://zorxm13.vercel.app/pricing" target="_blank" rel="noreferrer" className="text-red-400 hover:text-red-300">
+                         <a href="https://zorxm13.vercel.app/pricing" target="_blank" rel="noreferrer" className="text-[#DC2626] hover:text-red-500">
                            Upgrade → zorxm13.vercel.app/pricing
                          </a>
                        ) : (
@@ -247,9 +247,9 @@ export default function RightPanel({
                     <button
                       onClick={() => handleRefine(promptRef.current)}
                       disabled={!prompt.trim() || refining}
-                      className="px-4 py-1.5 bg-white/10 border border-white/10 rounded-lg text-xs font-medium text-white hover:bg-white/20 disabled:opacity-30 transition-all flex items-center gap-2"
+                      className="px-4 py-1.5 bg-[#166534]-white hover:bg-[#145228] disabled:opacity-30 transition-all flex items-center gap-2"
                     >
-                      {refining ? 'Thinking...' : 'Refine →'}
+                      {refining ? 'Working...' : 'Refine ✦'}
                     </button>
                   </div>
                 </div>
@@ -259,29 +259,25 @@ export default function RightPanel({
                 )}
 
                 {/* Quick Prompts */}
-                <div>
-                  <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-3">
-                    Quick prompts
-                  </p>
-                  <div className="flex flex-col gap-2">
-                    {getQuickPrompts().map((txt, i) => (
+                <div className="pt-2">
+                  <p className="text-[10px] text-[#94A3B8]">Suggestions</p>
+                  <div className="flex flex-col gap-1.5">
+                    {getQuickPrompts().map((p, i) => (
                       <button
                         key={i}
-                        onClick={() => handleRefine(txt)}
-                        disabled={refining}
-                        className="text-left px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs hover:bg-white/10 transition-all text-white/70 hover:text-white disabled:opacity-30"
+                        onClick={() => handleRefine(p)}
+                        className="text-left text-xs text-[#64748B] bg-[#F8F9FA] hover:bg-[#F0FDF4] hover:text-[#166534] px-3 py-2 rounded-lg border border-[#E2E8F0] transition-all truncate"
                       >
-                        {txt}
+                        {p}
                       </button>
                     ))}
                   </div>
                 </div>
               </>
             )}
-
           </div>
         ) : (
-          <div className="p-0">
+          <div className="divide-y divide-[#E2E8F0]">
             {isEl && selectedElement ? (
               <ElementSettings
                 element={selectedElement}

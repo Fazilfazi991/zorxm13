@@ -26,9 +26,9 @@ export default function SectionSettings({
               backgroundType: e.target.value as any
             }
           })}
-          className="w-full bg-white/5 
-            border border-white/10 rounded 
-            px-2 py-1.5 text-xs text-white/80"
+          className="w-full bg-[#F8F9FA] 
+            border border-[#E2E8F0] rounded 
+            px-2 py-1.5 text-xs text-[#64748B]"
         >
           <option value="color">Color</option>
           <option value="image">Image</option>
@@ -54,9 +54,9 @@ export default function SectionSettings({
               ? 'Image URL' 
               : '#ffffff'
           }
-          className="w-full bg-white/5 
-            border border-white/10 rounded 
-            px-2 py-1.5 text-xs text-white/80"
+          className="w-full bg-[#F8F9FA] 
+            border border-[#E2E8F0] rounded 
+            px-2 py-1.5 text-xs text-[#64748B]"
         />
       </div>
 
@@ -76,9 +76,9 @@ export default function SectionSettings({
               }
             })}
             placeholder="rgba(0,0,0,0.7)"
-            className="w-full bg-white/5 
-              border border-white/10 rounded 
-              px-2 py-1.5 text-xs text-white/80"
+            className="w-full bg-[#F8F9FA] 
+              border border-[#E2E8F0] rounded 
+              px-2 py-1.5 text-xs text-[#64748B]"
           />
         </div>
       )}
@@ -101,9 +101,9 @@ export default function SectionSettings({
                 }
               }
             })}
-            className="w-full bg-white/5 
-              border border-white/10 rounded 
-              px-2 py-1.5 text-xs text-white/80"
+            className="w-full bg-[#F8F9FA] 
+              border border-[#E2E8F0] rounded 
+              px-2 py-1.5 text-xs text-[#64748B]"
           />
         </div>
         <div>
@@ -123,9 +123,9 @@ export default function SectionSettings({
                 }
               }
             })}
-            className="w-full bg-white/5 
-              border border-white/10 rounded 
-              px-2 py-1.5 text-xs text-white/80"
+            className="w-full bg-[#F8F9FA] 
+              border border-[#E2E8F0] rounded 
+              px-2 py-1.5 text-xs text-[#64748B]"
           />
         </div>
       </div>

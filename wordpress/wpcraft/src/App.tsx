@@ -15,8 +15,7 @@ export default function App() {
     ? config.pageData
     : null
 
-  const [pageData, setPageData] = 
-    useState<PageData | null>(initialData)
+  const [pageData, setPageData] = useState<PageData | null>(initialData)
   
   const [selection, setSelection] = 
     useState<Selection | null>(null)
@@ -24,12 +23,11 @@ export default function App() {
   const [expandedSections, setExpandedSections] = 
     useState<string[]>([])
 
+  const [viewMode, setViewMode] = useState<'desktop'|'mobile'>('desktop')
+
   const [saving, setSaving] = useState(false)
   
-  // Only show AI prompt if NO existing content
-  const [showAI, setShowAI] = useState(
-    !initialData && !config.hasExistingContent
-  )
+  const [showAI, setShowAI] = useState(!initialData && !config.hasExistingContent)
   
   const [undoStack, setUndoStack] = useState<PageData[]>([])
   const [hasPreview, setHasPreview] = useState(false)
@@ -84,7 +82,7 @@ export default function App() {
     setPageData(prev)
     
     const el = document.createElement('div')
-    el.className = 'fixed bottom-4 left-1/2 -translate-x-1/2 bg-white/10 text-white px-4 py-2 rounded-lg text-sm backdrop-blur border border-white/20 z-50 shadow-lg transition-opacity duration-300'
+    el.className = 'fixed bottom-4 left-1/2 -translate-x-1/2 bg-[#F1F5F9] text-[#1A1A1A] px-4 py-2 rounded-lg text-sm backdrop-blur border border-white/20 z-50 shadow-lg transition-opacity duration-300'
     el.innerText = 'Undid last AI change'
     document.body.appendChild(el)
     setTimeout(() => {
@@ -151,6 +149,49 @@ export default function App() {
     })
   }
 
+  const handleAddBlankSection = () => {
+    if (!pageData) return
+    const ts = Date.now()
+    const newSection: Section = {
+      id: `section_${ts}`,
+      type: 'custom',
+      settings: {
+        background: '#ffffff',
+        backgroundType: 'color',
+        backgroundOverlay: '',
+        padding: { top: 80, bottom: 80 },
+        fullHeight: false,
+        maxWidth: 1200,
+        contentAlign: 'left'
+      },
+      columns: [{
+        id: `col_${ts}`,
+        width: 100,
+        elements: []
+      }]
+    }
+    
+    setPageData({
+      ...pageData,
+      sections: [...pageData.sections, newSection]
+    })
+    setSelection({ type: 'section', sectionId: newSection.id })
+    setExpandedSections(prev => [...prev, newSection.id])
+  }
+
+  const handleDeleteSection = (id: string) => {
+    if (!pageData) return
+    if (confirm('Delete this section? This cannot be undone.')) {
+      setPageData({
+        ...pageData,
+        sections: pageData.sections.filter(s => s.id !== id)
+      })
+      if (selection?.sectionId === id) {
+        setSelection(null)
+      }
+    }
+  }
+
   // Helper to get selected section
   const getSelectedSection = () => {
     if (!selection || !pageData) return null
@@ -197,14 +238,14 @@ export default function App() {
             c.id !== columnId ? c : {
               ...c,
               elements: c.elements.map(e =>
-                e.id !== elementId ? e : {
+                e.id !== elementId ? e : ({
                   ...e,
                   ...updates,
                   settings: {
-                    ...(e.settings as any),
-                    ...((updates as any).settings || {})
+                    ...e.settings,
+                    ...(updates.settings as any || {})
                   }
-                }
+                } as Element)
               )
             }
           )
@@ -242,7 +283,7 @@ export default function App() {
 
   return (
     <div className="flex flex-col h-screen 
-      bg-[#111] text-white overflow-hidden">
+      bg-[#F8F9FA] text-[#1A1A1A] overflow-hidden">
       
       {/* TOP BAR - minimal */}
       <TopBar
@@ -250,6 +291,8 @@ export default function App() {
         saving={saving}
         hasData={!!pageData}
         canUndo={undoStack.length > 0}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
         onUndo={handleUndo}
         onSave={handleSave}
         onPublish={handlePublish}
@@ -290,6 +333,8 @@ export default function App() {
             )
           }
           onOpenAI={() => setShowAI(true)}
+          onAddBlankSection={handleAddBlankSection}
+          onDeleteSection={handleDeleteSection}
         />
 
         {/* CENTER - full canvas */}
@@ -297,6 +342,7 @@ export default function App() {
           pageData={pageData}
           selection={selection}
           hasPreview={hasPreview}
+          viewMode={viewMode}
           onSelectSection={(sectionId) => setSelection({
             type: 'section',
             sectionId

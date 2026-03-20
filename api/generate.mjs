@@ -1,5 +1,96 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { createClient } from '@supabase/supabase-js'
+import { readFileSync, readdirSync } from 'fs'
+import { join } from 'path'
+
+// Load design skills once at startup
+let ALL_SKILLS = {}
+try {
+  const skillsPath = join(process.cwd(), 'api/design-skills-master.json')
+  ALL_SKILLS = JSON.parse(readFileSync(skillsPath, 'utf8'))
+  console.log('[skills] Loaded', Object.keys(ALL_SKILLS).length, 'design examples')
+} catch(e) {
+  console.log('[skills] Could not load design skills:', e.message)
+}
+
+try {
+  const skillsDir = join(process.cwd(), 'api/skills')
+  const files = readdirSync(skillsDir).filter(f => f.endsWith('.json'))
+  
+  files.forEach(file => {
+    try {
+      const extra = JSON.parse(
+        readFileSync(join(skillsDir, file), 'utf8')
+      )
+      Object.assign(ALL_SKILLS, extra)
+      console.log('[skills] Loaded extra file:', file)
+    } catch(e) {
+      console.log('[skills] Failed to load:', file, e.message)
+    }
+  })
+} catch(e) {
+  // skills/ folder doesn't exist yet — that's fine
+}
+
+function getRelevantExamples(userPrompt, generationType) {
+  // Skip for non-generation tasks
+  if (['refine', 'seo', 'palette', 'copywriting'].includes(generationType)) {
+    return ''
+  }
+
+  const prompt = (userPrompt || '').toLowerCase()
+  const scored = []
+
+  Object.entries(ALL_SKILLS).forEach(([key, skill]) => {
+    if (!skill.tags || !skill.example) return
+    
+    const score = skill.tags.filter(tag => 
+      prompt.includes(tag.toLowerCase())
+    ).length
+    
+    if (score > 0) {
+      scored.push({ key, skill, score })
+    }
+  })
+
+  // Sort by relevance score descending
+  scored.sort((a, b) => b.score - a.score)
+
+  // Take top 2 most relevant
+  let topExamples = scored.slice(0, 2).map(s => s.skill.example)
+
+  // If no keyword matches found, use smart defaults
+  if (topExamples.length === 0) {
+    const defaults = ['hero_dark_left', 'cta_dark_centered']
+    topExamples = defaults
+      .filter(k => ALL_SKILLS[k])
+      .map(k => ALL_SKILLS[k].example)
+  }
+
+  if (topExamples.length === 0) return ''
+
+  console.log('[skills] Injecting', topExamples.length, 
+    'examples for prompt:', prompt.substring(0, 50))
+
+  return `
+
+PROVEN WPCRAFT SECTION EXAMPLES — study and copy this exact 
+JSON structure. Use these as your reference for field names, 
+nesting, and formatting. Do NOT invent new field names:
+
+${JSON.stringify(topExamples, null, 2)}
+
+CRITICAL RULES from these examples:
+- columns array contains column objects with id, width, elements
+- elements array contains element objects with id, type, settings
+- buttonGroup wraps multiple buttons — NEVER put buttons directly in elements
+- buttonGroup has a buttons array, not an elements array
+- All colors are hex (#ffffff) or rgba(r,g,b,a) — no Tailwind classes
+- fontSize is always a number (px) not a string
+- marginBottom is always a number (px) not a string
+- padding is always { top: number, bottom: number }
+`
+}
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -50,8 +141,9 @@ async function checkAndDeductCredit(licenseKey) {
   }
 }
 
-function getSystemPrompt(generationType) {
-  
+function getSystemPrompt(generationType, userPrompt = '') {
+  const examples = getRelevantExamples(userPrompt, generationType)
+
   const schemaRules = `
 WPCRAFT JSON SCHEMA RULES:
 - Valid element types: heading, text, button, buttonGroup, 
@@ -112,7 +204,8 @@ Return JSON: { "primary": "string", "secondary": "string",
 All values as hex codes. Raw JSON only.`
   }
   
-  return prompts[generationType] || prompts['page']
+  const basePrompt = prompts[generationType] || prompts['page']
+  return basePrompt + examples
 }
 
 function buildUserPrompt(data) {
@@ -247,7 +340,7 @@ const TEMPLATE_PROMPTS = {
     6. CTA footer — centered headline, single CTA button, 
        dark background with overlay image
     Brand: modern, minimal, professional. 
-    Primary color: #6366f1 (indigo).`,
+    Primary color: #6366f1 (indigo). Use the hero_saas_split_image or hero_light_minimal_centered example as your hero section base. Use features_grid_light_icons for the features section. Use pricing_three_col for pricing.`,
 
   'agency': `Generate a complete agency/business landing page 
     for a professional services company. Include these sections:
@@ -264,7 +357,7 @@ const TEMPLATE_PROMPTS = {
     6. Contact footer — centered, email + phone + address, 
        dark background
     Brand: professional, trustworthy, clean.
-    Primary color: #e60000 (red).`,
+    Primary color: #e60000 (red). Use hero_light_split as your hero base. Use about_split for the about section. Use features_three_col_dark for services. Use team_three_col for the team section.`,
 
   'portfolio': `Generate a complete creative portfolio page 
     for a photographer or designer. Include these sections:
@@ -277,7 +370,7 @@ const TEMPLATE_PROMPTS = {
     4. Client logos — simple strip of 6 client name placeholders
     5. Contact — minimal centered section with email CTA button
     Brand: minimal, elegant, creative.
-    Primary color: #000000 (black).`
+    Primary color: #000000 (black). Use hero_light_minimal_centered as your hero base with minimal styling. Keep sections clean and spacious.`
 }
 
 const isValidColor = (col) => /^#([0-9A-F]{3}){1,2}$/i.test(col) || /^rgba?\(/i.test(col) || col === 'transparent';
@@ -374,7 +467,7 @@ async function tryKimiModel(prompt, systemPrompt, useThinking = false) {
   const model = 'kimi-k2-turbo-preview'
   
   const response = await fetch(
-    'https://api.moonshot.cn/v1/chat/completions',
+    'https://api.moonshot.ai/v1/chat/completions',
     {
       method: 'POST',
       headers: {
@@ -440,6 +533,10 @@ async function tryClaudeModel(prompt, systemPrompt, model = 'claude-sonnet-4-5-2
 
 async function routeToModel(generationType, prompt, systemPrompt, contextJson) {
   
+  console.log('[skills] System prompt length:', systemPrompt.length)
+  console.log('[skills] Examples injected:', 
+    systemPrompt.includes('PROVEN WPCRAFT SECTION EXAMPLES') ? 'YES' : 'NO')
+
   // Note: userPrompt already incorporates contextJson dynamically from generic payload builder,
   // but we enforce the user's precise object mapping algorithm for the models.
   
@@ -680,7 +777,7 @@ export default async function handler(req, res) {
       
       try {
         const r = await fetch(
-          'https://api.moonshot.cn/v1/chat/completions', {
+          'https://api.moonshot.ai/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -758,7 +855,7 @@ DESIGN RULES:
   https://images.unsplash.com/photo-[id]?w=1600&q=80
 - Generate unique IDs for every section, column, element
 
-Return ONLY raw JSON. No markdown. No explanation.`
+Return ONLY raw JSON. No markdown. No explanation.` + getRelevantExamples(templatePrompt, 'template')
 
       const parsed = await generatePageInChunks(templatePrompt, systemPrompt, 'template')
 
@@ -783,7 +880,7 @@ Return ONLY raw JSON. No markdown. No explanation.`
     }
 
     const userPrompt = buildUserPrompt(body)
-    const systemPrompt = getSystemPrompt(body.pageType)
+    const systemPrompt = getSystemPrompt(body.pageType, userPrompt)
 
     let rawResponse
     let parsed

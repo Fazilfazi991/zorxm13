@@ -315,181 +315,28 @@ function wpcraft_ai_generate($request) {
     );
   }
   
+  // Retrieve raw payload from Vercel
+  $vercel_payload = $data['data'] ?? [];
+  
   if ($generation_type === 'refine') {
-    // Return precisely the updated component JSON from Vercel bypassing elementor -> wpcraft total page conversion
-    return rest_ensure_response([
-      'success' => true,
-      'data' => $data['data'] ?? [],
-      'credits_remaining' => 
-        $data['credits_remaining'] ?? null
-    ]);
+    $wpcraft_data = $vercel_payload;
+  } else {
+    // Force format to native WPCraft {"sections": [...]} exactly!
+    $wpcraft_data = [];
+    $wpcraft_data['title'] = $vercel_payload['title'] ?? 'Generated Page';
+    $wpcraft_data['sections'] = $vercel_payload['sections'] ?? $vercel_payload['elements'] ?? [];
   }
-  
-  // Convert Elementor JSON to WPCraft format
-  $wpcraft_data = wpcraft_convert_from_elementor(
-    $data['data'] ?? []
-  );
-  
+
+  error_log('WPCRAFT DATA KEYS: ' . implode(',', array_keys($wpcraft_data ?? [])));
+
   return rest_ensure_response([
     'success' => true,
     'data' => $wpcraft_data,
-    'credits_remaining' => 
-      $data['credits_remaining'] ?? null
+    'credits_remaining' => $data['credits_remaining'] ?? null
   ]);
 }
 
-function wpcraft_parse_elementor_widgets($widgets) {
-  $elements_out = [];
-  foreach ($widgets as $widget) {
-    $ws = $widget['settings'] ?? [];
-    $type = $widget['widgetType'] ?? '';
-    
-    switch ($type) {
-      case 'heading':
-        $elements_out[] = [
-          'id' => $widget['id'] ?? uniqid('el_'),
-          'type' => 'heading',
-          'settings' => [
-            'text' => $ws['title'] ?? '',
-            'tag' => $ws['header_size'] ?? 'h2',
-            'fontSize' => $ws['typography_font_size']['size'] ?? 32,
-            'fontWeight' => $ws['typography_font_weight'] ?? '700',
-            'fontFamily' => $ws['typography_font_family'] ?? 'DM Sans',
-            'color' => $ws['title_color'] ?? '#ffffff',
-            'align' => $ws['align'] ?? 'left',
-            'marginBottom' => intval($ws['_margin']['bottom'] ?? 16)
-          ]
-        ];
-        break;
-      case 'text-editor':
-        $elements_out[] = [
-          'id' => $widget['id'] ?? uniqid('el_'),
-          'type' => 'text',
-          'settings' => [
-            'text' => strip_tags($ws['editor'] ?? $ws['content'] ?? '', '<br><b><strong><i><em><u><a><span>'),
-            'fontSize' => $ws['typography_font_size']['size'] ?? 16,
-            'color' => $ws['text_color'] ?? '#ffffff',
-            'align' => $ws['align'] ?? 'left',
-            'marginBottom' => 24,
-            'lineHeight' => 1.7
-          ]
-        ];
-        break;
-      case 'button':
-        $elements_out[] = [
-          'id' => $widget['id'] ?? uniqid('el_'),
-          'type' => 'button',
-          'settings' => [
-            'text' => $ws['text'] ?? 'Click Here',
-            'url' => $ws['link']['url'] ?? '#',
-            'backgroundColor' => $ws['background_color'] ?? '#166534',
-            'color' => $ws['button_text_color'] ?? '#ffffff',
-            'borderRadius' => 8,
-            'align' => $ws['align'] ?? 'left',
-            'marginBottom' => 0
-          ]
-        ];
-        break;
-      case 'image':
-        $elements_out[] = [
-          'id' => $widget['id'] ?? uniqid('el_'),
-          'type' => 'image',
-          'settings' => [
-            'url' => $ws['image']['url'] ?? '',
-            'alt' => '',
-            'width' => '100%',
-            'marginBottom' => 16
-          ]
-        ];
-        break;
-      case 'spacer':
-        $elements_out[] = [
-          'id' => $widget['id'] ?? uniqid('el_'),
-          'type' => 'spacer',
-          'settings' => [
-            'height' => $ws['spacer_size']['size'] ?? 40,
-            'backgroundColor' => $ws['background_color'] ?? '',
-            'width' => isset($ws['_width']['size']) ? $ws['_width']['size'] . 'px' : '100%'
-          ]
-        ];
-        break;
-    }
-  }
-  return $elements_out;
-}
-
-function wpcraft_convert_from_elementor($elementor) {
-  $sections = [];
-  
-  $elements = $elementor['elements'] ?? 
-    $elementor['content'] ?? [];
-  
-  foreach ($elements as $el) {
-    if (!isset($el['elType']) || ($el['elType'] !== 'section' && $el['elType'] !== 'container')) {
-      continue;
-    }
-    
-    $settings = $el['settings'] ?? [];
-    $columns = [];
-    $implicit_widgets = [];
-    
-    foreach ($el['elements'] ?? [] as $child) {
-      if (!isset($child['elType'])) continue;
-      
-      if ($child['elType'] === 'column' || $child['elType'] === 'container') {
-        $width = $child['settings']['_column_size'] ?? 100;
-        $elements_out = wpcraft_parse_elementor_widgets($child['elements'] ?? []);
-        
-        if (!empty($elements_out)) {
-          $columns[] = [
-            'id' => $child['id'] ?? uniqid('col_'),
-            'width' => intval($width),
-            'elements' => $elements_out
-          ];
-        }
-      } elseif ($child['elType'] === 'widget') {
-        $parsed = wpcraft_parse_elementor_widgets([$child]);
-        if (!empty($parsed)) {
-          $implicit_widgets = array_merge($implicit_widgets, $parsed);
-        }
-      }
-    }
-    
-    if (!empty($implicit_widgets)) {
-      $columns[] = [
-        'id' => uniqid('col_impl_'),
-        'width' => 100,
-        'elements' => $implicit_widgets
-      ];
-    }
-    
-    // Build section settings
-    $bg_image = $settings['background_image']['url'] ?? '';
-    $bg_color = $settings['background_color'] ?? '#ffffff';
-    $bg_type = !empty($bg_image) ? 'image' : 'color';
-    
-    $sections[] = [
-      'id' => $el['id'] ?? uniqid('sec_'),
-      'type' => 'section',
-      'settings' => [
-        'background' => $bg_type === 'image' ? $bg_image : $bg_color,
-        'backgroundType' => $bg_type,
-        'backgroundOverlay' => $settings['background_overlay_color'] ?? '',
-        'padding' => [
-          'top' => intval($settings['padding']['top'] ?? 80),
-          'bottom' => intval($settings['padding']['bottom'] ?? 80)
-        ],
-        'fullHeight' => ($settings['height'] ?? '') === 'min-height'
-      ],
-      'columns' => $columns
-    ];
-  }
-  
-  return [
-    'title' => 'Imported Page',
-    'sections' => $sections
-  ];
-}
+  // Elementor conversion routines removed. WPCraft is now standalone.
 
 function wpcraft_ai_seo($request) {
   $body = $request->get_json_params();

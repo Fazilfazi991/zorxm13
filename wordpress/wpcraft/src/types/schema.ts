@@ -113,6 +113,17 @@ export type Element =
   ButtonGroupElement | ImageElement | SpacerElement |
   DividerElement | IconElement
 
+export type ElementSettings = Partial<
+  HeadingElement['settings'] &
+  TextElement['settings'] &
+  ButtonElement['settings'] &
+  ButtonGroupElement['settings'] &
+  ImageElement['settings'] &
+  SpacerElement['settings'] &
+  DividerElement['settings'] &
+  IconElement['settings']
+>
+
 export interface Column {
   id: string
   width: number

@@ -5,6 +5,7 @@ interface Props {
   pageData: PageData | null
   selection: Selection | null
   hasPreview?: boolean
+  viewMode?: 'desktop' | 'mobile'
   onSelectSection: (id: string) => void
   onSelectElement: (sectionId: string, columnId: string, elementId: string) => void
   siteUrl: string
@@ -79,7 +80,7 @@ export default function Canvas({
   }, [pageData, selection, hasPreview])
 
   return (
-    <div className="flex-1 bg-[#1a1a1a] flex flex-col overflow-hidden">
+    <div className="flex-1 bg-[#F1F3F4] flex flex-col overflow-hidden">
       <div className="flex-1 overflow-auto p-4">
         <div className="mx-auto bg-white 
           rounded-lg overflow-hidden shadow-2xl"
@@ -189,6 +190,7 @@ function renderPageToHtml(
           '*'
         )"
         style="position:relative;
+          border-bottom: 1px solid #e2e8f0;
           cursor:pointer;
           box-sizing:border-box;
           ${bgStyle}
@@ -222,9 +224,9 @@ function renderPageToHtml(
 body { font-family: 'Inter', sans-serif; }
 img { max-width: 100%; }
 a { text-decoration: none; }
-section:hover { outline: 1px solid rgba(22,101,52,0.3) !important; }
+section:hover { outline: 1px dashed rgba(22,101,52,0.4) !important; }
 .wpcraft-element:hover {
-  outline: 1px dashed rgba(34,197,94,0.5) !important;
+  outline: 1px dashed rgba(22,101,52,0.4) !important;
   outline-offset: 2px;
 }
 @keyframes fadeInUp {
@@ -233,6 +235,19 @@ section:hover { outline: 1px solid rgba(22,101,52,0.3) !important; }
 }
 .wpcraft-animate { 
   animation: fadeInUp 0.6s ease forwards; 
+}
+.wpcraft-element.is-selected::before {
+  content: attr(data-el-type);
+  position: absolute;
+  top: -24px; left: -2px;
+  background: #22c55e;
+  color: white;
+  font-size: 10px;
+  text-transform: capitalize;
+  padding: 2px 8px;
+  border-radius: 4px 4px 0 0;
+  pointer-events: none;
+  z-index: 20;
 }
 </style>
 <style>
@@ -310,7 +325,7 @@ function renderElement(
     ? `outline: 2px ${hasPreview ? 'dashed' : 'solid'} ${hasPreview ? '#eab308' : '#22c55e'} !important; outline-offset: 2px;`
     : ''
   
-  const hoverClass = 'wpcraft-element'
+  const hoverClass = 'wpcraft-element' + (isSelected ? ' is-selected' : '')
   
   const baseStyle = `cursor: pointer; position: relative; ${selectedStyle}`
 
@@ -383,6 +398,48 @@ function renderElement(
         ${baseStyle}">
       </div>`
     
+    case 'buttonGroup':
+      const dir = s.direction || 'row'
+      const gap = s.gap || 16
+      const justify = s.align === 'left' ? 'flex-start' : (s.align === 'right' ? 'flex-end' : 'center')
+      const buttonsHtml = (el.buttons || []).map((btn: any) => 
+        renderElement(btn, sectionId, columnId, false, hasPreview, isSectionActive)
+      ).join('')
+      
+      return `<div 
+        ${dataAttrs} ${clickHandler}
+        class="${hoverClass}"
+        style="display:flex; flex-direction:${dir}; gap:${gap}px; justify-content:${justify};
+        margin-bottom:${s.marginBottom||0}px; ${baseStyle}">
+        ${buttonsHtml}
+      </div>`
+
+    case 'divider':
+      const dColor = s.color || '#e2e8f0'
+      const dHeight = s.height || 0
+      const dMb = s.marginBottom || 0
+      if (s.style === 'wave') {
+        return `<div ${dataAttrs} ${clickHandler} class="${hoverClass}" style="${baseStyle}; height:${dHeight||60}px; margin-bottom:${dMb}px;">
+          <svg viewBox="0 0 1200 120" preserveAspectRatio="none" style="display:block;width:100%;height:100%;">
+            <path d="M321.4,56.4c58-10.8,114.2-30.1,172-41.9,82.4-16.7,168.2-17.7,250.5-.4,242.9,50.8,325.8,91.8,404.7,112.7,70.1,18.5,146.5,26.1,214.3,3V0H0v27.4A600.2,600.2,0,0,0,321.4,56.4Z" fill="${dColor}"></path>
+          </svg>
+        </div>`
+      }
+      return `<div ${dataAttrs} ${clickHandler} class="${hoverClass}" style="${baseStyle}; margin:${dMb}px 0;">
+        <hr style="border:none; border-top:1px solid ${dColor}; margin:0;">
+      </div>`
+
+    case 'icon':
+      const name = s.name || 'mdi:check'
+      const size = s.size || 24
+      const iconColor = encodeURIComponent(s.color || '#000000')
+      const alignStyle = s.align === 'center' ? 'margin:0 auto;' : (s.align === 'right' ? 'margin-left:auto;' : '')
+      const iconUrl = `https://api.iconify.design/${name}.svg?color=${iconColor}`
+      
+      return `<div ${dataAttrs} ${clickHandler} class="${hoverClass}" style="${baseStyle}; ${alignStyle}">
+        <img src="${iconUrl}" width="${size}" height="${size}" style="display:block;">
+      </div>`
+
     default:
       return ''
   }
