@@ -1,6 +1,6 @@
-// WPCraft — /api/generate.mjs v5.3
-// Claude-first for page generation (reliable JSON), Kimi/Gemini fallback
-// Fast: reduced system prompt, Claude Haiku is ~3-5s for full pages
+// WPCraft — /api/generate.mjs v5.4
+// Kimi-first (cheap + fast with JSON mode), Gemini fallback, Claude emergency only
+// JSON mode forces valid JSON — no more corrupt output
 
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
@@ -36,7 +36,6 @@ function toneSkill(tone = '') {
   return loadSkill('tones/professional.md');
 }
 
-// ── System prompt builder (trimmed for speed) ─────────────────────────────────
 function buildSystemPrompt(body) {
   return [
     loadSkill('base.md'),
@@ -47,7 +46,6 @@ function buildSystemPrompt(body) {
   ].filter(Boolean).join('\n\n---\n\n');
 }
 
-// ── User prompt ───────────────────────────────────────────────────────────────
 function buildUserPrompt(body) {
   if (body.enhancedPrompt) return body.enhancedPrompt;
   const p = [];
@@ -61,36 +59,47 @@ function buildUserPrompt(body) {
   if (body.prompt)       p.push(`Additional: ${body.prompt}`);
   if (body.sections?.length) p.push(`Include sections: ${body.sections.join(', ')}`);
   const count = body.sectionCount || 6;
-  p.push(`Generate exactly ${count} sections total (navbar + footer count). Navbar first, footer last. Real copy only. Return raw JSON only.`);
+  p.push(`Generate exactly ${count} sections total (navbar + footer count). Navbar first, footer last. Real copy only.`);
   return p.join('\n');
 }
 
 // ── JSON repair ───────────────────────────────────────────────────────────────
 function repairJSON(str) {
+  // Strip markdown fences
   str = str.trim().replace(/^```json\s*/i, '').replace(/\s*```$/, '').trim();
-  // Extract JSON object
+  // Find opening brace
   const start = str.indexOf('{');
   if (start > 0) str = str.substring(start);
-  // Remove trailing comma before closing
+  // Remove trailing commas before closing brackets
   str = str.replace(/,(\s*[}\]])/g, '$1');
-  // Count and close unclosed brackets
+  // Remove incomplete string at the end
+  // Find last complete JSON value
+  const trimBack = (s) => {
+    // Remove trailing incomplete key or value
+    const lastColon = s.lastIndexOf(':');
+    const lastComma = s.lastIndexOf(',');
+    const lastComplete = Math.max(lastComma, 0);
+    if (lastColon > lastComma && lastColon > s.lastIndexOf('}') && lastColon > s.lastIndexOf(']')) {
+      // Cut back to last complete property
+      return s.substring(0, Math.max(lastComma, s.lastIndexOf('}'), s.lastIndexOf(']')));
+    }
+    return s;
+  };
+  // Count unclosed brackets
   let braces = 0, brackets = 0, inStr = false, esc = false;
+  let lastSafePos = 0;
   for (let i = 0; i < str.length; i++) {
     const c = str[i];
     if (esc) { esc = false; continue; }
     if (c === '\\' && inStr) { esc = true; continue; }
     if (c === '"') { inStr = !inStr; continue; }
     if (inStr) continue;
-    if (c === '{') braces++; else if (c === '}') braces--;
-    else if (c === '[') brackets++; else if (c === ']') brackets--;
+    if (c === '{') braces++; else if (c === '}') { braces--; if (braces >= 0) lastSafePos = i + 1; }
+    else if (c === '[') brackets++; else if (c === ']') { brackets--; if (brackets >= 0) lastSafePos = i + 1; }
   }
-  // If inside unclosed string, trim back to last complete value
-  if (inStr) {
-    const lastComma = str.lastIndexOf(',');
-    const lastBrace = str.lastIndexOf('{');
-    const trim = Math.max(lastComma, lastBrace);
-    if (trim > 0) str = str.substring(0, trim);
-    // Recount
+  // If still inside a string, trim back to last safe position
+  if (inStr && lastSafePos > 0) {
+    str = str.substring(0, lastSafePos);
     braces = 0; brackets = 0;
     for (const c of str) {
       if (c === '{') braces++; else if (c === '}') braces--;
@@ -104,66 +113,58 @@ function repairJSON(str) {
 }
 
 function parseJSON(raw) {
+  if (!raw) throw new Error('Empty response from model');
   const cleaned = raw.trim().replace(/^```json\s*/i, '').replace(/\s*```$/, '').trim();
+  // Try 1: direct parse
   try { return JSON.parse(cleaned); } catch {}
+  // Try 2: repair and parse
   try { return JSON.parse(repairJSON(cleaned)); } catch {}
+  // Try 3: find JSON object and repair
   const m = cleaned.match(/\{[\s\S]*/);
   if (m) { try { return JSON.parse(repairJSON(m[0])); } catch {} }
-  throw new Error('Could not parse JSON from model response');
+  throw new Error('Could not parse JSON from model response (all repair attempts failed)');
 }
 
 // ── Model calls ───────────────────────────────────────────────────────────────
-async function callClaude(userPrompt, systemPrompt, maxTokens = 16000) {
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) throw new Error('No Anthropic key');
-  console.log('[claude] calling haiku...');
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: maxTokens,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userPrompt }]
-    })
-  });
-  console.log('[claude] status:', res.status);
-  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(`Claude ${res.status}: ${e?.error?.message || 'unknown'}`); }
-  const data = await res.json();
-  const text = data.content?.[0]?.text;
-  const stop = data.stop_reason;
-  console.log('[claude] stop_reason:', stop, '| length:', text?.length || 0);
-  if (stop === 'max_tokens') { console.error('[claude] truncated'); return null; }
-  return text;
-}
 
+// KIMI — primary, cheapest, JSON mode forces valid JSON
 async function callKimi(userPrompt, systemPrompt, maxTokens = 16000) {
   const key = process.env.KIMI_API_KEY || process.env.MOONSHOT_API_KEY;
   if (!key) throw new Error('No Kimi key');
-  console.log('[kimi] calling...');
+  console.log('[kimi] calling with JSON mode, maxTokens:', maxTokens);
   const res = await fetch('https://api.moonshot.ai/v1/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
     body: JSON.stringify({
       model: 'kimi-k2-turbo-preview',
-      messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ],
       temperature: 0.6,
       max_tokens: maxTokens,
-      response_format: { type: 'json_object' }  // Force JSON mode
+      response_format: { type: 'json_object' }  // ← Forces valid JSON every time
     })
   });
   console.log('[kimi] status:', res.status);
-  const raw = await res.text();
-  if (!res.ok) throw new Error(`Kimi ${res.status}`);
-  const data = JSON.parse(raw);
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Kimi ${res.status}: ${err.substring(0, 100)}`);
+  }
+  const data = await res.json();
   const text = data.choices?.[0]?.message?.content;
   const finish = data.choices?.[0]?.finish_reason;
-  console.log('[kimi] finish_reason:', finish, '| length:', text?.length || 0);
-  if (finish === 'length') { console.error('[kimi] truncated'); return null; }
+  const usage = data.usage;
+  console.log('[kimi] finish_reason:', finish, '| length:', text?.length || 0, '| tokens:', usage?.total_tokens || '?');
+  if (finish === 'length') {
+    console.error('[kimi] hit token limit, will try fallback');
+    return null;
+  }
   return text;
 }
 
-async function callGemini(userPrompt, systemPrompt, model = 'gemini-2.5-flash') {
+// GEMINI — second choice, free tier available, also enforces JSON via responseMimeType
+async function callGemini(userPrompt, systemPrompt, model = 'gemini-2.0-flash') {
   const key = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
   if (!key) throw new Error('No Gemini key');
   console.log(`[gemini] calling ${model}...`);
@@ -175,39 +176,68 @@ async function callGemini(userPrompt, systemPrompt, model = 'gemini-2.5-flash') 
       body: JSON.stringify({
         system_instruction: { parts: [{ text: systemPrompt }] },
         contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 16384, responseMimeType: 'application/json' }
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 16384,
+          responseMimeType: 'application/json'  // ← Forces valid JSON
+        }
       })
     }
   );
   console.log(`[gemini] ${model} status:`, res.status);
-  const raw = await res.text();
-  if (!res.ok) throw new Error(`Gemini ${res.status}`);
-  const data = JSON.parse(raw);
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Gemini ${res.status}: ${err.substring(0, 100)}`);
+  }
+  const data = await res.json();
   const finish = data.candidates?.[0]?.finishReason;
   if (finish === 'MAX_TOKENS') { console.error('[gemini] truncated'); return null; }
-  return data.candidates?.[0]?.content?.parts?.[0]?.text;
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  console.log('[gemini] finish:', finish, '| length:', text?.length || 0);
+  return text;
 }
 
-// ── Model router — Claude FIRST for page (most reliable JSON) ─────────────────
+// CLAUDE — emergency fallback only (expensive, use sparingly)
+async function callClaude(userPrompt, systemPrompt, maxTokens = 8000) {
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key) throw new Error('No Anthropic key');
+  console.log('[claude] calling haiku (emergency fallback)...');
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: maxTokens,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }]
+    })
+  });
+  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(`Claude ${res.status}: ${e?.error?.message}`); }
+  const data = await res.json();
+  console.log('[claude] stop_reason:', data.stop_reason, '| length:', data.content?.[0]?.text?.length || 0);
+  if (data.stop_reason === 'max_tokens') return null;
+  return data.content?.[0]?.text;
+}
+
+// ── Model router ──────────────────────────────────────────────────────────────
 async function routeToModel(type, userPrompt, systemPrompt) {
+  // Kimi first (cheapest), Gemini second (free), Claude only for refine/seo (small tasks)
   const chains = {
-    // Page: Claude first (best JSON), Gemini second, Kimi third  
-    page:      [() => callClaude(userPrompt, systemPrompt), () => callGemini(userPrompt, systemPrompt), () => callKimi(userPrompt, systemPrompt)],
-    template:  [() => callClaude(userPrompt, systemPrompt), () => callGemini(userPrompt, systemPrompt), () => callKimi(userPrompt, systemPrompt)],
-    section:   [() => callClaude(userPrompt, systemPrompt, 8000), () => callGemini(userPrompt, systemPrompt), () => callKimi(userPrompt, systemPrompt, 8000)],
-    refine:    [() => callClaude(userPrompt, systemPrompt, 4000), () => callKimi(userPrompt, systemPrompt, 4000)],
-    copywriting:[() => callClaude(userPrompt, systemPrompt, 4000)],
-    seo:       [() => callClaude(userPrompt, systemPrompt, 2000)],
-    palette:   [() => callClaude(userPrompt, systemPrompt, 1000)],
+    page:      [() => callKimi(userPrompt, systemPrompt, 16000), () => callGemini(userPrompt, systemPrompt, 'gemini-2.5-flash')],
+    template:  [() => callKimi(userPrompt, systemPrompt, 16000), () => callGemini(userPrompt, systemPrompt)],
+    section:   [() => callKimi(userPrompt, systemPrompt, 8000),  () => callGemini(userPrompt, systemPrompt)],
+    refine:    [() => callKimi(userPrompt, systemPrompt, 4000),  () => callGemini(userPrompt, systemPrompt)],
+    seo:       [() => callGemini(userPrompt, systemPrompt, 'gemini-2.0-flash')],
+    palette:   [() => callGemini(userPrompt, systemPrompt, 'gemini-2.0-flash')],
   };
   const chain = chains[type] || chains.page;
   let lastErr;
   for (let i = 0; i < chain.length; i++) {
     try {
-      console.log(`[router] attempt ${i+1}/${chain.length} for ${type}`);
+      console.log(`[router] attempt ${i+1}/${chain.length} for "${type}"`);
       const result = await chain[i]();
       if (result) { console.log(`[router] success on attempt ${i+1}`); return result; }
-      console.log(`[router] attempt ${i+1} returned null (truncated), trying next`);
+      console.log(`[router] attempt ${i+1} returned null, trying next`);
     } catch (e) {
       console.error(`[router] attempt ${i+1} error:`, e.message);
       lastErr = e;
@@ -228,53 +258,50 @@ export default async function handler(req, res) {
   const generation_type = body.generation_type || 'page';
   const license_key = req.headers['x-license-key'] || body.license_key;
 
-  // License check (skip for utility types)
   if (!['test','palette','seo','enhance_prompt'].includes(generation_type)) {
-    if (!license_key) return res.status(401).json({ success: false, error: 'License required. Go to WPCraft → Settings.' });
+    if (!license_key) return res.status(401).json({ success: false, error: 'License required.' });
   }
 
-  console.log(`[generate] type: ${generation_type} | license: ${license_key ? 'present' : 'missing'}`);
+  console.log(`[generate] type:${generation_type} | skills:${loadSkill('base.md').length}chars`);
 
   try {
-    // ── ENHANCE PROMPT (local, instant) ──────────────────────────────────
+
     if (generation_type === 'enhance_prompt') {
       return res.status(200).json({ success: true, data: { enhanced_prompt: body.prompt || '' } });
     }
 
-    // ── SEO ──────────────────────────────────────────────────────────────
     if (generation_type === 'seo') {
-      const text = await callClaude(
-        `Analyze this page content and return ONLY JSON: {"title":"...","description":"...","keywords":["..."]}. Content: ${(body.prompt||'').substring(0,2000)}`,
-        'Return only valid JSON. No markdown. No explanation.'
+      const text = await callGemini(
+        `Analyze this content and return ONLY JSON: {"title":"...","description":"...","keywords":["..."]}. Content: ${(body.prompt||'').substring(0,2000)}`,
+        'Return only valid JSON. No markdown.',
+        'gemini-2.0-flash'
       );
       return res.status(200).json({ success: true, data: parseJSON(text) });
     }
 
-    // ── PALETTE ───────────────────────────────────────────────────────────
     if (generation_type === 'palette') {
-      const text = await callClaude(
+      const text = await callGemini(
         `Generate color palette for: ${body.prompt}. Return ONLY JSON: {"primary":"#hex","secondary":"#hex","accent":"#hex","background":"#hex","text":"#hex"}`,
-        'Return only valid JSON. No markdown.'
+        'Return only valid JSON.',
+        'gemini-2.0-flash'
       );
       return res.status(200).json({ success: true, data: parseJSON(text) });
     }
 
-    // ── REFINE ────────────────────────────────────────────────────────────
     if (generation_type === 'refine') {
-      const systemPrompt = loadSkill('base.md') + '\n\n' + loadSkill('contrast.md');
+      const sp = loadSkill('base.md') + '\n\n' + loadSkill('contrast.md');
       const text = await routeToModel('refine',
         `Return ONLY the updated JSON object. No markdown.\n\nContext:\n${body.contextJson}\n\nInstruction: ${body.prompt}`,
-        systemPrompt
+        sp
       );
       return res.status(200).json({ success: true, data: parseJSON(text) });
     }
 
-    // ── SECTION ───────────────────────────────────────────────────────────
     if (generation_type === 'section') {
-      const systemPrompt = [loadSkill('base.md'), loadSkill('contrast.md'), loadSkill('sections/blueprints.md')].join('\n\n---\n\n');
+      const sp = [loadSkill('base.md'), loadSkill('contrast.md'), loadSkill('sections/blueprints.md')].join('\n\n---\n\n');
       const text = await routeToModel('section',
-        `Generate ONE section object (not a full page). Return a single section JSON: ${body.prompt}`,
-        systemPrompt
+        `Generate ONE section object (not a full page). Return a single section JSON object: ${body.prompt}`,
+        sp
       );
       const parsed = parseJSON(text);
       const section = parsed.sections?.[0] ?? parsed;
@@ -284,7 +311,7 @@ export default async function handler(req, res) {
     // ── PAGE GENERATION ───────────────────────────────────────────────────
     const systemPrompt = buildSystemPrompt(body);
     const userPrompt   = buildUserPrompt(body);
-    console.log(`[generate] system prompt: ${systemPrompt.length} chars | user prompt: ${userPrompt.length} chars`);
+    console.log(`[generate] system:${systemPrompt.length}c user:${userPrompt.length}c`);
 
     const rawText = await routeToModel(generation_type, userPrompt, systemPrompt);
     const parsed  = parseJSON(rawText);
@@ -296,18 +323,16 @@ export default async function handler(req, res) {
 
     console.log(`[generate] success — ${pageData.sections.length} sections`);
 
-    // ── Stream NDJSON ─────────────────────────────────────────────────────
+    // Stream NDJSON
     res.setHeader('Content-Type', 'application/x-ndjson');
     res.setHeader('Transfer-Encoding', 'chunked');
     res.setHeader('Cache-Control', 'no-cache, no-store');
 
     res.write(JSON.stringify({ type: 'skeleton', sections: pageData.sections.length, message: 'Building your page...' }) + '\n');
-
     for (let i = 0; i < pageData.sections.length; i++) {
       await new Promise(r => setTimeout(r, 50));
       res.write(JSON.stringify({ type: 'section', index: i + 1, total: pageData.sections.length, data: pageData.sections[i] }) + '\n');
     }
-
     res.write(JSON.stringify({ type: 'complete', title: pageData.title, timestamp: Date.now() }) + '\n');
     return res.end();
 
