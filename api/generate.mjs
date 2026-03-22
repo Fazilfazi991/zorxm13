@@ -1,12 +1,12 @@
-// WPCraft — /api/generate.mjs v5.0
-// Skills-based system prompt injection
+// WPCraft — /api/generate.mjs v5.1
+// Skills-based system prompt injection + Kimi/Claude/Gemini fallback chain
 // Reads skill .md files and injects them per industry/tone
 
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY || '');
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || '');
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function loadSkill(rel) {
@@ -58,29 +58,174 @@ function buildUserPrompt(body) {
   if (body.description)   p.push(`Description: ${body.description}`);
   if (body.prompt)        p.push(`Instructions: ${body.prompt}`);
   if (body.sections?.length) p.push(`Sections to include: ${body.sections.join(', ')}`);
-  const count = body.sectionCount || 8;
-  p.push(`Total sections including navbar + footer: ${count}`);
-  p.push(`Generate complete premium page. Navbar first, footer last. Real copy only. Raw JSON only.`);
-  return p.join('. ');
+  const count = body.sectionCount || 6;
+  p.push(`OUTPUT: Complete WPCraft JSON with exactly ${count} sections. Full schema: sections → columns → elements. All elements with correct settings. No empty columns. Real copy throughout.`);
+  return p.join('\n');
+}
+
+// ── Model Helpers ─────────────────────────────────────────────────────────────
+async function tryKimiModel(prompt, systemPrompt) {
+  console.log('[kimi] attempting call...');
+  console.log('[kimi] API key present:', !!(process.env.KIMI_API_KEY || process.env.MOONSHOT_API_KEY));
+  const model = 'kimi-k2-turbo-preview';
+  const response = await fetch(
+    'https://api.moonshot.ai/v1/chat/completions',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.KIMI_API_KEY || process.env.MOONSHOT_API_KEY}`
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.6,
+        max_tokens: 8000
+      })
+    }
+  );
+  console.log('[kimi] response status:', response.status);
+  const responseText = await response.text();
+  console.log('[kimi] raw response first 200:', responseText.substring(0, 200));
+  if (!response.ok) throw new Error(`Kimi ${response.status}`);
+  const data = JSON.parse(responseText);
+  return data.choices?.[0]?.message?.content;
+}
+
+async function tryClaudeModel(prompt, systemPrompt, model = 'claude-haiku-4-5-20251001', maxTokens = 8192) {
+  console.log('[claude] attempting call...');
+  console.log('[claude] API key present:', !!process.env.ANTHROPIC_API_KEY);
+  const response = await fetch(
+    'https://api.anthropic.com/v1/messages',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: maxTokens,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    }
+  );
+  console.log('[claude] response status:', response.status);
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    throw new Error(`Claude ${response.status}: ${errorBody?.error?.message || 'unknown'}`);
+  }
+  const data = await response.json();
+  return data.content?.[0]?.text;
+}
+
+async function tryGeminiModel(userPrompt, modelName, thinkingBudget = 0, systemPrompt = '') {
+  try {
+    const key = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+    if (!key) throw new Error('No Gemini key');
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${key}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: systemPrompt }] },
+          contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+          generationConfig: { temperature: 0.7, maxOutputTokens: 8192, thinkingConfig: { thinkingBudget } }
+        })
+      }
+    );
+    console.log(`[gemini] ${modelName} status:`, response.status);
+    const rawText = await response.text();
+    if (!response.ok) throw new Error(`${modelName} ${response.status}: ${rawText.substring(0, 200)}`);
+    const data = JSON.parse(rawText);
+    const finishReason = data.candidates?.[0]?.finishReason;
+    if (finishReason === 'MAX_TOKENS') { console.error(`[gemini] ${modelName} truncated`); return null; }
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) throw new Error('No text in response');
+    console.log(`[gemini] ${modelName} succeeded, length:`, text.length);
+    return text;
+  } catch (e) {
+    console.error(`[gemini] ${modelName} failed:`, e.message);
+    return null;
+  }
+}
+
+// ── Model Router ──────────────────────────────────────────────────────────────
+async function routeToModel(generationType, prompt, systemPrompt) {
+  console.log('[skills] System prompt length:', systemPrompt.length);
+  const chains = {
+    'page': [
+      () => tryKimiModel(prompt, systemPrompt),
+      () => tryClaudeModel(prompt, systemPrompt, 'claude-haiku-4-5-20251001', 8192),
+      () => tryGeminiModel(prompt, 'gemini-2.5-flash', 0, systemPrompt)
+    ],
+    'template': [
+      () => tryKimiModel(prompt, systemPrompt),
+      () => tryClaudeModel(prompt, systemPrompt, 'claude-haiku-4-5-20251001', 8192),
+      () => tryGeminiModel(prompt, 'gemini-2.5-flash', 0, systemPrompt)
+    ],
+    'section': [
+      () => tryKimiModel(prompt, systemPrompt),
+      () => tryClaudeModel(prompt, systemPrompt),
+      () => tryGeminiModel(prompt, 'gemini-2.5-flash', 0, systemPrompt)
+    ],
+    'refine': [
+      () => tryClaudeModel(prompt, systemPrompt),
+      () => tryKimiModel(prompt, systemPrompt),
+      () => tryGeminiModel(prompt, 'gemini-2.5-flash', 0, systemPrompt)
+    ],
+    'copywriting': [
+      () => tryClaudeModel(prompt, systemPrompt),
+      () => tryKimiModel(prompt, systemPrompt),
+      () => tryGeminiModel(prompt, 'gemini-2.5-flash', 0, systemPrompt)
+    ],
+    'seo': [
+      () => tryClaudeModel(prompt, systemPrompt, 'claude-haiku-4-5-20251001'),
+      () => tryKimiModel(prompt, systemPrompt),
+      () => tryGeminiModel(prompt, 'gemini-2.5-flash', 0, systemPrompt)
+    ],
+    'palette': [
+      () => tryClaudeModel(prompt, systemPrompt, 'claude-haiku-4-5-20251001'),
+      () => tryKimiModel(prompt, systemPrompt),
+      () => tryGeminiModel(prompt, 'gemini-2.5-flash', 0, systemPrompt)
+    ]
+  };
+  const chain = chains[generationType] || chains['page'];
+  let lastError;
+  for (let i = 0; i < chain.length; i++) {
+    try {
+      console.log(`[router] trying model ${i+1}/${chain.length} for task: ${generationType}`);
+      const result = await chain[i]();
+      if (result) { console.log(`[router] success on attempt ${i+1}`); return result; }
+    } catch (err) {
+      console.log(`[router] model ${i+1} failed:`, err.message);
+      lastError = err;
+    }
+  }
+  throw new Error(`All models failed for ${generationType}: ${lastError?.message}`);
 }
 
 // ── Main handler ─────────────────────────────────────────────────────────────
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-License-Key');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST')    return res.status(405).json({ error: 'Method not allowed' });
 
   const body = req.body || {};
-  const { generation_type = 'page', license_key, dev_mode } = body;
+  const generation_type = body.generation_type || 'page';
+  const license_key = req.headers['x-license-key'] || body.license_key;
 
-  // ── License check ──
-  const isDevMode = dev_mode === true || license_key === 'dev_bypass_2024';
-  if (!isDevMode) {
-    // Add your license/credits check here
-    // For now just check key exists
+  // ── License check (skip for test/palette/seo) ──
+  if (!['test', 'palette', 'seo'].includes(generation_type)) {
     if (!license_key) {
       return res.status(401).json({ success: false, error: 'License required. Go to WPCraft → Settings.' });
     }
@@ -115,44 +260,33 @@ export default async function handler(req, res) {
 
     // ── REFINE ──
     if (generation_type === 'refine') {
-      const model  = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+      const systemPrompt = buildSystemPrompt(body);
       const prompt = `You are a JSON editor. Return ONLY the updated JSON object. No markdown.\n\nContext:\n${body.contextJson}\n\nInstruction: ${body.prompt}`;
-      const result = await model.generateContent(prompt);
-      let text = result.response.text().trim().replace(/```json|```/g, '').trim();
-      return res.status(200).json({ success: true, data: JSON.parse(text) });
+      const rawText = await routeToModel('refine', prompt, systemPrompt);
+      const cleaned = rawText.trim().replace(/^```json\s*/i,'').replace(/\s*```$/,'').trim();
+      return res.status(200).json({ success: true, data: JSON.parse(cleaned) });
     }
 
     // ── SECTION ──
     if (generation_type === 'section') {
-      const model  = genAI.getGenerativeModel({
-        model: 'gemini-2.0-flash',
-        systemInstruction: loadSkill('base.md') + '\n\n' + loadSkill('contrast.md') + '\n\n' + loadSkill('sections/blueprints.md'),
-        generationConfig: { temperature: 0.7, maxOutputTokens: 8192, responseMimeType: 'application/json' }
-      });
-      const result = await model.generateContent(`Add a single section. Return JSON with ONE section object (not a full page): ${body.prompt}`);
-      let text = result.response.text().trim().replace(/```json|```/g, '').trim();
-      const parsed = JSON.parse(text);
+      const systemPrompt = [loadSkill('base.md'), loadSkill('contrast.md'), loadSkill('sections/blueprints.md')].filter(Boolean).join('\n\n---\n\n');
+      const prompt = `Add a single section. Return JSON with ONE section object (not a full page): ${body.prompt}`;
+      const rawText = await routeToModel('section', prompt, systemPrompt);
+      const cleaned = rawText.trim().replace(/^```json\s*/i,'').replace(/\s*```$/,'').trim();
+      const parsed = JSON.parse(cleaned);
       const section = parsed.sections?.[0] ?? parsed;
       return res.status(200).json({ success: true, data: { sections: [section] } });
     }
 
-    // ── PAGE GENERATION (main) ──
+    // ── PAGE GENERATION (main) — Kimi → Claude → Gemini ──
     const systemPrompt = buildSystemPrompt(body);
     const userPrompt   = buildUserPrompt(body);
 
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash-preview-05-20',
-      systemInstruction: systemPrompt,
-      generationConfig: {
-        temperature: 0.7,
-        topP: 0.95,
-        maxOutputTokens: 65536,
-        responseMimeType: 'application/json',
-      }
-    });
+    console.log('[generate] type:', generation_type);
+    console.log('[generate] skills system prompt length:', systemPrompt.length);
 
-    const result = await model.generateContent(userPrompt);
-    let   text   = result.response.text().trim().replace(/^```json\s*/i,'').replace(/\s*```$/,'').trim();
+    const rawText = await routeToModel(generation_type, userPrompt, systemPrompt);
+    let text = rawText.trim().replace(/^```json\s*/i,'').replace(/\s*```$/,'').trim();
 
     let parsed;
     try {
