@@ -83,7 +83,7 @@ async function tryKimiModel(prompt, systemPrompt) {
           { role: 'user', content: prompt }
         ],
         temperature: 0.6,
-        max_tokens: 8000
+        max_tokens: 16000
       })
     }
   );
@@ -92,7 +92,15 @@ async function tryKimiModel(prompt, systemPrompt) {
   console.log('[kimi] raw response first 200:', responseText.substring(0, 200));
   if (!response.ok) throw new Error(`Kimi ${response.status}`);
   const data = JSON.parse(responseText);
-  return data.choices?.[0]?.message?.content;
+  const content = data.choices?.[0]?.message?.content;
+  const finishReason = data.choices?.[0]?.finish_reason;
+  console.log('[kimi] finish_reason:', finishReason, '| content length:', content?.length || 0);
+  // If truncated by token limit, return null so fallback model kicks in
+  if (finishReason === 'length' || finishReason === 'max_tokens') {
+    console.error('[kimi] response truncated by token limit, falling back');
+    return null;
+  }
+  return content;
 }
 
 async function tryClaudeModel(prompt, systemPrompt, model = 'claude-haiku-4-5-20251001', maxTokens = 8192) {
@@ -162,12 +170,12 @@ async function routeToModel(generationType, prompt, systemPrompt) {
   const chains = {
     'page': [
       () => tryKimiModel(prompt, systemPrompt),
-      () => tryClaudeModel(prompt, systemPrompt, 'claude-haiku-4-5-20251001', 8192),
+      () => tryClaudeModel(prompt, systemPrompt, 'claude-haiku-4-5-20251001', 16000),
       () => tryGeminiModel(prompt, 'gemini-2.5-flash', 0, systemPrompt)
     ],
     'template': [
       () => tryKimiModel(prompt, systemPrompt),
-      () => tryClaudeModel(prompt, systemPrompt, 'claude-haiku-4-5-20251001', 8192),
+      () => tryClaudeModel(prompt, systemPrompt, 'claude-haiku-4-5-20251001', 16000),
       () => tryGeminiModel(prompt, 'gemini-2.5-flash', 0, systemPrompt)
     ],
     'section': [
@@ -209,6 +217,53 @@ async function routeToModel(generationType, prompt, systemPrompt) {
     }
   }
   throw new Error(`All models failed for ${generationType}: ${lastError?.message}`);
+}
+
+
+// ── JSON Truncation Repair ────────────────────────────────────────────────────
+function repairTruncatedJSON(str) {
+  // Remove any trailing incomplete key-value pair
+  // Find last complete property by looking for last complete value
+  str = str.trimEnd();
+  
+  // Remove trailing comma if present
+  str = str.replace(/,\s*$/, '');
+  
+  // Remove incomplete string at end (unclosed quote)
+  const lastQuote = str.lastIndexOf('"');
+  const secondLastQuote = str.lastIndexOf('"', lastQuote - 1);
+  if (lastQuote > secondLastQuote) {
+    // Check if last quote opens an unclosed string
+    const betweenQuotes = str.substring(secondLastQuote + 1, lastQuote);
+    if (!betweenQuotes.includes('"') && str.indexOf('"', lastQuote + 1) === -1) {
+      // Unclosed string — remove from secondLastQuote back to last comma
+      const lastComma = str.lastIndexOf(',', secondLastQuote);
+      if (lastComma > 0) str = str.substring(0, lastComma);
+    }
+  }
+  
+  // Remove trailing comma again after cleanup
+  str = str.trimEnd().replace(/,\s*$/, '');
+  
+  // Count unclosed brackets and braces
+  let braces = 0, brackets = 0, inStr = false, escape = false;
+  for (let i = 0; i < str.length; i++) {
+    const c = str[i];
+    if (escape) { escape = false; continue; }
+    if (c === '\\' && inStr) { escape = true; continue; }
+    if (c === '"') { inStr = !inStr; continue; }
+    if (inStr) continue;
+    if (c === '{') braces++;
+    else if (c === '}') braces--;
+    else if (c === '[') brackets++;
+    else if (c === ']') brackets--;
+  }
+  
+  // Close all open brackets then braces
+  while (brackets > 0) { str += ']'; brackets--; }
+  while (braces > 0) { str += '}'; braces--; }
+  
+  return str;
 }
 
 // ── Main handler ─────────────────────────────────────────────────────────────
@@ -291,10 +346,25 @@ export default async function handler(req, res) {
     let parsed;
     try {
       parsed = JSON.parse(text);
-    } catch {
-      const m = text.match(/\{[\s\S]*\}/);
-      if (!m) throw new Error('No valid JSON in response');
-      parsed = JSON.parse(m[0]);
+    } catch (e) {
+      console.log('[generate] JSON parse failed, attempting repair. Error:', e.message.substring(0, 80));
+      // Try to extract valid JSON object
+      const m = text.match(/\{[\s\S]*/);
+      if (!m) throw new Error('No JSON found in response');
+      let raw = m[0];
+      // Truncation repair: if JSON is cut off, try to close it properly
+      try {
+        parsed = JSON.parse(raw);
+      } catch {
+        // Count unclosed braces/brackets and close them
+        raw = repairTruncatedJSON(raw);
+        try {
+          parsed = JSON.parse(raw);
+          console.log('[generate] JSON repaired successfully, sections:', parsed?.sections?.length || 0);
+        } catch (e2) {
+          throw new Error('JSON repair failed: ' + e2.message.substring(0, 100));
+        }
+      }
     }
 
     const pageData = {
