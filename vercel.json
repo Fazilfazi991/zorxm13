@@ -3,6 +3,9 @@
   "functions": {
     "api/*.mjs": {
       "maxDuration": 300
+    },
+    "api/*.js": {
+      "maxDuration": 300
     }
   },
   "rewrites": [
