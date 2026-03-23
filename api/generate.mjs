@@ -37,13 +37,20 @@ function toneSkill(tone = '') {
 }
 
 function buildSystemPrompt(body) {
-  return [
+  const parts = [
     loadSkill('base.md'),
     loadSkill('contrast.md'),
     industrySkill(body.industry),
     toneSkill(body.tone),
     loadSkill('sections/blueprints.md'),
-  ].filter(Boolean).join('\n\n---\n\n');
+  ];
+  
+  // Inject reference style context if provided
+  if (body.referenceStyleContext) {
+    parts.push(`## STYLE REFERENCE — HIGH PRIORITY\n\nThe user has provided a design reference. Match this style direction when generating:\n\n${body.referenceStyleContext}\n\nApply these visual characteristics: adapt the color palette, typography weight, layout approach, and overall aesthetic to match the reference while using the business content provided.`);
+  }
+  
+  return parts.filter(Boolean).join('\n\n---\n\n');
 }
 
 function buildUserPrompt(body) {
@@ -60,6 +67,9 @@ function buildUserPrompt(body) {
   if (body.sections?.length) p.push(`Include sections: ${body.sections.join(', ')}`);
   const count = body.sectionCount || 6;
   p.push(`Generate exactly ${count} sections total (navbar + footer count). Navbar first, footer last. Real copy only.`);
+  if (body.referenceStyleContext) {
+    p.push(`\nSTYLE BRIEF: ${body.referenceStyleContext.substring(0, 400)}`);
+  }
   return p.join('\n');
 }
 
