@@ -1,7 +1,8 @@
 ## INDUSTRY SKILL: Healthcare / Medical
 
 VISUAL DIRECTION: Clean, trustworthy, calming. Light backgrounds, professional photography.
-HERO IMAGE: https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=80
+HERO IMAGE: https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=1200&q=85
+SECONDARY IMAGE: https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=1200&q=85
 
 REQUIRED SECTIONS ORDER: navbar → hero → logostrip (accreditations) → services → process (Consult → Diagnose → Treat) → team → testimonials → cta → footer
 

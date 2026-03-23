@@ -1,7 +1,8 @@
 ## INDUSTRY SKILL: Restaurant / Food & Beverage
 
 VISUAL DIRECTION: Warm, appetizing, inviting. Rich food photography. Amber/cream palette.
-HERO IMAGE: https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80
+HERO IMAGE: https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=85
+SECONDARY IMAGE: https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=1200&q=85
 ABOUT IMAGE: https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=800&q=80
 
 REQUIRED SECTIONS ORDER: navbar → hero → logostrip (awards/press) → about → services (menu highlights as cards) → process (Reserve → Arrive → Enjoy) → testimonials → stats → cta → footer

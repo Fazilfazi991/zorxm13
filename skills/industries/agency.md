@@ -1,7 +1,8 @@
 ## INDUSTRY SKILL: Digital Marketing / SEO Agency
 
 VISUAL DIRECTION: Bold, data-driven, high-contrast. Dark hero, metrics-heavy.
-HERO IMAGE: https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=800&q=80
+HERO IMAGE: https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=85
+SECONDARY IMAGE: https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&q=85
 ABOUT IMAGE: https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80
 
 REQUIRED SECTIONS ORDER: navbar → hero → logostrip (client logos) → services → process (3-step: Audit → Strategy → Execute) → testimonials → stats → cta → footer
