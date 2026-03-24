@@ -1,0 +1,12 @@
+{
+  "BUSINESS_NAME": "business name",
+  "TAGLINE": "short punchy tagline",
+  "HERO_EYEBROW": "GET READY",
+  "HERO_H1_LINE1": "Something amazing",
+  "HERO_H1_LINE2": "is coming soon",
+  "HERO_BODY": "We are currently working hard building something extraordinary.",
+  "HERO_CTA_1": "Notify Me",
+  "FOOTER_TAGLINE": "Brand promise",
+  "COPYRIGHT": "© 2026 ${businessName}. All rights reserved.",
+  "PRIMARY_COLOR": "${primaryColor || '#00a86b'}"
+}

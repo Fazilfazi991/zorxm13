@@ -18,13 +18,27 @@ function loadSkill(rel) {
 
 function industrySkill(industry = '') {
   const l = industry.toLowerCase();
-  if (l.includes('restaurant') || l.includes('food') || l.includes('cafe')) return loadSkill('industries/restaurant.md');
-  if (l.includes('seo') || l.includes('marketing') || l.includes('agency') || l.includes('digital')) return loadSkill('industries/agency.md');
-  if (l.includes('real estate') || l.includes('property')) return loadSkill('industries/realestate.md');
-  if (l.includes('saas') || l.includes('software') || l.includes('tech') || l.includes('app')) return loadSkill('industries/saas.md');
-  if (l.includes('construct') || l.includes('engineer') || l.includes('mep') || l.includes('contracting')) return loadSkill('industries/construction.md');
-  if (l.includes('medical') || l.includes('health') || l.includes('clinic')) return loadSkill('industries/medical.md');
-  return loadSkill('industries/default.md');
+  let id = 'default';
+  if (l.includes('saas') || l.includes('tech')) id = 'saas';
+  else if (l.includes('real estate')) id = 'real_estate';
+  else if (l.includes('restaurant') || l.includes('food')) id = 'restaurant';
+  else if (l.includes('commerce')) id = 'ecommerce';
+  else if (l.includes('medical') || l.includes('health')) id = 'medical';
+  else if (l.includes('law') || l.includes('legal')) id = 'legal';
+  else if (l.includes('finance') || l.includes('account')) id = 'finance';
+  else if (l.includes('construct') || l.includes('contractor')) id = 'construction';
+  else if (l.includes('home')) id = 'home_services';
+  else if (l.includes('consult')) id = 'consulting';
+  else if (l.includes('profit')) id = 'nonprofit';
+  else if (l.includes('event')) id = 'event_planning';
+  else if (l.includes('photo') || l.includes('creative')) id = 'photography';
+  else if (l.includes('logistic') || l.includes('shipping')) id = 'logistics';
+  else if (l.includes('education') || l.includes('coach')) id = 'education';
+  else if (l.includes('fitness') || l.includes('gym')) id = 'fitness';
+  else if (l.includes('auto') || l.includes('car')) id = 'automotive';
+  else if (l.includes('beauty') || l.includes('salon')) id = 'beauty';
+  else if (l.includes('agency') || l.includes('market')) id = 'agency';
+  return loadSkill(`industries/${id}.md`);
 }
 
 function toneSkill(tone = '') {

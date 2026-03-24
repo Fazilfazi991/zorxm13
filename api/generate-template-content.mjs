@@ -2,7 +2,39 @@
 // Generates flat content to fill template {{PLACEHOLDERS}}
 // Much cheaper than full page JSON — just text values, no structural JSON needed
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { readFileSync, existsSync } from 'fs';
+import { join } from 'path';
+
+function loadSkill(rel) {
+  try {
+    const p = join(process.cwd(), 'skills', rel);
+    return existsSync(p) ? readFileSync(p, 'utf8') : '';
+  } catch { return ''; }
+}
+
+function getIndustryId(industry = '') {
+  const l = industry.toLowerCase();
+  if (l.includes('saas') || l.includes('tech')) return 'saas';
+  if (l.includes('real estate')) return 'real_estate';
+  if (l.includes('restaurant') || l.includes('food')) return 'restaurant';
+  if (l.includes('commerce')) return 'ecommerce';
+  if (l.includes('medical') || l.includes('health')) return 'medical';
+  if (l.includes('law') || l.includes('legal')) return 'legal';
+  if (l.includes('finance') || l.includes('account')) return 'finance';
+  if (l.includes('construct') || l.includes('contractor')) return 'construction';
+  if (l.includes('home')) return 'home_services';
+  if (l.includes('consult')) return 'consulting';
+  if (l.includes('profit')) return 'nonprofit';
+  if (l.includes('event')) return 'event_planning';
+  if (l.includes('photo') || l.includes('creative')) return 'photography';
+  if (l.includes('logistic') || l.includes('shipping')) return 'logistics';
+  if (l.includes('education') || l.includes('coach')) return 'education';
+  if (l.includes('fitness') || l.includes('gym')) return 'fitness';
+  if (l.includes('auto') || l.includes('car')) return 'automotive';
+  if (l.includes('beauty') || l.includes('salon')) return 'beauty';
+  if (l.includes('agency') || l.includes('market')) return 'agency';
+  return 'default';
+}
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -12,16 +44,34 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const body = req.body || {};
-  const { businessName, industry, location, pageGoal, tone, primaryColor, phone, email, template, referenceStyleContext } = body;
+  const { businessName, industry, location, pageGoal, pageType, tone, primaryColor, phone, email, template, referenceStyleContext } = body;
 
   const key = process.env.KIMI_API_KEY || process.env.MOONSHOT_API_KEY;
   if (!key) return res.status(500).json({ error: 'No API key configured' });
+
+  const pt = pageType || 'homepage';
+  let keysJSON;
+  try {
+    const p = join(process.cwd(), 'skills', 'pageTypes', `${pt}.json`);
+    keysJSON = readFileSync(p, 'utf8');
+  } catch(e) {
+    const fallbackPath = join(process.cwd(), 'skills', 'pageTypes', 'homepage.json');
+    keysJSON = readFileSync(fallbackPath, 'utf8');
+  }
+
+  const iid = getIndustryId(industry);
+  const indSkill = loadSkill(`industries/${iid}.md`) || loadSkill('industries/default.md');
+  const gid = pageGoal ? pageGoal.toLowerCase().replace(/[^a-z0-9]+/g, '_') : 'generate_leads';
+  const goalSkill = loadSkill(`goals/${gid}.md`);
 
   const systemPrompt = `You are a world-class copywriter generating website content. 
 Return ONLY valid JSON with the exact keys listed. No markdown, no explanation.
 Write real, specific, compelling copy for the exact business described.
 Every field must have real content — no placeholders, no generic filler.
-${referenceStyleContext ? `\nSTYLE DIRECTION: ${referenceStyleContext}` : ''}`;
+${referenceStyleContext ? `\nSTYLE DIRECTION: ${referenceStyleContext}` : ''}
+
+${indSkill}
+${goalSkill}`;
 
   const userPrompt = `Generate website content for:
 Business: ${businessName || 'Our Business'}
@@ -35,93 +85,7 @@ Email: ${email || 'hello@business.com'}
 Template style: ${template || 'clean-modern'}
 
 Return JSON with EXACTLY these keys:
-{
-  "BUSINESS_NAME": "business name",
-  "TAGLINE": "short punchy tagline under 8 words",
-  "EYEBROW": "3-5 word uppercase label e.g. DUBAI'S #1 SEO AGENCY",
-  "NAV_CTA": "short nav button text e.g. Get Started",
-  "HERO_H1_LINE1": "first line of hero headline (3-5 words)",
-  "HERO_H1_LINE2": "second line, the most powerful words (2-4 words)",
-  "HERO_BODY": "1-2 sentence hero description, specific and compelling",
-  "HERO_CTA_1": "primary button text",
-  "HERO_CTA_2": "secondary button text",
-  "HERO_IMAGE_URL": "https://images.unsplash.com/photo-[RELEVANT_ID]?w=1200&q=85",
-  "LOGOSTRIP_LABEL": "Trusted by line e.g. Trusted by 200+ businesses across the UAE",
-  "LOGO_1": "Client or partner name 1",
-  "LOGO_2": "Client or partner name 2",
-  "LOGO_3": "Client or partner name 3",
-  "LOGO_4": "Client or partner name 4",
-  "LOGO_5": "Client or partner name 5",
-  "SERVICES_EYEBROW": "WHAT WE DO or similar",
-  "SERVICES_H2": "Services section heading",
-  "SERVICES_BODY": "1 sentence about services",
-  "SERVICES_CTA": "View All Services",
-  "SERVICE_1_TITLE": "Service 1 name",
-  "SERVICE_1_DESC": "2-3 sentence service description",
-  "SERVICE_1_ICON": "single relevant emoji",
-  "SERVICE_2_TITLE": "Service 2 name",
-  "SERVICE_2_DESC": "2-3 sentence service description",
-  "SERVICE_2_ICON": "single relevant emoji",
-  "SERVICE_3_TITLE": "Service 3 name",
-  "SERVICE_3_DESC": "2-3 sentence service description",
-  "SERVICE_3_ICON": "single relevant emoji",
-  "ABOUT_EYEBROW": "OUR STORY or similar",
-  "ABOUT_H2": "About section heading",
-  "ABOUT_H2_LINE1": "first part of about heading",
-  "ABOUT_H2_LINE2": "italic second part",
-  "ABOUT_BODY": "2-3 sentence about paragraph, specific",
-  "ABOUT_IMAGE_URL": "https://images.unsplash.com/photo-[RELEVANT_ID]?w=1200&q=85",
-  "ABOUT_CHECK_1": "Key differentiator 1",
-  "ABOUT_CHECK_2": "Key differentiator 2",
-  "ABOUT_CHECK_3": "Key differentiator 3",
-  "ABOUT_CTA": "Learn More About Us",
-  "ABOUT_H2": "About heading",
-  "FEATURE_1_ICON": "emoji",
-  "FEATURE_1_TITLE": "Feature 1 title",
-  "FEATURE_1_DESC": "One sentence feature description",
-  "FEATURE_2_ICON": "emoji",
-  "FEATURE_2_TITLE": "Feature 2 title",
-  "FEATURE_2_DESC": "One sentence feature description",
-  "FEATURE_3_ICON": "emoji",
-  "FEATURE_3_TITLE": "Feature 3 title",
-  "FEATURE_3_DESC": "One sentence feature description",
-  "STAT_1_NUM": "impressive number with suffix e.g. 200+ or 98%",
-  "STAT_1_LABEL": "what that number means",
-  "STAT_2_NUM": "impressive number",
-  "STAT_2_LABEL": "what it means",
-  "STAT_3_NUM": "impressive number",
-  "STAT_3_LABEL": "what it means",
-  "STAT_4_NUM": "impressive number",
-  "STAT_4_LABEL": "what it means",
-  "TESTI_EYEBROW": "WHAT OUR CLIENTS SAY or similar",
-  "TESTI_H2": "Testimonials section heading",
-  "TESTI_1_QUOTE": "Compelling client quote 2-3 sentences",
-  "TESTI_1_NAME": "Client Full Name",
-  "TESTI_1_ROLE": "Title, Company Name",
-  "TESTI_2_QUOTE": "Different compelling client quote",
-  "TESTI_2_NAME": "Client Full Name",
-  "TESTI_2_ROLE": "Title, Company Name",
-  "TESTI_3_QUOTE": "Third compelling quote",
-  "TESTI_3_NAME": "Client Full Name",
-  "TESTI_3_ROLE": "Title, Company Name",
-  "CTA_EYEBROW": "READY TO GET STARTED? or similar",
-  "CTA_H2_LINE1": "CTA heading first part",
-  "CTA_H2_LINE2": "CTA heading second part (italic/accent)",
-  "CTA_BODY": "1-2 sentence CTA description with urgency",
-  "CTA_BTN_1": "Primary CTA button",
-  "CTA_BTN_2": "Secondary CTA button",
-  "CTA_LINK_1": "#contact",
-  "CTA_LINK_2": "https://wa.me/${phone?.replace(/[^0-9]/g,'')}",
-  "FOOTER_TAGLINE": "Short brand promise under 10 words",
-  "SOCIAL_INSTAGRAM": "#",
-  "SOCIAL_LINKEDIN": "#",
-  "SOCIAL_WHATSAPP": "https://wa.me/${phone?.replace(/[^0-9]/g,'')}",
-  "PHONE": "${phone || '+971 50 000 0000'}",
-  "EMAIL": "${email || 'hello@business.com'}",
-  "LOCATION": "${location || 'Dubai, UAE'}",
-  "COPYRIGHT": "© 2025 ${businessName}. All rights reserved.",
-  "PRIMARY_COLOR": "${primaryColor || '#00a86b'}"
-}
+${keysJSON}
 
 CRITICAL: Use real Unsplash photo IDs relevant to the industry.
 Agency/marketing: photo-1460925895917-afdab827c52f (team working)
