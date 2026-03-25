@@ -24,6 +24,7 @@ import WhatsAppButton from "./components/WhatsAppButton";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import HeroShowcase from "./components/hero/HeroShowcase";
 import SkipTheBS from "./pages/tools/SkipTheBS";
+import PromptAgent from "./pages/tools/PromptAgent";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import Login from "./pages/Login";
@@ -59,6 +60,7 @@ const App = () => (
           <Route path="/streaming" element={<StreamingDemo />} />
           <Route path="/hero-library" element={<HeroShowcase />} />
           <Route path="/tools/skip-the-bs" element={<SkipTheBS />} />
+          <Route path="/tools/prompt-agent" element={<PromptAgent />} />
           
           {/* Auth Routes */}
           <Route path="/login" element={<Login />} />
