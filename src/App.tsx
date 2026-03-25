@@ -22,6 +22,8 @@ import StreamingDemo from "./pages/tools/StreamingDemo";
 import Blogs from "./pages/Blogs";
 import WhatsAppButton from "./components/WhatsAppButton";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import HeroShowcase from "./components/hero/HeroShowcase";
+import SkipTheBS from "./pages/tools/SkipTheBS";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import Login from "./pages/Login";
@@ -55,6 +57,8 @@ const App = () => (
           <Route path="/seo-tools" element={<SEOCopilotTools />} />
           <Route path="/ai-generator" element={<ErrorBoundary><PageGenerator /></ErrorBoundary>} />
           <Route path="/streaming" element={<StreamingDemo />} />
+          <Route path="/hero-library" element={<HeroShowcase />} />
+          <Route path="/tools/skip-the-bs" element={<SkipTheBS />} />
           
           {/* Auth Routes */}
           <Route path="/login" element={<Login />} />
