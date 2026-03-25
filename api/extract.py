@@ -117,6 +117,7 @@ def get_direct(url: str):
 # -------------------------
 # ROUTES
 # -------------------------
+@app.post("/")
 @app.post("/api/extract")
 async def api_extract(url: str = Form(...)):
     direct = get_direct(url)
