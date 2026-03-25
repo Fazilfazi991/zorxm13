@@ -3,7 +3,8 @@
   "functions": {
     "api/*.py": {
       "maxDuration": 300,
-      "memory": 1024
+      "memory": 1024,
+      "excludeFiles": "{src,public,wordpress,node_modules,*.zip,*.json}/**"
     }
   },
   "rewrites": [

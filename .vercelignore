@@ -3,13 +3,9 @@ dist
 wordpress
 .git
 .github
-public
-src
 backend
-*.md
-*.json
 *.zip
 *.rar
 *.7z
-!api/requirements.txt
-!api/index.py
+# Allow EVERYTHING else for the build
+# Vercel will process these and then create the Lambda bundle
