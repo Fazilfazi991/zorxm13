@@ -1,14 +1,9 @@
 {
-  "version": 2,
   "functions": {
     "api/*.py": {
       "maxDuration": 300,
       "memory": 1024,
       "excludeFiles": "{src,public,wordpress,node_modules,*.zip,*.json}/**"
     }
-  },
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
+  }
 }
