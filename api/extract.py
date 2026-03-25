@@ -18,12 +18,14 @@ app.add_middleware(
 # EXTRACTORS (2026 working)
 # -------------------------
 def extract_dood(url: str):
-    vid = re.search(r'/d/([a-zA-Z0-9]+)', url)
+    # Support /d/ and mirrors
+    vid = re.search(r'/(?:d|e)/([a-zA-Z0-9]+)', url)
     if not vid: return None
     vid_id = vid.group(1)
+    # Use .la/d/ for extraction
     api = f"https://dood.la/api/token/{vid_id}"
     try:
-        r = requests.get(api, headers={"User-Agent": "Mozilla/5.0"}).json()
+        r = requests.get(api, headers={"User-Agent": "Mozilla/5.0"}, timeout=10).json()
         if "token" in r:
             return f"https://dood.la/d/{vid_id}?token={r['token']}"
     except: pass
@@ -44,12 +46,14 @@ def extract_streamtape(url: str):
     return None
 
 def extract_filemoon(url: str):
-    vid = re.search(r'/e/([a-zA-Z0-9]+)', url)
+    # Support /e/ID, /ID/file, or just /ID
+    vid = re.search(r'/(?:e/|)([a-zA-Z0-9]{10,})', url)
     if not vid: return None
     vid_id = vid.group(1)
+    # Use .sx as the reliable mirror for extraction
     api = f"https://filemoon.sx/e/{vid_id}"
     try:
-        r = requests.get(api, headers={"User-Agent": "Mozilla/5.0"})
+        r = requests.get(api, headers={"User-Agent": "Mozilla/5.0"}, timeout=10)
         m = re.search(r'file:\s*"([^"]+)"', r.text)
         if m: return m.group(1)
     except: pass
@@ -68,12 +72,13 @@ def extract_vidhide(url: str):
     return None
 
 def extract_streamwish(url: str):
-    vid = re.search(r'/e/([a-zA-Z0-9]+)', url)
+    # Support /e/ or /v/ or just /ID
+    vid = re.search(r'/(?:e/|v/|)([a-zA-Z0-9]{10,})', url)
     if not vid: return None
     vid_id = vid.group(1)
     api = f"https://streamwish.com/e/{vid_id}"
     try:
-        r = requests.get(api, headers={"User-Agent": "Mozilla/5.0"})
+        r = requests.get(api, headers={"User-Agent": "Mozilla/5.0"}, timeout=10)
         m = re.search(r'file:\s*"([^"]+\.mp4)"', r.text)
         if m: return m.group(1)
     except: pass
