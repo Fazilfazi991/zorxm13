@@ -17,8 +17,8 @@ export default function SkipTheBS() {
     setError('');
 
     try {
-      // Calls the FastAPI backend running locally on port 8000
-      const res = await fetch('http://localhost:8000/api/extract', {
+      // Calls the Vercel Serverless Function at /api/extract
+      const res = await fetch('/api/extract', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
@@ -34,7 +34,7 @@ export default function SkipTheBS() {
         setError('Could not extract. Maybe host not supported yet or link broken.');
       }
     } catch (e) {
-      setError('Error connecting to backend. Make sure main.py is running on port 8000.');
+      setError('Error connecting to extraction service. Please try again later.');
     } finally {
       setLoading(false);
     }
